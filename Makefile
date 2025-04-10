@@ -39,27 +39,18 @@ release: test ## Tag a new patch version and push to git remote
 	# @[ $$(git rev-parse --abbrev-ref HEAD) = "$(GIT_BRANCH)" ] || (echo "ERROR: Not on $(GIT_BRANCH) branch." && exit 1)
 	# 3. Fetch latest tags
 	@git fetch $(GIT_REMOTE) --tags
-	# 4. Get latest tag, default to v0.0.0 if none exists
-	@{ \
-		LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0"); \
-		echo "Latest tag: $LATEST_TAG"; \
-		\
-		# Remove 'v' prefix if present
-		VERSION_NUM=$(echo $LATEST_TAG | sed 's/^v//'); \
-		\
-		# Increment patch version (assuming semantic versioning X.Y.Z)
-		NEW_VERSION_NUM=$(echo $VERSION_NUM | awk -F. '{OFS="."; $NF = $NF + 1 ; print}'); \
-		NEW_TAG="v$NEW_VERSION_NUM"; \
-		\
-		echo "Creating new tag: $NEW_TAG"; \
-		git tag $NEW_TAG || exit 1; \
-		\
-		echo "Pushing $(GIT_BRANCH) branch and tag $$NEW_TAG to $(GIT_REMOTE)..."; \
-		git push $(GIT_REMOTE) $(GIT_BRANCH) || exit 1; \
-		git push $(GIT_REMOTE) $$NEW_TAG || exit 1; \
-		\
-		echo "Release $$NEW_TAG successfully pushed."; \
-	}
+	# 4. Get latest tag, calculate new tag, tag, and push
+	@LATEST_TAG=$$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0") && \
+	 echo "Latest tag: $$LATEST_TAG" && \
+	 VERSION_NUM=$$(echo $$LATEST_TAG | sed 's/^v//') && \
+	 NEW_VERSION_NUM=$$(echo $$VERSION_NUM | awk -F. '{OFS="."; $$NF = $$NF + 1 ; print}') && \
+	 NEW_TAG="v$$NEW_VERSION_NUM" && \
+	 echo "Creating new tag: $$NEW_TAG" && \
+	 git tag $$NEW_TAG && \
+	 echo "Pushing $(GIT_BRANCH) branch and tag $$NEW_TAG to $(GIT_REMOTE)..." && \
+	 git push $(GIT_REMOTE) $(GIT_BRANCH) && \
+	 git push $(GIT_REMOTE) $$NEW_TAG && \
+	 echo "Release $$NEW_TAG successfully pushed."
 
 help: ## Display this help message
 	@echo "Available targets:"
