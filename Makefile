@@ -48,7 +48,6 @@ release: test ## Tag a new patch version and push to git remote
 		VERSION_NUM=$$(echo $$LATEST_TAG | sed 's/^v//'); \
 		\
 		# Increment patch version (assuming semantic versioning X.Y.Z)
-		# Using awk for robustness
 		NEW_VERSION_NUM=$$(echo $$VERSION_NUM | awk -F. '{OFS="."; $$NF = $$NF + 1 ; print}'); \
 		NEW_TAG="v$$NEW_VERSION_NUM"; \
 		\
@@ -61,11 +60,6 @@ release: test ## Tag a new patch version and push to git remote
 		\
 		echo "Release $$NEW_TAG successfully pushed."; \
 	}
-
-clean: ## Remove generated files (binary and coverage report)
-	@echo "Cleaning up..."
-	@rm -f $(BINARY_NAME) $(COVERAGE_FILE)
-	@echo "Clean complete."
 
 help: ## Display this help message
 	@echo "Available targets:"
