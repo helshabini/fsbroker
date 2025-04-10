@@ -141,7 +141,13 @@ func (b *FSBroker) RemoveWatch(path string) {
 func (b *FSBroker) eventloop() {
 	eventQueue := NewEventQueue() // queue of events to be processed, gets cleared every tick
 
-	ticker := time.NewTicker(b.config.Timeout)
+	// Ensure timeout is positive
+	timeout := b.config.Timeout
+	if timeout <= 0 {
+		timeout = 300 * time.Millisecond // Default to 300ms if timeout is invalid
+	}
+
+	ticker := time.NewTicker(timeout)
 	tickerLock := sync.Mutex{}
 	defer ticker.Stop()
 
@@ -225,7 +231,7 @@ func (b *FSBroker) resolveAndHandle(eventQueue *EventQueue, tickerLock *sync.Mut
 				processedPaths[action.Signature()] = true
 			}
 		case Rename:
-			// Rename could be called if the item is moved outside the bound of watch directories, or moved to a trash directory
+			// Rename could be called if the item is moved outside the bounds of watch directories, or moved to a trash directory
 			// In both of these cases, we should remove the watch and emit a Remove event
 			// We do that by checking if the file actually exists, if it doesn't, we'll emit a Remove event
 			// If the item is moved to another directory within watched directories, we'll rely on the associated Create event to detect it
@@ -271,15 +277,22 @@ func (b *FSBroker) resolveAndHandle(eventQueue *EventQueue, tickerLock *sync.Mut
 			}
 		case Chmod:
 			// Handle case where writing empty file in macOS results in no modify event, but only in chmod event
-			if b.config.DarwinChmodAsModify && runtime.GOOS == "darwin" && action.Type == Chmod {
+			if b.config.DarwinChmodAsModify && runtime.GOOS == "darwin" {
 				stat, err := os.Stat(action.Path)
 				if err == nil && stat.Size() == 0 {
 					// Here we are assuming that the file was modified (just because it is empty and had a chmod event)
 					modified := NewFSEvent(Modify, action.Path, action.Timestamp)
 					b.handleEvent(modified)
+					processedPaths[action.Signature()] = true
+				} else if b.config.EmitChmod {
+					// If the file is not empty or there's an error stating the file, emit the chmod event if configured
+					b.handleEvent(action)
+					processedPaths[action.Signature()] = true
 				}
 			} else if b.config.EmitChmod {
+				// Not on Darwin or DarwinChmodAsModify is false, emit chmod event if configured
 				b.handleEvent(action)
+				processedPaths[action.Signature()] = true
 			}
 		default:
 			// Ignore other event types

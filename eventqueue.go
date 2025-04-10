@@ -36,5 +36,9 @@ func (eq *EventQueue) Pop() *FSEvent {
 func (eq *EventQueue) List() []*FSEvent {
 	eq.queueLock.Lock()
 	defer eq.queueLock.Unlock()
-	return eq.queue
+	// Create a new slice with the same length and capacity
+	queueCopy := make([]*FSEvent, len(eq.queue))
+	// Copy the elements
+	copy(queueCopy, eq.queue)
+	return queueCopy
 }
