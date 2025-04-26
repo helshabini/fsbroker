@@ -289,6 +289,7 @@ func (b *FSBroker) resolveAndHandle(eventQueue *EventQueue, tickerLock *sync.Mut
 
 				// Enrich the event with the deleted file information
 				action.EnrichFromInfo(deletedFile)
+				action.Properties["Type"] = "Hard"
 
 				// Process the Remove event normally
 				b.emitEvent(action)
@@ -306,54 +307,61 @@ func (b *FSBroker) resolveAndHandle(eventQueue *EventQueue, tickerLock *sync.Mut
 				continue
 			}
 
-			// On Windows, a rename action causes a rename event followed by a create event (with the old file name).
-			// So we need to check if there's a rename event for the same file identifier within the queue
-			// If there is, we ignore the create event and only raise the rename event
-			// Otherwise, we raise the create event
-
-			// Get the sys info about the created file
-			createdFileInfo := FromOSInfo(action.Path, stat)
-			if createdFileInfo == nil {
-				// Should never happen, but just in case
-				b.watchmap.Delete(action.Path)
+			info := FromOSInfo(action.Path, stat)
+			if info == nil {
+				// We failed to get the file Id, so we'll just raise the create event
+				action.EnrichFromStat(stat)
+				b.emitEvent(action)
+				processedPaths[action.Signature()] = true
 				continue
 			}
 
-			isRename := false
-			// Check if there's a Rename event for the same file identifier within queue
+			var isRenameOrMove bool = false
+			// Check if there is a corresponding rename event for the same file identifier
 			for _, relatedAction := range eventList {
 				if relatedAction.Type == Rename {
-					fmt.Println("Potential rename event:", relatedAction.Path)
-					// Potential rename event, need to check the file identifier to be sure
 					potentialRename := b.watchmap.Get(relatedAction.Path)
-					if potentialRename == nil {
-						continue
-					}
-					if createdFileInfo.Id == potentialRename.Id {
-						fmt.Println("Found rename event:", relatedAction.Path)
+					if potentialRename != nil && potentialRename.Id == info.Id {
 						// We found the rename event, ignore the create event and only raise the Rename event
 						result := NewFSEvent(Rename, action.Path, action.Timestamp)
 						result.Properties["OldPath"] = potentialRename.Path
+						result.EnrichFromInfo(info)
 						b.emitEvent(result)
 						processedPaths[action.Signature()] = true
 						processedPaths[relatedAction.Signature()] = true
-						isRename = true
-
-						// Update the watchmap with the new file information (i.e. after the rename)
-						b.watchmap.Delete(potentialRename.Path)      // Remove the old file from the watchmap
-						b.watchmap.Set(action.Path, createdFileInfo) // Add the new file to the watchmap
-
+						isRenameOrMove = true
 						break
 					}
 				}
 			}
-			if !isRename {
-				// Process the Create event normally
+
+			// Now that we're sure it is not a rename or move. We need to check if it is non-empty file creation.
+			// If it is, there should be a corresponding write event which we need to ignore.
+			// We also need to check if it is a directory creation. If it is, we need to add a watch for it. Otherwise, we add the file to the watchmap.
+			// TODO: Make this optional. Maybe users want to also get write events for non-empty files?
+			if !isRenameOrMove {
 				if b.watchrecursive && stat.IsDir() {
 					b.AddWatch(action.Path) // This adds the directory to the watchmap and creates a watch for it
-				} else if !stat.IsDir() {
-					b.watchmap.Set(action.Path, createdFileInfo) // Adds an already watched file to the watchmap
+				} else {
+					b.watchmap.Set(action.Path, info)
 				}
+
+				if !stat.IsDir() {
+					// Check if there's a corresponding write event for the same path
+					for _, relatedAction := range eventList {
+						if relatedAction.Type == Write && relatedAction.Timestamp.After(action.Timestamp) {
+							processedPaths[relatedAction.Signature()] = true
+							// We found the write event, so we can stop checking.
+							// If there are multiple write events, the next one should
+							// be considered a nomral write event that we happened to capture
+							// in the same queue frame.
+							break
+						}
+					}
+				}
+
+				// Now we raise the create event normally
+				action.EnrichFromInfo(info)
 				b.emitEvent(action)
 				processedPaths[action.Signature()] = true
 			}

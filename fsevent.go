@@ -2,6 +2,7 @@ package fsbroker
 
 import (
 	"fmt"
+	"os"
 	"time"
 )
 
@@ -54,8 +55,13 @@ func (action *FSEvent) Signature() string {
 
 func (action *FSEvent) EnrichFromInfo(info *Info) {
 	action.Properties["Id"] = info.Id
-	action.Properties["Path"] = info.Path
 	action.Properties["Size"] = info.Size
 	action.Properties["ModTime"] = info.ModTime
 	action.Properties["Mode"] = info.Mode
+}
+
+func (action *FSEvent) EnrichFromStat(stat os.FileInfo) {
+	action.Properties["Size"] = stat.Size()
+	action.Properties["ModTime"] = stat.ModTime()
+	action.Properties["Mode"] = uint32(stat.Mode())
 }
