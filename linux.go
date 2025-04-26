@@ -7,8 +7,14 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 	"syscall"
 )
+
+func (b *FSBroker) resolveAndHandle(eventQueue *EventQueue, tickerLock *sync.Mutex) {
+	// Not implemented yet
+
+}
 
 // isSystemFile checks if the file is a common Linux system or temporary file.
 func isSystemFile(name string) bool {
