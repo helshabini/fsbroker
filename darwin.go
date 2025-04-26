@@ -306,8 +306,14 @@ func isSystemFile(name string) bool {
 	base := strings.ToLower(filepath.Base(name))
 	switch base {
 	case ".ds_store", // Finder metadata
-		".appledouble",             // Stores resource forks and HFS+ metadata
-		".spotlight-v100",          // Spotlight indexing folder
+		".appledouble",    // Stores resource forks and HFS+ metadata
+		".spotlight-v100", // Spotlight indexing folder
+		// Common Unix/Shell/User files also found on macOS
+		".bash_history", ".bash_logout", ".bash_profile", ".bashrc", ".profile",
+		".zshrc", ".zhistory",
+		".cache", ".config",
+		".viminfo",
+		// macOS specific files
 		".temporaryitems",          // Temporary items cache
 		".trashes",                 // User trash folder
 		".fseventsd",               // Filesystem event log daemon data
