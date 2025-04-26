@@ -10,7 +10,7 @@ GIT_BRANCH=main
 .DEFAULT_GOAL := help
 
 # Phony targets don't represent files and will always execute
-.PHONY: test coverage-func coverage-html release clean help
+.PHONY: test coverage-func coverage-html release help
 
 test: ## Run tests verbosely
 	@echo "Running tests..."

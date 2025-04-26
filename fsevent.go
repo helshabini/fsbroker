@@ -9,7 +9,7 @@ type EventType int
 
 const (
 	Create EventType = iota
-	Modify
+	Write
 	Rename
 	Remove
 	Chmod
@@ -19,8 +19,8 @@ func (t *EventType) String() string {
 	switch *t {
 	case Create:
 		return "Create"
-	case Modify:
-		return "Modify"
+	case Write:
+		return "Write"
 	case Rename:
 		return "Rename"
 	case Remove:
@@ -36,7 +36,7 @@ type FSEvent struct {
 	Type       EventType
 	Path       string
 	Timestamp  time.Time
-	Properties map[string]string
+	Properties map[string]any
 }
 
 func NewFSEvent(op EventType, path string, timestamp time.Time) *FSEvent {
@@ -44,10 +44,18 @@ func NewFSEvent(op EventType, path string, timestamp time.Time) *FSEvent {
 		Type:       op,
 		Path:       path,
 		Timestamp:  timestamp,
-		Properties: make(map[string]string),
+		Properties: make(map[string]any),
 	}
 }
 
 func (action *FSEvent) Signature() string {
 	return fmt.Sprintf("%d-%s", action.Type, action.Path)
+}
+
+func (action *FSEvent) EnrichFromInfo(info *Info) {
+	action.Properties["Id"] = info.Id
+	action.Properties["Path"] = info.Path
+	action.Properties["Size"] = info.Size
+	action.Properties["ModTime"] = info.ModTime
+	action.Properties["Mode"] = info.Mode
 }

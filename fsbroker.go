@@ -1,9 +1,12 @@
 package fsbroker
 
 import (
+	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"sync"
 	"time"
 
@@ -31,9 +34,8 @@ func DefaultFSConfig() *FSConfig {
 // FSBroker collects fsnotify events, groups them, dedupes them, and processes them as a single event.
 type FSBroker struct {
 	watcher        *fsnotify.Watcher
-	watched        map[string]bool
-	watchermu      sync.Mutex
 	watchrecursive bool          // watch recursively on directories, set by AddRecursiveWatch
+	watchmap       *Map          // local map of watched files and directories
 	events         chan *FSEvent // internal events channel, processes FSevent for every FSNotify Op
 	emitch         chan *FSEvent // emitted events channel, sends FSevent to the user after deduplication, grouping, and processing
 	errors         chan error
@@ -53,7 +55,7 @@ func NewFSBroker(config *FSConfig) (*FSBroker, error) {
 
 	return &FSBroker{
 		watcher:        watcher,
-		watched:        make(map[string]bool),
+		watchmap:       NewMap(),
 		watchrecursive: false,
 		events:         make(chan *FSEvent, 100),
 		emitch:         make(chan *FSEvent),
@@ -71,6 +73,7 @@ func (b *FSBroker) Start() {
 		for {
 			select {
 			case event := <-b.watcher.Events:
+				fmt.Printf("Event: %s, File: %s\n", event.Op, event.Name)
 				b.addEvent(event.Op, event.Name)
 			case err := <-b.watcher.Errors:
 				b.errors <- err
@@ -110,31 +113,61 @@ func (b *FSBroker) AddRecursiveWatch(path string) error {
 
 // AddWatch adds a watch on a file or directory.
 func (b *FSBroker) AddWatch(path string) error {
-	b.watchermu.Lock()
-	defer b.watchermu.Unlock()
-
-	if b.watched[path] {
+	if b.watchmap.Get(path) != nil {
 		return nil
 	}
 
 	if err := b.watcher.Add(path); err != nil {
 		return err
 	}
-	b.watched[path] = true
+
+	stat, err := os.Stat(path)
+	if err != nil {
+		return err
+	}
+	if !stat.IsDir() {
+		return errors.New("path is not a directory")
+	}
+
+	b.watchmap.Set(path, FromOSInfo(path, stat))
+
+	// List all files in the directory
+	files, err := os.ReadDir(path)
+	if err != nil {
+		return err
+	}
+
+	// Add the files to the watchmap. No need to add FSNotify watches, because we're already watching the directory.
+	for _, file := range files {
+		// Skip directories, we'll watch them later if recursive watch is being requested
+		if file.IsDir() {
+			continue
+		}
+		stat, err := file.Info()
+		if err != nil {
+			return err
+		}
+		b.watchmap.Set(filepath.Join(path, file.Name()), FromOSInfo(filepath.Join(path, file.Name()), stat))
+	}
+
 	return nil
 }
 
 // RemoveWatch removes a watch on a file or directory.
 func (b *FSBroker) RemoveWatch(path string) {
-	b.watchermu.Lock()
-	defer b.watchermu.Unlock()
+	_ = b.watcher.Remove(path) // Ignore error, fsnotify will remove the watch automatically if it caught the event
 
-	if !b.watched[path] {
-		return
+	paths := make([]string, 0)
+
+	// Remove all files in the directory from the watchmap
+	b.watchmap.Iterate(func(key string, _ *Info) {
+		if strings.HasPrefix(key, path) {
+			paths = append(paths, key)
+		}
+	})
+	for _, path := range paths {
+		b.watchmap.Delete(path)
 	}
-
-	b.watcher.Remove(path)
-	delete(b.watched, path)
 }
 
 // eventloop starts the broker, grouping and interpreting events as a single action.
@@ -172,15 +205,18 @@ func (b *FSBroker) resolveAndHandle(eventQueue *EventQueue, tickerLock *sync.Mut
 		return
 	}
 	defer tickerLock.Unlock()
+
 	// Process grouped events, detecting related Create and Rename events
 	processedPaths := make(map[string]bool)
+
+	// temporary list of events to process
 	eventList := eventQueue.List()
 
 	if len(eventList) == 0 {
 		return
 	}
 
-	//Pop event from queue, and stop the loop when it's empty
+	//Now we process the events remaining in the event queue, and stop the loop when it's empty
 	for action := eventQueue.Pop(); action != nil; action = eventQueue.Pop() {
 		// Ignore already processed paths
 		if processedPaths[action.Signature()] {
@@ -189,113 +225,287 @@ func (b *FSBroker) resolveAndHandle(eventQueue *EventQueue, tickerLock *sync.Mut
 
 		switch action.Type {
 		case Remove:
-			// TODO: On Windows, a rename causes a remove event followed by a create event.
-			// Unfortunately, there is no way we can handle it except two distinct events
-			// I have ideas that involve looking at file properties, and try to find remove and create events which are close to each other, but it's not reliable
-
-			// Check if there's any other event for the same path within the queue, ignore it and only raise the remove event
+			// Check if there's any earlier event for the same path within the queue, ignore it and only raise the remove event
 			for _, relatedAction := range eventList {
 				if relatedAction.Path == action.Path && relatedAction.Timestamp.Before(action.Timestamp) {
 					processedPaths[relatedAction.Signature()] = true
 				}
 			}
-			// If a directory is removed, remove the watch
-			b.RemoveWatch(action.Path)
-			// Process the Remove event normally
-			b.handleEvent(action)
-			processedPaths[action.Signature()] = true
-		case Create:
-			// If a directory is created, add a watch
-			if b.watchrecursive {
-				info, err := os.Stat(action.Path)
-				if err == nil && info.IsDir() {
-					b.AddWatch(action.Path)
+
+			// On Windows, a rename causes a remove event (with the old name) followed by a create event (with the new name)
+			// So we have to check our watchmap to get infomation about the file that was deleted
+			// Then we compare the Identifier of the deleted file with identifiers of created files in the eventList
+			// If we find a match, we ignore the remove and create events, and only raise the Rename event
+			// Otherwise, we raise the remove event
+
+			// Get the file that was deleted from the watchmap
+			deletedFile := b.watchmap.Get(action.Path)
+			if deletedFile == nil {
+				// If the file is not in the watchmap, it means it's not being watched, so we raise the remove event
+				// This shouldn't happen if our watchmap is up to date.
+				// But if it does, we'll raise the remove event because we have nothing to compare to
+				b.emitEvent(action)
+				processedPaths[action.Signature()] = true
+				continue
+			}
+
+			var isRename bool = false
+
+			if runtime.GOOS == "windows" {
+				// Check if there's a create event for the same file identifier within queue
+				for _, relatedAction := range eventList {
+					if relatedAction.Type == Create && relatedAction.Timestamp.After(action.Timestamp) {
+						stat, err := os.Stat(relatedAction.Path)
+						if err != nil {
+							continue
+						}
+						relatedFile := FromOSInfo(relatedAction.Path, stat)
+						if relatedFile.Id == deletedFile.Id {
+							// We found the new name, ignore the remove event and only raise the Rename event
+							result := NewFSEvent(Rename, action.Path, action.Timestamp)
+							result.Properties["OldPath"] = relatedAction.Path
+							result.EnrichFromInfo(relatedFile)
+							b.emitEvent(result)
+							processedPaths[action.Signature()] = true
+							processedPaths[relatedAction.Signature()] = true
+							isRename = true
+
+							// Update the watchmap with the new file information (i.e. after the rename)
+							b.watchmap.Delete(action.Path)                  // Remove the old file from the watchmap
+							b.watchmap.Set(relatedAction.Path, relatedFile) // Add the new file to the watchmap
+
+							break
+						}
+					}
 				}
 			}
-			// Check if there's a Rename event for the same path within the queue
+
+			if !isRename {
+				// Check if the file the deleted item was a directory, and if so, remove the watch
+				if os.FileMode(deletedFile.Mode).IsDir() {
+					b.RemoveWatch(action.Path)
+					b.watchmap.Delete(action.Path)
+				}
+
+				// Enrich the event with the deleted file information
+				action.EnrichFromInfo(deletedFile)
+
+				// Process the Remove event normally
+				b.emitEvent(action)
+				processedPaths[action.Signature()] = true
+			}
+
+		case Create:
+			// Get info about the created file
+			stat, err := os.Stat(action.Path)
+			if err != nil {
+				if os.IsNotExist(err) { // Created item no longet exists. Remove it from the watchmap if it exists
+					b.watchmap.Delete(action.Path)
+				}
+				processedPaths[action.Signature()] = true
+				continue
+			}
+
+			// On Windows, a rename action causes a rename event followed by a create event (with the old file name).
+			// So we need to check if there's a rename event for the same file identifier within the queue
+			// If there is, we ignore the create event and only raise the rename event
+			// Otherwise, we raise the create event
+
+			// Get the sys info about the created file
+			createdFileInfo := FromOSInfo(action.Path, stat)
+			if createdFileInfo == nil {
+				// Should never happen, but just in case
+				b.watchmap.Delete(action.Path)
+				continue
+			}
+
 			isRename := false
-			for _, relatedrename := range eventList {
-				if filepath.Dir(relatedrename.Path) == filepath.Dir(action.Path) && relatedrename.Type == Rename {
-					result := NewFSEvent(Rename, action.Path, action.Timestamp)
-					result.Properties["OldPath"] = relatedrename.Path
-					b.handleEvent(result)
-					processedPaths[action.Signature()] = true
-					processedPaths[relatedrename.Signature()] = true
-					isRename = true
-					break
+			// Check if there's a Rename event for the same file identifier within queue
+			for _, relatedAction := range eventList {
+				if relatedAction.Type == Rename {
+					fmt.Println("Potential rename event:", relatedAction.Path)
+					// Potential rename event, need to check the file identifier to be sure
+					potentialRename := b.watchmap.Get(relatedAction.Path)
+					if potentialRename == nil {
+						continue
+					}
+					if createdFileInfo.Id == potentialRename.Id {
+						fmt.Println("Found rename event:", relatedAction.Path)
+						// We found the rename event, ignore the create event and only raise the Rename event
+						result := NewFSEvent(Rename, action.Path, action.Timestamp)
+						result.Properties["OldPath"] = potentialRename.Path
+						b.emitEvent(result)
+						processedPaths[action.Signature()] = true
+						processedPaths[relatedAction.Signature()] = true
+						isRename = true
+
+						// Update the watchmap with the new file information (i.e. after the rename)
+						b.watchmap.Delete(potentialRename.Path)      // Remove the old file from the watchmap
+						b.watchmap.Set(action.Path, createdFileInfo) // Add the new file to the watchmap
+
+						break
+					}
 				}
 			}
 			if !isRename {
 				// Process the Create event normally
-				b.handleEvent(action)
+				if b.watchrecursive && stat.IsDir() {
+					b.AddWatch(action.Path) // This adds the directory to the watchmap and creates a watch for it
+				} else if !stat.IsDir() {
+					b.watchmap.Set(action.Path, createdFileInfo) // Adds an already watched file to the watchmap
+				}
+				b.emitEvent(action)
 				processedPaths[action.Signature()] = true
 			}
+
 		case Rename:
-			// Rename could be called if the item is moved outside the bounds of watch directories, or moved to a trash directory
-			// In both of these cases, we should remove the watch and emit a Remove event
-			// We do that by checking if the file actually exists, if it doesn't, we'll emit a Remove event
-			// If the item is moved to another directory within watched directories, we'll rely on the associated Create event to detect it
-			if _, err := os.Stat(action.Path); os.IsNotExist(err) {
-				// If a directory is removed, remove the watch
-				b.RemoveWatch(action.Path)
-				// Create and process the Remove event normally
-				remove := NewFSEvent(Remove, action.Path, action.Timestamp)
-				b.handleEvent(remove)
+			// A rename event always carries a path that should no longer exist
+			// It is emitted in one of the following cases:
+			// - When a file or directory is renamed. In such case there should also be a corresponding Create event
+			// - When a file or directory is moved between or within watched directories. Also emits a Create event.
+			// - When a file or directory is moved outside the bounds of watched directories, or moved to a trash directory (i.e, soft deleted)
+			//   This happens only on POSIX systems (i.e. Linux, MacOS). Windows correctly emits Remove events in cases of soft deletion.
+
+			// So, we need to check if there's a corresponding Create event for the same file identifier
+			// If there is one, we ignore the Create event and only raise the Rename event
+			// Otherwise, we ignore the Rename event and raise a Remove event
+
+			// Get the file info from the watchmap
+			renamedFileInfo := b.watchmap.Get(action.Path)
+			if renamedFileInfo == nil {
+				// If the file is not in the watchmap, it means it's not being watched, so we raise the rename event
+				// This shouldn't happen if our watchmap is up to date.
+				// But if it does, we'll raise the rename event because we have nothing to compare to
+				b.emitEvent(action)
 				processedPaths[action.Signature()] = true
-				// Then we'll loop on all other preceding captured actions to ignore them, they should be now irrelevant
-				for _, relatedAction := range eventList {
-					if relatedAction.Path == action.Path && relatedAction.Timestamp.Before(action.Timestamp) {
-						processedPaths[relatedAction.Signature()] = true
+				continue
+			}
+
+			isRenameOrMove := false
+			// Check if there's a corresponding Create event for the same file identifier
+			// Unfortunately this is a little expensive, because the create event could be before or after the rename event
+			// So we'll have to stat all paths in Create events in the eventList
+			for _, relatedCreate := range eventList {
+				if relatedCreate.Type == Create {
+					createdStat, err := os.Stat(relatedCreate.Path)
+					if err != nil {
+						continue
+					}
+					createdFileInfo := FromOSInfo(relatedCreate.Path, createdStat)
+					if createdFileInfo != nil && createdFileInfo.Id == renamedFileInfo.Id {
+						// We found the create event, ignore it and only raise the enriched Rename event
+						result := NewFSEvent(Rename, action.Path, action.Timestamp)
+						result.Properties["OldPath"] = renamedFileInfo.Path
+						result.EnrichFromInfo(createdFileInfo)
+						b.emitEvent(result)
+						b.watchmap.Delete(renamedFileInfo.Path)
+						b.watchmap.Set(createdFileInfo.Path, createdFileInfo)
+						processedPaths[action.Signature()] = true
+						processedPaths[relatedCreate.Signature()] = true
+						isRenameOrMove = true
+						break
 					}
 				}
 			}
-		case Modify:
+			if !isRenameOrMove {
+				// No corresponding create event found, raise a Remove event
+				result := NewFSEvent(Remove, action.Path, action.Timestamp)
+				result.Properties["Type"] = "Soft"
+				result.EnrichFromInfo(renamedFileInfo)
+				b.emitEvent(result)
+				processedPaths[action.Signature()] = true
+			}
+
+		case Write:
 			// First, dedup modify events
 			// Check if there are multiple save events for the same path within the queue, treat them as a single Modify event
 			latestModify := action
 			for _, relatedModify := range eventList {
-				if relatedModify.Path == action.Path && relatedModify.Type == Modify && relatedModify.Timestamp.After(latestModify.Timestamp) {
+				if relatedModify.Path == action.Path && relatedModify.Type == Write && relatedModify.Timestamp.After(latestModify.Timestamp) {
+					processedPaths[latestModify.Signature()] = true
 					latestModify = relatedModify
 				}
 			}
 
-			// Then check if there is a Create event for the same path, ignore the Modify event, we'll let the Create event handle it
-			// This handles the case where Windows/Linux emits a Create event followed by a Modify event for a new file
+			// Check if the file exists on disk
+			stat, err := os.Stat(latestModify.Path)
+			if err != nil {
+				// If the file doesn't exist on disk, remove it from the watchmap and ignore the event as there must be a corresponding Remove event
+				if os.IsNotExist(err) {
+					b.watchmap.Delete(latestModify.Path)
+				}
+				processedPaths[latestModify.Signature()] = true
+				continue
+			}
+
+			// Windows emits write events on directories when contents are changed. This is irrelevant for us.
+			// Check if we're on Windows AND for event is for a directory? If true, ignore the event
+			if runtime.GOOS == "windows" && stat.IsDir() {
+				processedPaths[latestModify.Signature()] = true
+				continue
+			}
+
+			// Then check if there is a Create event for the same path, ignore the Write event and raise the Create event instead
+			// This handles the case where any OS emits a Create event followed by a Write event for a new non-empty file or a copy or move from unwatched directory a watched one
 			foundCreated := false
 			for _, relatedCreate := range eventList {
-				if relatedCreate.Path == action.Path && relatedCreate.Type == Create {
+				if relatedCreate.Path == latestModify.Path && relatedCreate.Type == Create && relatedCreate.Timestamp.Before(latestModify.Timestamp) {
+					// We found the Create event, ignore the Write event and raise the Create event instead
+					// But first we need to check if this specific create event was already processed
+					if !processedPaths[relatedCreate.Signature()] {
+						relatedCreate.EnrichFromInfo(FromOSInfo(latestModify.Path, stat))
+						b.emitEvent(relatedCreate)
+						processedPaths[relatedCreate.Signature()] = true
+					}
 					processedPaths[latestModify.Signature()] = true
 					foundCreated = true
 					break
 				}
 			}
 
-			// Otherwise, Process the latest Modify event
+			// Otherwise, Process the latest Write event
 			if !foundCreated {
-				b.handleEvent(latestModify)
+				info := FromOSInfo(latestModify.Path, stat)
+				if info != nil {
+					b.watchmap.Set(latestModify.Path, info)
+					latestModify.EnrichFromInfo(info)
+				}
+				b.emitEvent(latestModify)
 				processedPaths[latestModify.Signature()] = true
 			}
+
 		case Chmod:
-			// Handle case where writing empty file in macOS results in no modify event, but only in chmod event
-			if b.config.DarwinChmodAsModify && runtime.GOOS == "darwin" {
-				stat, err := os.Stat(action.Path)
-				if err == nil && stat.Size() == 0 {
-					// Here we are assuming that the file was modified (just because it is empty and had a chmod event)
-					modified := NewFSEvent(Modify, action.Path, action.Timestamp)
-					b.handleEvent(modified)
-					processedPaths[action.Signature()] = true
-				} else if b.config.EmitChmod {
-					// If the file is not empty or there's an error stating the file, emit the chmod event if configured
-					b.handleEvent(action)
-					processedPaths[action.Signature()] = true
-				}
-			} else if b.config.EmitChmod {
-				// Not on Darwin or DarwinChmodAsModify is false, emit chmod event if configured
-				b.handleEvent(action)
-				processedPaths[action.Signature()] = true
+			// Emit the chmod event if configured
+			if b.config.EmitChmod {
+				b.emitEvent(action)
 			}
+
+			// Mark the action as processed anyway, because it's a chmod event
+			processedPaths[action.Signature()] = true
+
+			// Handle case where writing empty file in macOS results in no modify event, but only in chmod event
+			if runtime.GOOS == "darwin" {
+				stat, err := os.Stat(action.Path)
+				if err != nil {
+					continue
+				}
+				potentialModify := b.watchmap.Get(action.Path)
+				if potentialModify != nil {
+					if stat.Size() == 0 && potentialModify.Size != 0 {
+						// Raise a write event
+						modified := NewFSEvent(Write, action.Path, action.Timestamp)
+						modified.EnrichFromInfo(FromOSInfo(action.Path, stat))
+						b.emitEvent(modified)
+					}
+
+					// Update the watchmap with the new file information (i.e. after the chmod)
+					// No need to do this for other operating systems because it will be eventually caught by the write or create events
+					b.watchmap.Set(action.Path, FromOSInfo(action.Path, stat))
+				}
+			}
+
 		default:
-			// Ignore other event types
+			// Unreachable
 		}
 	}
 }
@@ -341,7 +551,7 @@ func mapOpToEventType(op fsnotify.Op) EventType {
 	case op&fsnotify.Create == fsnotify.Create:
 		return Create
 	case op&fsnotify.Write == fsnotify.Write:
-		return Modify
+		return Write
 	case op&fsnotify.Rename == fsnotify.Rename:
 		return Rename
 	case op&fsnotify.Remove == fsnotify.Remove:
@@ -353,7 +563,15 @@ func mapOpToEventType(op fsnotify.Op) EventType {
 	}
 }
 
-// handleEvent sends the event to the user after deduplication, grouping, and processing.
-func (b *FSBroker) handleEvent(event *FSEvent) {
+// emitEvent sends the event to the user after deduplication, grouping, and processing.
+func (b *FSBroker) emitEvent(event *FSEvent) {
 	b.emitch <- event
+}
+
+// utility method to print the watchmap. This is useful for debugging.
+func (b *FSBroker) PrintMap() {
+	fmt.Println("Watchmap size:", b.watchmap.Size())
+	b.watchmap.Iterate(func(key string, value *Info) {
+		fmt.Println(key, value)
+	})
 }

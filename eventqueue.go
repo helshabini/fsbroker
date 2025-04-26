@@ -1,6 +1,7 @@
 package fsbroker
 
 import (
+	"slices"
 	"sync"
 )
 
@@ -41,4 +42,21 @@ func (eq *EventQueue) List() []*FSEvent {
 	// Copy the elements
 	copy(queueCopy, eq.queue)
 	return queueCopy
+}
+
+func (eq *EventQueue) Delete(event *FSEvent) {
+	eq.queueLock.Lock()
+	defer eq.queueLock.Unlock()
+	for i, e := range eq.queue {
+		if e == event {
+			eq.queue = slices.Delete(eq.queue, i, i+1)
+			return
+		}
+	}
+}
+
+func (eq *EventQueue) Clear() {
+	eq.queueLock.Lock()
+	defer eq.queueLock.Unlock()
+	eq.queue = make([]*FSEvent, 0)
 }

@@ -1,29 +1,47 @@
 # FSBroker
 
-FSBroker is a file system event broker library for Go. All the heavy lifting is thankfully done by [fsnotify](https://github.com/fsnotify/fsnotify).
-While fsnotify is great, there are a few downsides which I find myself lacking in every project I use it in:
+FSBroker is a Go library that acts as an intelligent translation layer on top of [fsnotify](https://github.com/fsnotify/fsnotify), converting raw file system events into reliable, high-level actions like `Create`, `Write`, `Rename`, and `Remove`.
 
-- I need to deduplicate events that happen in quick succession. An example would be the user repeatedly saving a file; I want to treat those bursts of file saves as an individual unit.
-- FSNotify does not detect the "rename" properly, simply because operating systems handle renames in an obtuse way. For instance, on most operating systems, there will be a Create event (with the new name of the file) then a Rename event (with the old name of the file). It is difficult in my logic to correlate those two events together.
-- I need to exclude common system files from raising events, such as ".DS_Store" on MacOS, or "thumbs.db" on Windows.
-- I need to recursively add directories which are created in runtime to the watch list.
-- I need to filter out some events based on path or type.
+Operating systems emit file system events inconsistently and often obscurely. For example:
+- A simple file rename might appear as a `CREATE` followed by a `RENAME` on one OS, but `REMOVE` then `CREATE` on another.
+- Moving a file to the trash might look like a `RENAME` event on some systems.
+- Rapid saves can flood your application with `WRITE` events.
+- System-specific files (`.DS_Store`, `thumbs.db`) generate unwanted noise.
 
-FSBroker allows you to watch for changes in the file system and handle events such as file creation, modification, and deletion.
+`fsnotify` provides the raw events, but leaves the complex interpretation up to you. FSBroker handles this complexity by:
+- **Batching:** Grouping events that occur close together in time.
+- **Pattern Recognition:** Analyzing sequences of raw events (like `CREATE`+`RENAME`) within a time window.
+- **Deduplication:** Filtering out redundant events (e.g., multiple `WRITE`s).
+- **Contextual Analysis:** Considering platform specifics (Windows vs. macOS vs. Linux) and file metadata.
+
+This allows FSBroker to reliably report the *actual* user actions happening on the filesystem.
 
 ## Features
 
-- Deduplicate similar "Write" events which happen in quick succession and present them as a single unit
-- Detect proper "Rename" events, providing the old and new paths (macOS and Linux only)
-- Detect proper "Remove" events in cases where the file is moved (i.e. renamed) to a directory that is outside the watch directory
-- Detect proper "Remove" events in which operating systems would emit as "Rename" because they are moved to a hidden trash directory
-- Exclude common system files and directories
-- Recursively add directories to the watch list
-- Apply custom filters while pre-processing events
+- **Accurate Event Interpretation:** Translates complex, platform-specific `fsnotify` event sequences into clear `Create`, `Write`, `Rename`, and `Remove` actions.
+- **Intelligent Rename/Move Detection:** Correctly identifies file/directory renames and moves, even across different watched directories, providing both old and new paths.
+- **Reliable Deletion Detection:** Differentiates between hard deletes (permanent removal) and soft deletes (moves to trash or to unwatched directories), emitting the appropriate `Remove` event.
+- **Write Event Deduplication:** Consolidates bursts of `WRITE` events (e.g., rapid saves) into a single `Write` event.
+- **macOS File Clear Handling:** Detects file clearing operations on macOS (which don't always emit `WRITE`) by analyzing `CHMOD` events and file size.
+- **Noise Reduction:** Automatically ignores irrelevant events (like `WRITE` on directories in Windows) and common system files (e.g., `.DS_Store`, `thumbs.db`). Option to ignore all hidden files.
+- **Automatic Recursive Watching:** Automatically adds newly created subdirectories within watched paths to the watcher.
+- **Custom Event Filtering:** Allows pre-filtering of raw `fsnotify` events based on path or type *before* processing.
+- **Optional Chmod Events:** Provides an option (`EmitChmod`) to receive raw `CHMOD` events if needed.
+
+## Supported Platforms
+
+FSBroker is designed and tested to work on the following operating systems:
+
+-   **Windows**
+-   **macOS**
+-   **Linux**
+
+While manually tested across these platforms, contributions towards automated multi-platform testing are welcome (see Missing Features).
 
 ## Changelog
 
-- (New x0.1.7) Update fsnotify to v1.9.0
+- (New v1.0.0) First release. See release notes.
+- (New v0.1.7) Update fsnotify to v1.9.0
 - (New v0.1.6) Added the option to ignore hidden files.
 - (New v0.1.5) Fix more bugs, added the option to emit chmod events (defaults to false).
 - (New v0.1.4) Fix a bug where multiple consecutive file creations would not be detected on Windows.
@@ -138,11 +156,7 @@ Here is a list of features I would like to add in the future, please feel free t
 
 - Conditional recursion for directories
 
-Currently, once you use FSBroker.AddRecursiveWatch it will automatically add newly created directories within any of the already watched directories to the watch list. Even if said watch directory was previously added using FSBroker.AddWatch. I would like to modify the watch map to allow for having the "recursivewatch" flag separately per watched directory, rather than globally on the entire broker.
-
-- More comprehensive system file/directory detection
-
-Currently, the list of system file/directory exclusion may not be 100% accurate. More testing and research on the detection process may be necessary.
+Currently, once you use FSBroker.AddRecursiveWatch it will automatically adds newly created directories within any of the already watched directories to the watch list. Even if said watch directory was previously added using FSBroker.AddWatch. I would like to modify the watch map to allow for having the "recursivewatch" flag separately per watched directory, rather than globally on the entire broker.
 
 - Separate the "FSBroker.Filter" function into two separate pre-filter and post-filter
 
@@ -150,7 +164,110 @@ Currently, FSBroker.Filter only runs while the event is being emitted out of FSN
 
 - Testing on different operating systems
 
-I've only tested this on MacOS, I need someone to comprehensively test this on Linux and Windows.
+I've ran manual tests on all platforms. Yet, your contibution to writing multi-platform tests is needed.
+
+## FAQ
+
+- ### How does fsbroker work and what does it offer as opposed to fsnotify?
+
+	fsbroker depends on fsnotify as an underlying file system event watcher. However, fsnotify expects you to make sense of the events it emits according to your platform and your use case. Unfortunately, because of how messy file system events are in various operating systems, it is diffucilt to make sense of them.
+	
+	It works by accumliating events emitted from fsnotify in an event queue, then process them in batches to try and make sense of what actually happened on the file system.
+
+- ### Does fsbroker have any overhead on top of fsnotify?
+
+	Yes. To be able to accurately make sense of what happened on the file system, fsbroker needs to keep an in-memory map of your watched directories. We've tried to keep it as small as possible, but it still grows as large as your number of files being watched.
+	
+	In addition, fsbroker may perform some additional file checks and syscalls to verify file attributes or existance on disk.
+
+	In my view, these are checks/overheads you would have had to deal with in your code anyway. They are also fairly minimal. So I consider it a very good trade-off.
+
+- ### How accurate is fsbroker?
+
+	It is not a 100%. But good enough for most use cases, and certainly far better than what fsnotify offers. The accuracy is directly propotional to the timeout interval you set in fsbroker configuration. The more you wait for batching events together, the better your accuracy will be.
+
+- ### Why is the accuracy of event detection not a 100%?
+	
+	There are two main reasons
+	- fsbroker depends on accumilating a bunch of fsnotify events togther to try and make sense of what actually happened. Because of the nature of this process, there has to be a cutoff interval. Some user actions may force fsnotify to emit multiple events in succession providing a certain pattern, which fsbroker uses to make its decision. If the action the user took results in a pattern that is divided between two queue frames, the result may not be accurate.
+	- Many software products handle files in very convulted ways, such as writing to shadow files, burst writing, and shadow deletion. We have no control over how other software decides to handle the file system. However, we tried to pick the most general and common patterns to detect and emit.
+
+- ### What patterns does fsbroker detect and what events does it emit?
+
+	Here are the main general behaviours which fsbroker applies to all platforms.
+
+	- fsnotify REMOVE events for a directory or file invalidates all previous events for that path. So, fsbroker will ignore all events preceeding a REMOVE event for a given path within the event queue interval window.
+	- fsnotify WRITE events on a file are all ignored except the last one within the event queue interval window. This offers WRITE event deduplication. Saving you from when users burst save the file multiple times.
+	- fsnotify WRITE events on directories are always ignored. They occur only on Windows when any watched directory (except the root watch directory) contents are modified (e.g. file created or file removed). These events are completely ignored by fsbroker, because the file created/removed event is already captured.
+	- fsnotify CHMOD events will be forwarded as is if the user elects to set `EmitChmod` to `true` in broker configuration. They will not be deduplicated.
+	- fsbroker will enrich events with additional event information.
+
+	Here are also common fsnotify patterns that fsbroker detects and handles as follows:
+	| User Action | Windows Pattern | macOS Pattern | Linux Pattern | Event Emitted | Notes |
+	|---------|---------|---------|---------|---------|---------|
+	| Create empty file within watched directory | - CREATE (file path) | - CREATE (file path) | - CREATE (file path) | Create | |
+	| Create non-empty file within watched directory | - CREATE (file path)<br>- WRITE (file path) | - CREATE (file path)<br>- WRITE (file path) | - CREATE (file path)<br>- WRITE (file path)<br>- WRITE (file path) | Create | |
+	| Clear file within a watched directory | - WRITE (file path) | - | - WRITE (file path) | Write | fsnotify doesn't emit a WRITE event when a file is cleared on macOS, instead we use the CHMOD event and check the file's existance and size to know it is a WRITE event |
+	| Modify file within a watched directory | - WRITE (file path) | - WRITE (file path) | - WRITE (file path) | Write | |
+	| Rename file inplace within a watched directory | - RENAME (old file path)<br>- CREATE (new file path) | - CREATE (new file path)<br>- RENAME (old file path) | - RENAME (old file path)<br>- CREATE (new file path) | Rename | |
+	| Move file from a watched directory to another watched directory | - REMOVE (old file path)<br>- CREATE (new file path) | - CREATE (new file path)<br>- RENAME (old file path) | - RENAME (old file path)<br>- CREATE (new file path) | Rename | |
+	| Move file from an unwatched directory to a watched directory | - | - | - | Create | Similar to creating a non-empty file |
+	| Soft delete file (move to trash) or Move file from a watched directory to an unwatched directory | - REMOVE (file path) | - RENAME (file path) | - RENAME (file path) | Create | |
+	| Hard delete file (permenantly) | - REMOVE (file path) | - REMOVE (file path) | - REMOVE (file path) | Remove | |
+	| Create a directory | - CREATE (dir path) | - CREATE (dir path) | - CREATE (dir path) | Create | |
+	| Rename directory inplace within a watched directory | - RENAME (old dir path)<br>- CREATE (new dir path) | - CREATE (new dir path)<br>- RENAME (old dir path) | - RENAME (old dir path)<br>- CREATE (new dir path)<br>- RENAME (old dir path) | Rename | |
+	| Move directory from a watched directory to another watched directory | - REMOVE (old dir path)<br>- CREATE (new dir path) | - CREATE (new dir path)<br>- RENAME (old dir path) | - RENAME (old dir path)<br>- CREATE (new dir path) | Rename | Note that operating systems do not raise events for any files already existing within the moved directory |
+	| Move directory from an unwatched directory to a watched directory | - | - | - | Create | Similar to creating a directory. Note that operating systems do not raise events for any files already existing within the moved directory |
+	| Soft delete directory (move to trash) or Move directory from a watched directory to an unwatched directory | - REMOVE (dir path) | - RENAME (dir path) | - RENAME (dir path) | Create | Note that no additional remove events are emitted for each directory or file within the deleted directory except on windows, additional remove events are emitted once the trash is emptied |
+	| Hard delete directory (permenantly) | - REMOVE (dir path) | - REMOVE (file path) | - REMOVE (file path) | Remove | Note that additional remove events are emitted for each directory or file within the deleted directory |
+	
+	Here is a decision tree to help visualize this nonsense:
+```
+Event received from fsnotify
+│
+├── Is it a CREATE event?
+│   ├── Yes
+│   │   ├── Is there a RENAME event for a the same Id?
+│   │   │   ├── Yes → RENAME event (internal rename/move)
+│   │   │   └── No → CREATE event
+│   │   │
+│   │   └── For a file: Is it followed by WRITE event(s)?
+│   │       └── Yes → Still CREATE event (non-empty file creation)
+│
+├── Is it a WRITE event?
+│   ├── Yes
+│   │   ├── Is it on Windows AND for a directory?
+│   │   │   └── Yes → Ignore event
+│   │   │
+│   │   ├── Was there a CREATE event for this path just before?
+│   │   │   └── Yes → Part of CREATE event (non-empty file)
+│   │   │
+│   │   └── Is it the most recent WRITE for this path?
+│   │       ├── Yes → WRITE event
+│   │       └── No → Ignore (deduplicate)
+│
+├── Is it a RENAME event?
+│   ├── Yes
+│   │   ├── Is there a CREATE event with the same Id?
+│   │   │   └── Yes → RENAME event (internal rename/move)
+│   │   │
+│   │   └── No matching CREATE event
+│   │       └── On macOS/Linux → REMOVE event (soft delete/move)
+│
+├── Is it a REMOVE event?
+│   ├── Yes
+│   │   ├── Is there a CREATE event with the same Id? (Windows only)
+│   │   │   └── Yes → RENAME event (internal rename/move)
+│   │   │
+│   │   └── No matching CREATE → REMOVE event (hard delete)
+│   │
+│   └── Invalidate all previous events for this path
+│  
+└── Is it a CHMOD event?
+	└── Yes
+		└── On macOS, Is it a file that became zero bytes?
+			└── Yes → WRITE event
+```
 
 ## License
 

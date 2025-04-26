@@ -28,7 +28,7 @@ func TestNewFSEvent(t *testing.T) {
 	t.Run("Event with properties", func(t *testing.T) {
 		path := "/test/path"
 		now := time.Now()
-		event := NewFSEvent(Modify, path, now)
+		event := NewFSEvent(Write, path, now)
 
 		// Add some properties
 		event.Properties["size"] = "1024"
@@ -66,7 +66,7 @@ func TestEventTypeString(t *testing.T) {
 		expected  string
 	}{
 		{Create, "Create"},
-		{Modify, "Modify"},
+		{Write, "Write"},
 		{Rename, "Rename"},
 		{Remove, "Remove"},
 		{Chmod, "Chmod"},
@@ -98,7 +98,7 @@ func TestFSEventSignature(t *testing.T) {
 			expected  string
 		}{
 			{Create, "/test/path", "0-/test/path"},
-			{Modify, "/test/path", "1-/test/path"},
+			{Write, "/test/path", "1-/test/path"},
 			{Rename, "/test/path", "2-/test/path"},
 			{Remove, "/test/path", "3-/test/path"},
 			{Chmod, "/test/path", "4-/test/path"},

@@ -4,9 +4,13 @@
 package fsbroker
 
 import (
+	"os"
 	"path/filepath"
 	"strings"
 	"syscall"
+	"unsafe"
+
+	"golang.org/x/sys/windows"
 )
 
 // isSystemFile checks if the file is a common Windows system or metadata file.
@@ -44,4 +48,49 @@ func isHiddenFile(path string) (bool, error) {
 	// Check if the hidden attribute is set
 	// FILE_ATTRIBUTE_HIDDEN = 2 in Windows
 	return attributes&syscall.FILE_ATTRIBUTE_HIDDEN != 0, nil
+}
+
+func FromOSInfo(path string, fileinfo os.FileInfo) *Info {
+	id, err := getFileID(path)
+	if err != nil {
+		return nil
+	}
+
+	return &Info{
+		Id:   id,
+		Path: path,
+		Mode: uint32(fileinfo.Mode()),
+	}
+}
+
+type BY_HANDLE_FILE_INFORMATION struct {
+	FileAttributes     uint32
+	CreationTime       syscall.Filetime
+	LastAccessTime     syscall.Filetime
+	LastWriteTime      syscall.Filetime
+	VolumeSerialNumber uint32
+	FileSizeHigh       uint32
+	FileSizeLow        uint32
+	NumberOfLinks      uint32
+	FileIndexHigh      uint32
+	FileIndexLow       uint32
+}
+
+func getFileID(path string) (uint64, error) {
+	file, err := os.Open(path)
+	if err != nil {
+		return 0, err
+	}
+	defer file.Close()
+
+	handle := windows.Handle(file.Fd())
+
+	var fileInfo BY_HANDLE_FILE_INFORMATION
+	err = windows.GetFileInformationByHandle(handle, (*windows.ByHandleFileInformation)(unsafe.Pointer(&fileInfo)))
+	if err != nil {
+		return 0, err
+	}
+
+	fileID := (uint64(fileInfo.FileIndexHigh) << 32) | uint64(fileInfo.FileIndexLow)
+	return fileID, nil
 }

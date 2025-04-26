@@ -4,8 +4,10 @@
 package fsbroker
 
 import (
+	"os"
 	"path/filepath"
 	"strings"
+	"syscall"
 )
 
 // isSystemFile checks if the file is a common macOS system or metadata file.
@@ -27,4 +29,20 @@ func isSystemFile(name string) bool {
 func isHiddenFile(path string) (bool, error) {
 	// On Unix-like platforms (Linux, macOS), hidden files start with a dot
 	return strings.HasPrefix(filepath.Base(path), "."), nil
+}
+
+func FromOSInfo(path string, fileinfo os.FileInfo) *Info {
+	sys := fileinfo.Sys()
+	sysstat, ok := sys.(*syscall.Stat_t)
+	if !ok {
+		return nil
+	}
+
+	return &Info{
+		Id:      sysstat.Ino,
+		Path:    path,
+		Size:    uint64(fileinfo.Size()),
+		ModTime: fileinfo.ModTime(),
+		Mode:    uint32(fileinfo.Mode()),
+	}
 }
