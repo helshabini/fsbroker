@@ -319,6 +319,20 @@ func isSystemFile(name string) bool {
 		return true
 	}
 
+	// Check for common patterns
+	// Editor backup/swap files
+	if strings.HasSuffix(base, "~") || // Common backup suffix (vim, emacs, etc.)
+		(strings.HasPrefix(base, "#") && strings.HasSuffix(base, "#")) || // Emacs autosave
+		(strings.HasPrefix(base, ".") && strings.HasSuffix(base, ".swp")) || // Vim swap file
+		(strings.HasPrefix(base, ".") && strings.HasSuffix(base, ".swo")) { // Vim swap file (newer)
+		return true
+	}
+
+	// Python bytecode
+	if strings.HasSuffix(base, ".pyc") {
+		return true
+	}
+
 	// Match patterns for resource fork or metadata files
 	return strings.HasPrefix(base, "._") || base == ".com.apple.timemachine.donotpresent"
 }
