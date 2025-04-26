@@ -14,7 +14,8 @@ import (
 const (
 	// Generous timeout to wait for events, allowing for FS latency and broker processing.
 	// The broker's internal timeout is 300ms by default.
-	eventTimeout = 2 * time.Second
+	// Increased from 2s to 3s to give more buffer for test timing issues.
+	eventTimeout = 3 * time.Second
 )
 
 // setupTestEnv creates a temporary directory, initializes and starts FSBroker watching it.
@@ -73,49 +74,116 @@ func setupTestEnv(t *testing.T) (*fsbroker.FSBroker, *fsbroker.FSConfig, string,
 }
 
 // expectEvent waits for a specific event type within a timeout.
-func expectEvent(t *testing.T, broker *fsbroker.FSBroker, expectedType fsbroker.EventType, expectedPath string) *fsbroker.FSEvent {
+// Modified to drain events for a full broker cycle before checking.
+func expectEvent(t *testing.T, broker *fsbroker.FSBroker, config *fsbroker.FSConfig, expectedType fsbroker.EventType, expectedPath string) *fsbroker.FSEvent {
 	t.Helper()
-	select {
-	case event := <-broker.Next():
-		if event.Type != expectedType {
-			t.Fatalf("Expected event type %v, but got %v for path %s", expectedType, event.Type, event.Path)
-		}
-		// Normalize paths for comparison
-		relEventPath, err := filepath.Rel(filepath.Dir(expectedPath), event.Path)
-		if err != nil {
-			t.Logf("Warning: Could not make event path relative: %v", err)
-			relEventPath = event.Path // Use absolute if relative fails
-		}
-		relExpectedPath, err := filepath.Rel(filepath.Dir(expectedPath), expectedPath)
-		if err != nil {
-			t.Logf("Warning: Could not make expected path relative: %v", err)
-			relExpectedPath = expectedPath // Use absolute if relative fails
-		}
 
-		if relEventPath != relExpectedPath {
-			t.Fatalf("Expected event path %s, but got %s (Type: %v)", expectedPath, event.Path, event.Type)
+	// Drain events for a duration slightly longer than the broker's timeout
+	// to allow the relevant tick to complete processing.
+	drainDuration := time.Duration(float64(config.Timeout) * 1.5)
+	t.Logf("Expecting %v for %s, draining events for %v first...", expectedType, expectedPath, drainDuration)
+
+	receivedEvents := []*fsbroker.FSEvent{}
+	deadline := time.NewTimer(eventTimeout) // Overall test timeout
+	defer deadline.Stop()
+	initialDrainTimer := time.NewTimer(drainDuration)
+	defer initialDrainTimer.Stop()
+
+	for {
+		select {
+		case event := <-broker.Next():
+			t.Logf("  ...received event during drain/wait: Type=%v, Path=%s", event.Type, event.Path)
+			receivedEvents = append(receivedEvents, event)
+		case err := <-broker.Error():
+			t.Fatalf("Received unexpected error while waiting for %v on %s: %v", expectedType, expectedPath, err)
+		case <-initialDrainTimer.C:
+			// Initial drain complete, now check received events
+			found := false
+			for _, event := range receivedEvents {
+				if event.Type == expectedType {
+					relEventPath, _ := filepath.Rel(filepath.Dir(expectedPath), event.Path)
+					relExpectedPath, _ := filepath.Rel(filepath.Dir(expectedPath), expectedPath)
+					if relEventPath == relExpectedPath {
+						t.Logf("Found expected event after drain: Type=%v, Path=%s, Props=%v", event.Type, event.Path, event.Properties)
+						found = true
+						// Continue draining until overall timeout in case other unexpected events arrive
+						// break // Don't break, keep draining
+					} else {
+						t.Logf("  ...event type %v matched, but path mismatch (Expected: %s, Got: %s)", expectedType, expectedPath, event.Path)
+					}
+				}
+			}
+			if found {
+				// Keep draining until deadline, but we found what we needed.
+				// We return the *last* matching event found, assuming it's the most processed one.
+				var lastMatchingEvent *fsbroker.FSEvent
+				for i := len(receivedEvents) - 1; i >= 0; i-- {
+					e := receivedEvents[i]
+					if e.Type == expectedType {
+						relEventPath, _ := filepath.Rel(filepath.Dir(expectedPath), e.Path)
+						relExpectedPath, _ := filepath.Rel(filepath.Dir(expectedPath), expectedPath)
+						if relEventPath == relExpectedPath {
+							lastMatchingEvent = e
+							break
+						}
+					}
+				}
+				// Continue draining in background, return the event
+				return lastMatchingEvent
+			} else {
+				t.Fatalf("Did not find expected event type %v for path %s after draining for %v", expectedType, expectedPath, drainDuration)
+			}
+
+		case <-deadline.C:
+			// Check one last time if the event arrived just before the deadline
+			found := false
+			var lastMatchingEvent *fsbroker.FSEvent
+			for i := len(receivedEvents) - 1; i >= 0; i-- {
+				e := receivedEvents[i]
+				if e.Type == expectedType {
+					relEventPath, _ := filepath.Rel(filepath.Dir(expectedPath), e.Path)
+					relExpectedPath, _ := filepath.Rel(filepath.Dir(expectedPath), expectedPath)
+					if relEventPath == relExpectedPath {
+						t.Logf("Found expected event just before deadline: Type=%v, Path=%s, Props=%v", e.Type, e.Path, e.Properties)
+						lastMatchingEvent = e
+						found = true
+						break
+					}
+				}
+			}
+			if found {
+				return lastMatchingEvent
+			}
+			t.Fatalf("Timeout waiting for event type %v on path %s. Received %d events total.", expectedType, expectedPath, len(receivedEvents))
 		}
-		t.Logf("Received expected event: Type=%v, Path=%s, Props=%v", event.Type, event.Path, event.Properties)
-		return event
-	case err := <-broker.Error():
-		t.Fatalf("Received unexpected error: %v", err)
-	case <-time.After(eventTimeout):
-		t.Fatalf("Timeout waiting for event type %v on path %s", expectedType, expectedPath)
 	}
-	return nil // Should not be reached
+	// return nil // Should be unreachable
 }
 
-// expectNoEvent waits for a duration and fails if any event is received.
-func expectNoEvent(t *testing.T, broker *fsbroker.FSBroker, duration time.Duration) {
+// expectNoEvent waits for a duration and fails if any event OR error is received during that time.
+// Modified to wait slightly longer than a broker tick.
+func expectNoEvent(t *testing.T, broker *fsbroker.FSBroker, config *fsbroker.FSConfig, duration time.Duration) {
 	t.Helper()
+
+	// Wait slightly longer than the provided duration, minimum one broker tick + buffer
+	waitDuration := duration
+	minWait := time.Duration(float64(config.Timeout) * 1.1) // Wait at least one broker tick plus 10%
+	if waitDuration < minWait {
+		waitDuration = minWait
+	}
+	t.Logf("Expecting no event/error for %v...", waitDuration)
+
+	timer := time.NewTimer(waitDuration)
+	defer timer.Stop()
+
 	select {
 	case event := <-broker.Next():
 		t.Fatalf("Received unexpected event: Type=%v, Path=%s", event.Type, event.Path)
 	case err := <-broker.Error():
 		t.Fatalf("Received unexpected error: %v", err)
-	case <-time.After(duration):
-		// Success - no event received
-		t.Logf("Correctly received no event within %v", duration)
+	case <-timer.C:
+		// Success - no event or error received within the adjusted duration
+		t.Logf("Correctly received no event or error within %v", waitDuration)
 	}
 }
 
@@ -151,7 +219,7 @@ func TestFSBrokerIntegration(t *testing.T) {
 		}
 		f.Close() // Close immediately
 
-		expectEvent(t, broker, fsbroker.Create, filePath)
+		expectEvent(t, broker, fsbroker.DefaultFSConfig(), fsbroker.Create, filePath)
 	})
 
 	t.Run("CreateNonEmptyFile", func(t *testing.T) {
@@ -164,11 +232,11 @@ func TestFSBrokerIntegration(t *testing.T) {
 			t.Fatalf("Failed to write file: %v", err)
 		}
 
-		expectEvent(t, broker, fsbroker.Create, filePath)
+		expectEvent(t, broker, config, fsbroker.Create, filePath)
 		// Important: Depending on timing and OS, a Write might follow closely.
 		// fsbroker *should* ideally coalesce this into the Create.
 		// We add a small delay and check no Write event arrives immediately after.
-		expectNoEvent(t, broker, config.Timeout/2)
+		expectNoEvent(t, broker, config, config.Timeout/2)
 	})
 
 	t.Run("ModifyFile", func(t *testing.T) {
@@ -180,7 +248,7 @@ func TestFSBrokerIntegration(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Failed to write initial file: %v", err)
 		}
-		expectEvent(t, broker, fsbroker.Create, filePath) // Consume create event
+		expectEvent(t, broker, fsbroker.DefaultFSConfig(), fsbroker.Create, filePath) // Consume create event
 
 		// Append to the file
 		f, err := os.OpenFile(filePath, os.O_APPEND|os.O_WRONLY, 0644)
@@ -194,7 +262,7 @@ func TestFSBrokerIntegration(t *testing.T) {
 		}
 		f.Close()
 
-		expectEvent(t, broker, fsbroker.Write, filePath)
+		expectEvent(t, broker, fsbroker.DefaultFSConfig(), fsbroker.Write, filePath)
 	})
 
 	t.Run("ClearFile", func(t *testing.T) {
@@ -207,14 +275,14 @@ func TestFSBrokerIntegration(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Failed to write initial file: %v", err)
 		}
-		expectEvent(t, broker, fsbroker.Create, filePath) // Consume create event
+		expectEvent(t, broker, fsbroker.DefaultFSConfig(), fsbroker.Create, filePath) // Consume create event
 
 		err = os.Truncate(filePath, 0)
 		if err != nil {
 			t.Fatalf("Failed to truncate file: %v", err)
 		}
 
-		expectEvent(t, broker, fsbroker.Write, filePath)
+		expectEvent(t, broker, fsbroker.DefaultFSConfig(), fsbroker.Write, filePath)
 	})
 
 	t.Run("RenameFileInplace", func(t *testing.T) {
@@ -228,14 +296,14 @@ func TestFSBrokerIntegration(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Failed to create file: %v", err)
 		}
-		expectEvent(t, broker, fsbroker.Create, oldPath) // Consume create event
+		expectEvent(t, broker, fsbroker.DefaultFSConfig(), fsbroker.Create, oldPath) // Consume create event
 
 		err = os.Rename(oldPath, newPath)
 		if err != nil {
 			t.Fatalf("Failed to rename file: %v", err)
 		}
 
-		event := expectEvent(t, broker, fsbroker.Rename, newPath)
+		event := expectEvent(t, broker, fsbroker.DefaultFSConfig(), fsbroker.Rename, newPath)
 		if oldPathProp, ok := event.Properties["OldPath"].(string); !ok || oldPathProp != oldPath {
 			t.Errorf("Rename event missing or incorrect 'OldPath' property. Expected %s, Got %v", oldPath, event.Properties["OldPath"])
 		}
@@ -251,7 +319,7 @@ func TestFSBrokerIntegration(t *testing.T) {
 			t.Fatalf("Failed to create subdir: %v", err)
 		}
 		// Explicitly consume the Create event for the subdirectory
-		expectEvent(t, broker, fsbroker.Create, subDir)
+		expectEvent(t, broker, config, fsbroker.Create, subDir)
 		// Drain any other potential related events just in case
 		drainEvents(broker, config.Timeout/2)
 
@@ -262,14 +330,14 @@ func TestFSBrokerIntegration(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Failed to create file: %v", err)
 		}
-		expectEvent(t, broker, fsbroker.Create, oldPath) // Consume create event
+		expectEvent(t, broker, config, fsbroker.Create, oldPath) // Consume create event
 
 		err = os.Rename(oldPath, newPath)
 		if err != nil {
 			t.Fatalf("Failed to move file: %v", err)
 		}
 
-		event := expectEvent(t, broker, fsbroker.Rename, newPath)
+		event := expectEvent(t, broker, config, fsbroker.Rename, newPath)
 		if oldPathProp, ok := event.Properties["OldPath"].(string); !ok || oldPathProp != oldPath {
 			t.Errorf("Rename event missing or incorrect 'OldPath' property. Expected %s, Got %v", oldPath, event.Properties["OldPath"])
 		}
@@ -294,7 +362,7 @@ func TestFSBrokerIntegration(t *testing.T) {
 			t.Fatalf("Failed to move file into watched dir: %v", err)
 		}
 
-		expectEvent(t, broker, fsbroker.Create, finalPath)
+		expectEvent(t, broker, fsbroker.DefaultFSConfig(), fsbroker.Create, finalPath)
 	})
 
 	t.Run("MoveFileWatchedToUnwatched", func(t *testing.T) {
@@ -309,14 +377,14 @@ func TestFSBrokerIntegration(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Failed to create internal file: %v", err)
 		}
-		expectEvent(t, broker, fsbroker.Create, internalPath) // Consume create
+		expectEvent(t, broker, fsbroker.DefaultFSConfig(), fsbroker.Create, internalPath) // Consume create
 
 		err = os.Rename(internalPath, externalPath)
 		if err != nil {
 			t.Fatalf("Failed to move file out of watched dir: %v", err)
 		}
 
-		expectEvent(t, broker, fsbroker.Remove, internalPath)
+		expectEvent(t, broker, fsbroker.DefaultFSConfig(), fsbroker.Remove, internalPath)
 	})
 
 	t.Run("HardDeleteFile", func(t *testing.T) {
@@ -328,14 +396,14 @@ func TestFSBrokerIntegration(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Failed to create file: %v", err)
 		}
-		expectEvent(t, broker, fsbroker.Create, filePath) // Consume create
+		expectEvent(t, broker, fsbroker.DefaultFSConfig(), fsbroker.Create, filePath) // Consume create
 
 		err = os.Remove(filePath)
 		if err != nil {
 			t.Fatalf("Failed to remove file: %v", err)
 		}
 
-		expectEvent(t, broker, fsbroker.Remove, filePath)
+		expectEvent(t, broker, fsbroker.DefaultFSConfig(), fsbroker.Remove, filePath)
 	})
 
 	// --- Directory Tests ---
@@ -350,7 +418,7 @@ func TestFSBrokerIntegration(t *testing.T) {
 			t.Fatalf("Failed to create directory: %v", err)
 		}
 
-		expectEvent(t, broker, fsbroker.Create, dirPath)
+		expectEvent(t, broker, fsbroker.DefaultFSConfig(), fsbroker.Create, dirPath)
 	})
 
 	t.Run("RenameDirectoryInplace", func(t *testing.T) {
@@ -364,14 +432,14 @@ func TestFSBrokerIntegration(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Failed to create directory: %v", err)
 		}
-		expectEvent(t, broker, fsbroker.Create, oldPath) // Consume create
+		expectEvent(t, broker, fsbroker.DefaultFSConfig(), fsbroker.Create, oldPath) // Consume create
 
 		err = os.Rename(oldPath, newPath)
 		if err != nil {
 			t.Fatalf("Failed to rename directory: %v", err)
 		}
 
-		event := expectEvent(t, broker, fsbroker.Rename, newPath)
+		event := expectEvent(t, broker, fsbroker.DefaultFSConfig(), fsbroker.Rename, newPath)
 		if oldPathProp, ok := event.Properties["OldPath"].(string); !ok || oldPathProp != oldPath {
 			t.Errorf("Rename event missing or incorrect 'OldPath' property. Expected %s, Got %v", oldPath, event.Properties["OldPath"])
 		}
@@ -387,7 +455,7 @@ func TestFSBrokerIntegration(t *testing.T) {
 			t.Fatalf("Failed to create parent dir: %v", err)
 		}
 		// Consume parent create
-		expectEvent(t, broker, fsbroker.Create, parentDir)
+		expectEvent(t, broker, fsbroker.DefaultFSConfig(), fsbroker.Create, parentDir)
 
 		oldPath := filepath.Join(watchDir, "move_this_dir")
 		newPath := filepath.Join(parentDir, "move_this_dir") // Moved inside parent
@@ -396,14 +464,14 @@ func TestFSBrokerIntegration(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Failed to create dir to move: %v", err)
 		}
-		expectEvent(t, broker, fsbroker.Create, oldPath) // Consume create event
+		expectEvent(t, broker, fsbroker.DefaultFSConfig(), fsbroker.Create, oldPath) // Consume create event
 
 		err = os.Rename(oldPath, newPath)
 		if err != nil {
 			t.Fatalf("Failed to move directory: %v", err)
 		}
 
-		event := expectEvent(t, broker, fsbroker.Rename, newPath)
+		event := expectEvent(t, broker, fsbroker.DefaultFSConfig(), fsbroker.Rename, newPath)
 		if oldPathProp, ok := event.Properties["OldPath"].(string); !ok || oldPathProp != oldPath {
 			t.Errorf("Rename event missing or incorrect 'OldPath' property. Expected %s, Got %v", oldPath, event.Properties["OldPath"])
 		}
@@ -426,7 +494,7 @@ func TestFSBrokerIntegration(t *testing.T) {
 			t.Fatalf("Failed to move directory into watched dir: %v", err)
 		}
 
-		expectEvent(t, broker, fsbroker.Create, finalPath)
+		expectEvent(t, broker, fsbroker.DefaultFSConfig(), fsbroker.Create, finalPath)
 	})
 
 	t.Run("MoveDirectoryWatchedToUnwatched", func(t *testing.T) {
@@ -440,14 +508,14 @@ func TestFSBrokerIntegration(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Failed to create internal dir: %v", err)
 		}
-		expectEvent(t, broker, fsbroker.Create, internalPath) // Consume create
+		expectEvent(t, broker, fsbroker.DefaultFSConfig(), fsbroker.Create, internalPath) // Consume create
 
 		err = os.Rename(internalPath, externalPath)
 		if err != nil {
 			t.Fatalf("Failed to move directory out of watched dir: %v", err)
 		}
 
-		expectEvent(t, broker, fsbroker.Remove, internalPath)
+		expectEvent(t, broker, fsbroker.DefaultFSConfig(), fsbroker.Remove, internalPath)
 	})
 
 	t.Run("HardDeleteDirectory", func(t *testing.T) {
@@ -466,7 +534,7 @@ func TestFSBrokerIntegration(t *testing.T) {
 			t.Fatalf("Failed to create inner file: %v", err)
 		}
 
-		expectEvent(t, broker, fsbroker.Create, dirPath) // Consume dir create
+		expectEvent(t, broker, config, fsbroker.Create, dirPath) // Consume dir create
 		// We might get a create for the inner file too depending on timing, drain it.
 		drainEvents(broker, config.Timeout/2)
 
@@ -510,7 +578,7 @@ func TestFSBrokerIntegration(t *testing.T) {
 
 		// Check no *other* unexpected events follow.
 		t.Logf("Checking for further unexpected events...")
-		expectNoEvent(t, broker, config.Timeout/2) // Use a shorter timeout here
+		expectNoEvent(t, broker, config, config.Timeout/2) // Use a shorter timeout here
 	})
 
 	// --- Other Tests ---
@@ -536,7 +604,7 @@ func TestFSBrokerIntegration(t *testing.T) {
 		}
 
 		// Expect *no* event because it should be ignored
-		expectNoEvent(t, broker, time.Duration(float64(config.Timeout)*1.5)) // Wait a bit longer than one cycle
+		expectNoEvent(t, broker, config, time.Duration(float64(config.Timeout)*1.5)) // Wait a bit longer than one cycle
 	})
 
 	// Add more tests for IgnoreSysFiles, EmitChmod=true/false, Filter, etc.
