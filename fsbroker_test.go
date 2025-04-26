@@ -38,8 +38,6 @@ func setupTestEnv(t *testing.T) (*fsbroker.FSBroker, *fsbroker.FSConfig, string,
 	config := fsbroker.DefaultFSConfig()
 	// Reduce timeout for faster tests, but keep it > fsnotify latency
 	config.Timeout = 400 * time.Millisecond
-	// Ensure macOS clear file test works if applicable
-	config.DarwinChmodAsModify = true
 
 	broker, err := fsbroker.NewFSBroker(config)
 	if err != nil {

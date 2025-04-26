@@ -13,20 +13,18 @@ import (
 )
 
 type FSConfig struct {
-	Timeout             time.Duration // duration to wait for events to be grouped and processed
-	IgnoreSysFiles      bool          // ignore common system files and directories
-	IgnoreHiddenFiles   bool          // ignore hidden files
-	DarwinChmodAsModify bool          // treat chmod events on empty files as modify events on macOS
-	EmitChmod           bool          // emit chmod events
+	Timeout           time.Duration // duration to wait for events to be grouped and processed
+	IgnoreSysFiles    bool          // ignore common system files and directories
+	IgnoreHiddenFiles bool          // ignore hidden files
+	EmitChmod         bool          // emit chmod events
 }
 
 func DefaultFSConfig() *FSConfig {
 	return &FSConfig{
-		Timeout:             300 * time.Millisecond,
-		IgnoreSysFiles:      true,
-		IgnoreHiddenFiles:   true,
-		DarwinChmodAsModify: true,
-		EmitChmod:           false,
+		Timeout:           300 * time.Millisecond,
+		IgnoreSysFiles:    true,
+		IgnoreHiddenFiles: true,
+		EmitChmod:         false,
 	}
 }
 
@@ -74,7 +72,7 @@ func (b *FSBroker) Start() {
 			case event := <-b.watcher.Events:
 				switch event.Op {
 				case fsnotify.Create, fsnotify.Write, fsnotify.Remove, fsnotify.Rename, fsnotify.Chmod:
-					//fmt.Printf("FSNotify Event: %s, File: %s\n", event.Op, event.Name)
+					fmt.Printf("FSNotify Event: %s, File: %s\n", event.Op, event.Name)
 					b.addEvent(event.Op, event.Name)
 				default:
 					b.errors <- errors.New("unknown fsnotify event")

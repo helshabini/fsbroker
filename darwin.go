@@ -323,7 +323,7 @@ func isSystemFile(name string) bool {
 	return strings.HasPrefix(base, "._") || base == ".com.apple.timemachine.donotpresent"
 }
 
-// isHiddenFile checks if a file is hidden on macOS.
+// isHiddenFile checks if a file is hidden on Unix-like systems.
 func isHiddenFile(path string) (bool, error) {
 	baseName := filepath.Base(path)
 	if len(baseName) > 0 && baseName[0] == '.' && baseName != "." && baseName != ".." {
