@@ -240,26 +240,11 @@ func (b *FSBroker) resolveAndHandle(eventQueue *EventQueue, tickerLock *sync.Mut
 			latestModify := action
 			for _, relatedModify := range eventList {
 				if relatedModify.Path == action.Path && relatedModify.Type == Write && relatedModify.Timestamp.After(latestModify.Timestamp) {
-					processedPaths[action.Signature()] = true // Mark current action processed
+					processedPaths[latestModify.Signature()] = true // Mark current action processed
 					fmt.Printf("[DEBUG - Linux - Write %s] Found later Write %s. Marking self processed, updating latestModify.\n", action.Signature(), relatedModify.Signature())
 					latestModify = relatedModify // Update latestModify to the later one
 				}
 			}
-
-			// If the latestModify event itself was marked processed (e.g., by an even later write), skip.
-			if processedPaths[latestModify.Signature()] {
-				// Need to check if latestModify *is* the current action. If action was marked processed by a later write, action != latestModify.
-				// If action *is* latestModify, but it's already processed (e.g. by Create+Write handling), then skip.
-				if latestModify.Signature() == action.Signature() {
-					fmt.Printf("[DEBUG - Linux - Write %s] Skipping: Event was latest write but already marked processed.\n", action.Signature())
-				} else {
-					// This case should theoretically not be hit because the outer check `if processedPaths[action.Signature()]` would catch it.
-					// If it is hit, it means the *original* action was processed, likely because a later write was found.
-					fmt.Printf("[DEBUG - Linux - Write %s] Skipping: Event was superseded by later write %s.\n", action.Signature(), latestModify.Signature())
-				}
-				continue
-			}
-			fmt.Printf("[DEBUG - Linux - Write %s] Processing as latest write.\n", latestModify.Signature())
 
 			// Check if the file exists on disk
 			stat, err := os.Stat(latestModify.Path)
