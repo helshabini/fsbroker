@@ -60,3 +60,9 @@ func (eq *EventQueue) Clear() {
 	defer eq.queueLock.Unlock()
 	eq.queue = make([]*FSEvent, 0)
 }
+
+func (eq *EventQueue) Len() int {
+	eq.queueLock.Lock()
+	defer eq.queueLock.Unlock()
+	return len(eq.queue)
+}

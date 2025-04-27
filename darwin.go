@@ -4,6 +4,7 @@
 package fsbroker
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -31,7 +32,9 @@ func (b *FSBroker) resolveAndHandle(eventQueue *EventQueue, tickerLock *sync.Mut
 	//Now we process the events remaining in the event queue, and stop the loop when it's empty
 	for action := eventQueue.Pop(); action != nil; action = eventQueue.Pop() {
 		// Ignore already processed paths
+		fmt.Printf("[DEBUG] Loop Start: Processing action: Type=%s, Path=%s, Sig=%s\n", action.Type.String(), action.Path, action.Signature())
 		if processedPaths[action.Signature()] {
+			fmt.Printf("[DEBUG] Loop Skip: Action %s already processed.\n", action.Signature())
 			continue
 		}
 
@@ -83,6 +86,7 @@ func (b *FSBroker) resolveAndHandle(eventQueue *EventQueue, tickerLock *sync.Mut
 			}
 
 			info := FromOSInfo(action.Path, stat)
+			fmt.Printf("[DEBUG - Create] Path %s got info: %+v\n", action.Path, info)
 			if info == nil {
 				// We failed to get the file info (maybe permission error or transient issue), enrich with what we have
 				action.EnrichFromStat(stat)
@@ -96,19 +100,33 @@ func (b *FSBroker) resolveAndHandle(eventQueue *EventQueue, tickerLock *sync.Mut
 			// check for following Rename event (Unix Rename/Move pattern)
 			// Only run this if the previous check didn't find a match
 			if !isRenameOrMove {
+				fmt.Printf("[DEBUG - Create %s] Entering Rename check block. isRenameOrMove=%t\n", action.Signature(), isRenameOrMove)
 				for _, relatedAction := range eventList {
 					// Look for RENAME *after* this CREATE
 					if relatedAction.Type == Rename && relatedAction.Timestamp.After(action.Timestamp) { // Check time relationship if needed
+						fmt.Printf("[DEBUG - Create %s] Checking potential RENAME partner: %s\n", action.Signature(), relatedAction.Signature())
+						// --- Log Watchmap State BEFORE potential rename handling ---
+						b.PrintMap()
 						potentialRename := b.watchmap.Get(relatedAction.Path)
-						// Check potentialRename is not nil before accessing Id
-						if potentialRename != nil && potentialRename.Id == info.Id {
+						fmt.Printf("[DEBUG - Create %s] Info for potential old path %s from watchmap: %+v\n", action.Signature(), relatedAction.Path, potentialRename)
+						// Safely log IDs, handling potential nil pointer for potentialRename
+						var potentialRenameId uint64
+						if potentialRename != nil {
+							potentialRenameId = potentialRename.Id
+						}
+						idsMatch := potentialRename != nil && potentialRename.Id == info.Id
+						fmt.Printf("[DEBUG - Create %s] Comparing IDs: potentialRename.Id (%d) == info.Id (%d) -> %t\n", action.Signature(), potentialRenameId, info.Id, idsMatch)
+						if idsMatch {
 							// We found the rename event, ignore the create event and only raise the Rename event
+							fmt.Printf("[DEBUG - Create] Found RENAME partner %s for CREATE %s via ID match (%d). Synthesizing.\n", relatedAction.Signature(), action.Signature(), info.Id)
 							result := NewFSEvent(Rename, action.Path, action.Timestamp) // Use NEW path/time
 							result.Properties["OldPath"] = potentialRename.Path         // Store OLD path
 							result.EnrichFromInfo(info)                                 // Enrich with NEW info
+							fmt.Printf("[DEBUG - Create] Emitting synthesized RENAME: %v\n", result)
 							b.emitEvent(result)
 							processedPaths[action.Signature()] = true
 							processedPaths[relatedAction.Signature()] = true
+							fmt.Printf("[DEBUG - Create %s] Updating watchmap: Deleting %s, Setting %s\n", action.Signature(), potentialRename.Path, action.Path)
 							isRenameOrMove = true
 
 							// Update watchmap
@@ -126,21 +144,27 @@ func (b *FSBroker) resolveAndHandle(eventQueue *EventQueue, tickerLock *sync.Mut
 			// We also need to check if it is a directory creation. If it is, we need to add a watch for it. Otherwise, we add the file to the watchmap.
 			// TODO: Make this optional. Maybe users want to also get write events for non-empty files?
 			if !isRenameOrMove {
+				fmt.Printf("[DEBUG - Create %s] Entering final processing block. isRenameOrMove=%t\n", action.Signature(), isRenameOrMove)
 				if b.watchrecursive && stat.IsDir() {
 					// Make sure AddWatch doesn't error due to existing map entry if called twice
 					_ = b.AddWatch(action.Path) // Add watch if not already present
+					fmt.Printf("[DEBUG - Create %s] Added recursive watch for directory %s\n", action.Signature(), action.Path)
 				} else {
 					// Update watchmap only if it's not a directory being handled by AddWatch
 					if !stat.IsDir() {
+						fmt.Printf("[DEBUG - Create %s] Updating watchmap: Setting %s (not a dir)\n", action.Signature(), action.Path)
 						b.watchmap.Set(action.Path, info)
 					}
 				}
 
 				if !stat.IsDir() {
+					foundWritePartner := false
 					// Check if there's a corresponding write event for the same path
 					for _, relatedAction := range eventList {
 						if relatedAction.Type == Write && relatedAction.Path == action.Path && relatedAction.Timestamp.After(action.Timestamp) {
+							fmt.Printf("[DEBUG - Create] Found subsequent WRITE partner %s for CREATE %s. Marking WRITE processed.\n", relatedAction.Signature(), action.Signature())
 							processedPaths[relatedAction.Signature()] = true
+							foundWritePartner = true
 							// We found the write event, so we can stop checking.
 							// If there are multiple write events, the next one should
 							// be considered a nomral write event that we happened to capture
@@ -148,9 +172,15 @@ func (b *FSBroker) resolveAndHandle(eventQueue *EventQueue, tickerLock *sync.Mut
 							break
 						}
 					}
+					if foundWritePartner {
+						fmt.Printf("[DEBUG - Create %s] Found write partner, emitting CREATE anyway (current logic).\n", action.Signature())
+					} else {
+						fmt.Printf("[DEBUG - Create %s] No write partner found, emitting CREATE.\n", action.Signature())
+					}
 				}
 
 				// Now we raise the create event normally
+				fmt.Printf("[DEBUG - Create] Emitting CREATE event: %v\n", action)
 				action.EnrichFromInfo(info) // Enrich with info we already have
 				b.emitEvent(action)
 				processedPaths[action.Signature()] = true
@@ -170,7 +200,10 @@ func (b *FSBroker) resolveAndHandle(eventQueue *EventQueue, tickerLock *sync.Mut
 
 			// Get the file info from the watchmap
 			renamedFileInfo := b.watchmap.Get(action.Path)
+			fmt.Printf("[DEBUG - Rename %s] Processing. Dumping watchmap BEFORE Get:\n", action.Signature())
+			b.PrintMap()
 			if renamedFileInfo == nil {
+				fmt.Printf("[DEBUG - Rename] Cannot find info for %s in watchmap. Emitting raw Rename.\n", action.Path)
 				// If the file is not in the watchmap, it means it's not being watched, so we raise the rename event
 				// This shouldn't happen if our watchmap is up to date.
 				// But if it does, we'll raise the rename event because we have nothing to compare to
@@ -192,12 +225,15 @@ func (b *FSBroker) resolveAndHandle(eventQueue *EventQueue, tickerLock *sync.Mut
 					createdFileInfo := FromOSInfo(relatedCreate.Path, createdStat)
 					if createdFileInfo != nil && createdFileInfo.Id == renamedFileInfo.Id {
 						// We found the create event, ignore it and only raise the enriched Rename event
+						fmt.Printf("[DEBUG - Rename] Found CREATE partner %s for RENAME %s via ID match. Synthesizing.\n", relatedCreate.Signature(), action.Signature())
 						result := NewFSEvent(Rename, action.Path, action.Timestamp)
 						result.Properties["OldPath"] = renamedFileInfo.Path
 						result.EnrichFromInfo(createdFileInfo)
+						fmt.Printf("[DEBUG - Rename] Emitting synthesized RENAME: %v\n", result)
 						b.emitEvent(result)
 						b.watchmap.Delete(renamedFileInfo.Path)
 						b.watchmap.Set(createdFileInfo.Path, createdFileInfo)
+						fmt.Printf("[DEBUG - Rename %s] Updated watchmap: Deleted %s, Set %s\n", action.Signature(), renamedFileInfo.Path, createdFileInfo.Path)
 						processedPaths[action.Signature()] = true
 						processedPaths[relatedCreate.Signature()] = true
 						isRenameOrMove = true
@@ -207,9 +243,14 @@ func (b *FSBroker) resolveAndHandle(eventQueue *EventQueue, tickerLock *sync.Mut
 			}
 			if !isRenameOrMove {
 				// No corresponding create event found, raise a Remove event
+				fmt.Printf("[DEBUG - Rename] No CREATE partner found for RENAME %s. Synthesizing Remove.\n", action.Signature())
+				// --- Log watchmap state before potential delete ---
+				fmt.Printf("[DEBUG - Rename %s] Watchmap state before potential delete of %s:\n", action.Signature(), renamedFileInfo.Path)
+				b.PrintMap()
 				result := NewFSEvent(Remove, action.Path, action.Timestamp)
 				result.Properties["Type"] = "Soft"
 				result.EnrichFromInfo(renamedFileInfo)
+				fmt.Printf("[DEBUG - Rename] Emitting synthesized REMOVE: %v\n", result)
 				b.emitEvent(result)
 				processedPaths[action.Signature()] = true
 			}
@@ -246,18 +287,28 @@ func (b *FSBroker) resolveAndHandle(eventQueue *EventQueue, tickerLock *sync.Mut
 					// We found the Create event, ignore the Write event and raise the Create event instead
 					// But first we need to check if this specific create event was already processed
 					if !processedPaths[relatedCreate.Signature()] {
-						relatedCreate.EnrichFromInfo(FromOSInfo(latestModify.Path, stat))
-						b.emitEvent(relatedCreate)
-						processedPaths[relatedCreate.Signature()] = true
+						fmt.Printf("[DEBUG - Write] Found preceding CREATE partner %s for WRITE %s.\n", relatedCreate.Signature(), latestModify.Signature())
+						// But first we need to check if this specific create event was already processed
+						if processedPaths[relatedCreate.Signature()] {
+							fmt.Printf("[DEBUG - Write] Preceding CREATE %s was already processed. Skipping emit.\n", relatedCreate.Signature())
+						} else {
+							fmt.Printf("[DEBUG - Write] Emitting preceding CREATE event %s instead of WRITE %s\n", relatedCreate.Signature(), latestModify.Signature())
+							relatedCreate.EnrichFromInfo(FromOSInfo(latestModify.Path, stat))
+							b.emitEvent(relatedCreate)
+							processedPaths[relatedCreate.Signature()] = true
+						}
+						processedPaths[latestModify.Signature()] = true
+						foundCreated = true
+						break
 					}
-					processedPaths[latestModify.Signature()] = true
-					foundCreated = true
-					break
 				}
 			}
 
 			// Otherwise, Process the latest Write event
 			if !foundCreated {
+				fmt.Printf("[DEBUG - Write] No preceding Create found or Create already processed. Emitting WRITE event: %v\n", latestModify)
+				fmt.Printf("[DEBUG - Write %s] Watchmap state before Set/Enrich/Emit:\n", latestModify.Signature())
+				b.PrintMap()
 				info := FromOSInfo(latestModify.Path, stat)
 				if info != nil {
 					b.watchmap.Set(latestModify.Path, info)
@@ -298,6 +349,7 @@ func (b *FSBroker) resolveAndHandle(eventQueue *EventQueue, tickerLock *sync.Mut
 			// Unreachable
 		}
 	}
+	fmt.Printf("[DEBUG] Loop End: Final processed paths: %v\n", processedPaths)
 }
 
 // isSystemFile checks if the file is a common macOS system or metadata file.

@@ -1,10 +1,11 @@
 package fsbroker_test
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
-	"strings"
+	"runtime"
 	"testing"
 	"time"
 
@@ -296,7 +297,7 @@ func TestFSBrokerIntegration(t *testing.T) {
 	})
 
 	t.Run("MoveFileWatchedToUnwatched", func(t *testing.T) {
-		broker, _, watchDir, cleanup := setupTestEnv(t)
+		broker, config, watchDir, cleanup := setupTestEnv(t)
 		defer cleanup()
 
 		internalPath := filepath.Join(watchDir, "internal.txt")
@@ -308,6 +309,8 @@ func TestFSBrokerIntegration(t *testing.T) {
 			t.Fatalf("Failed to create internal file: %v", err)
 		}
 		expectEvent(t, broker, fsbroker.Create, internalPath) // Consume create
+		// Drain potential Write event associated with create before moving
+		drainEvents(broker, config.Timeout/2)
 
 		err = os.Rename(internalPath, externalPath)
 		if err != nil {
@@ -518,26 +521,259 @@ func TestFSBrokerIntegration(t *testing.T) {
 		broker, config, watchDir, cleanup := setupTestEnv(t)
 		defer cleanup()
 
-		// Need to know how isHiddenFile determines hidden status.
-		// Typically starts with '.' on Unix or has Hidden attribute on Windows.
-		// Let's test Unix style for broad compatibility.
-		filePath := filepath.Join(watchDir, ".hidden_file")
-		err := os.WriteFile(filePath, []byte("hidden"), 0644)
+		// Test Strategy: Create file outside watch dir, make it hidden (Windows), move it in.
+		externalDir := filepath.Dir(watchDir)
+		externalPath := filepath.Join(externalDir, ".hidden_external")
+		finalPath := filepath.Join(watchDir, ".hidden_external") // Final path inside watch dir
+
+		// 1. Create the file externally
+		err := os.WriteFile(externalPath, []byte("hidden content"), 0644)
 		if err != nil {
-			// On Windows, creating dotfiles might require specific APIs or fail.
-			// If creation fails, we can't test the ignore. Skip instead?
-			// For now, assume it works or the test handles the error.
-			if strings.Contains(err.Error(), "Access is denied") || strings.Contains(err.Error(), "invalid argument") {
-				t.Skipf("Skipping hidden file test: OS may not support creating dotfiles easily (%v)", err)
-			}
-			t.Fatalf("Failed to create hidden file: %v", err)
+			t.Fatalf("Failed to create external hidden file: %v", err)
+		}
+		// Cleanup external file if test fails before move
+		defer os.Remove(externalPath)
+
+		// 2. On Windows, explicitly set the hidden attribute on the external file
+		if runtime.GOOS == "windows" {
+			// Call the OS-specific function (defined in fsbroker_test_windows.go)
+			fsbroker.SetHiddenAttribute(t, externalPath)
 		}
 
-		// Expect *no* event because it should be ignored
+		// 3. Move the file into the watched directory
+		err = os.Rename(externalPath, finalPath)
+		if err != nil {
+			t.Fatalf("Failed to move hidden file into watched dir: %v", err)
+		}
+
+		// 4. Expect *no* event because the file entering the watch dir is hidden
 		expectNoEvent(t, broker, time.Duration(float64(config.Timeout)*1.5)) // Wait a bit longer than one cycle
 	})
 
-	// Add more tests for IgnoreSysFiles, EmitChmod=true/false, Filter, etc.
-	// Test Write Deduplication explicitly with rapid writes
+	t.Run("IgnoreSystemFile", func(t *testing.T) {
+		// Assumes DefaultFSConfig has IgnoreSysFiles = true
+		broker, config, watchDir, cleanup := setupTestEnv(t)
+		defer cleanup()
 
+		// Determine OS-specific system file name
+		var sysFileName string
+		switch runtime.GOOS {
+		case "windows":
+			sysFileName = "desktop.ini"
+		case "darwin":
+			sysFileName = ".DS_Store"
+		case "linux":
+			sysFileName = ".bash_history" // Example for Linux
+		default:
+			sysFileName = ".sysfile_test" // Fallback for other OSes
+			t.Logf("Warning: Unknown OS %s for IgnoreSystemFile test, using generic .sysfile_test", runtime.GOOS)
+		}
+		sysFilePath := filepath.Join(watchDir, sysFileName)
+
+		err := os.WriteFile(sysFilePath, []byte("system stuff"), 0644)
+		if err != nil {
+			t.Fatalf("Failed to create system file: %v", err)
+		}
+
+		// Expect *no* event because the file should be ignored
+		expectNoEvent(t, broker, time.Duration(float64(config.Timeout)*1.5))
+	})
+
+	t.Run("WriteDeduplication", func(t *testing.T) {
+		broker, config, watchDir, cleanup := setupTestEnv(t)
+		// Extend timeout to ensure all rapid writes fall within one tick
+		config.Timeout = 3 * time.Second
+		defer cleanup()
+
+		filePath := filepath.Join(watchDir, "dedup_write.txt")
+
+		// Initial create
+		err := os.WriteFile(filePath, []byte("first"), 0644)
+		if err != nil {
+			t.Fatalf("Failed initial write: %v", err)
+		}
+		expectEvent(t, broker, fsbroker.Create, filePath) // Consume create
+
+		// Perform rapid writes
+		t.Logf("Performing rapid writes...")
+		numWrites := 5
+		for i := 0; i < numWrites; i++ {
+			f, err := os.OpenFile(filePath, os.O_APPEND|os.O_WRONLY, 0644)
+			if err != nil {
+				t.Fatalf("Failed to open for append %d: %v", i, err)
+			}
+			_, err = f.WriteString(fmt.Sprintf("\nwrite %d", i+1))
+			f.Close() // Close immediately after write
+			if err != nil {
+				t.Fatalf("Failed append %d: %v", i, err)
+			}
+			time.Sleep(50 * time.Millisecond) // Delay << config.Timeout
+		}
+		t.Logf("Finished rapid writes.")
+
+		// Expect only ONE consolidated Write event
+		expectEvent(t, broker, fsbroker.Write, filePath)
+
+		// Ensure no other events follow immediately
+		expectNoEvent(t, broker, config.Timeout/2)
+	})
+
+	t.Run("DeleteDeduplication", func(t *testing.T) {
+		broker, config, watchDir, cleanup := setupTestEnv(t)
+		// Extend timeout to ensure rapid actions fall within one tick
+		config.Timeout = 3 * time.Second
+		defer cleanup()
+
+		filePath := filepath.Join(watchDir, "dedup_delete.txt")
+
+		// Initial create
+		err := os.WriteFile(filePath, []byte("to be deleted"), 0644)
+		if err != nil {
+			t.Fatalf("Failed initial write: %v", err)
+		}
+		expectEvent(t, broker, fsbroker.Create, filePath) // Consume create
+
+		// Perform rapid actions ending in delete (all within one tick)
+		t.Logf("Performing rapid write then delete...")
+		f, err := os.OpenFile(filePath, os.O_APPEND|os.O_WRONLY, 0644)
+		if err != nil {
+			t.Fatalf("Failed open for append: %v", err)
+		}
+		_, err = f.WriteString("\nadding more before delete")
+		f.Close()
+		if err != nil {
+			t.Fatalf("Failed append: %v", err)
+		}
+		// No sleep here - we want write and remove close together
+
+		err = os.Remove(filePath)
+		if err != nil {
+			t.Fatalf("Failed to remove file: %v", err)
+		}
+		t.Logf("Finished rapid write then delete.")
+
+		// Expect only ONE Remove event, the write should be ignored
+		expectEvent(t, broker, fsbroker.Remove, filePath)
+
+		// Ensure no other events follow immediately (like the ignored write)
+		expectNoEvent(t, broker, config.Timeout/2)
+	})
+
+	t.Run("MixedRapidActions", func(t *testing.T) {
+		broker, config, watchDir, cleanup := setupTestEnv(t)
+		// Extend timeout significantly for this specific test to ensure all actions
+		// likely fall within a single processing tick.
+		config.Timeout = 3 * time.Second
+		defer cleanup()
+
+		fileA := filepath.Join(watchDir, "file_a.txt")
+		fileB := filepath.Join(watchDir, "file_b.txt")
+		fileC := filepath.Join(watchDir, "file_c.txt")
+		fileA1 := filepath.Join(watchDir, "file_a_renamed.txt")
+
+		// --- Perform a burst of actions ---
+		t.Logf("Performing mixed rapid actions...")
+		// 1. Create A, B, C
+		mustWrite(t, fileA, "content A")
+		mustWrite(t, fileB, "content B")
+		mustWrite(t, fileC, "content C")
+		// 2. Rename A -> A1
+		mustRename(t, fileA, fileA1)
+		// 3. Write to B (now A1 exists, B exists, C exists)
+		mustAppend(t, fileB, "\nmore B")
+		// 4. Remove C (now A1 exists, B exists)
+		mustRemove(t, fileC)
+		t.Logf("Finished mixed rapid actions.")
+
+		// --- Collect all events that arrive within a reasonable timeframe ---
+		t.Logf("Collecting events...")
+		receivedEvents := make(map[string]*fsbroker.FSEvent)
+		stopTimer := time.NewTimer(eventTimeout) // Use the general event timeout
+	collectLoop:
+		for {
+			select {
+			case event := <-broker.Next():
+				t.Logf("Collected Event: Type=%v, Path=%s, OldPath=%v", event.Type, event.Path, event.Properties["OldPath"])
+				// Use signature based on final path for uniqueness in this test
+				eventSig := fmt.Sprintf("%d-%s", event.Type, event.Path)
+				receivedEvents[eventSig] = event
+			case err := <-broker.Error():
+				t.Errorf("Received unexpected error during collection: %v", err)
+			case <-stopTimer.C:
+				break collectLoop
+			}
+		}
+		t.Logf("Finished collecting events. Got %d events.", len(receivedEvents))
+
+		// --- Assert expected final events ---
+		expectedSignatures := map[string]struct{}{ // Use a set for easy checking
+			fmt.Sprintf("%d-%s", fsbroker.Rename, fileA1): {}, // Rename A -> A1
+			fmt.Sprintf("%d-%s", fsbroker.Write, fileB):   {}, // Write B
+			fmt.Sprintf("%d-%s", fsbroker.Remove, fileC):  {}, // Remove C
+		}
+
+		if len(receivedEvents) != len(expectedSignatures) {
+			t.Errorf("Expected %d final events, but got %d", len(expectedSignatures), len(receivedEvents))
+		}
+
+		for sig, event := range receivedEvents {
+			if _, ok := expectedSignatures[sig]; !ok {
+				t.Errorf("Received unexpected final event: Type=%v, Path=%s", event.Type, event.Path)
+			}
+			// Specific checks for properties
+			if event.Type == fsbroker.Rename && event.Path == fileA1 {
+				if oldPath, _ := event.Properties["OldPath"].(string); oldPath != fileA {
+					t.Errorf("Rename event for %s has incorrect OldPath: got %q, want %q", fileA1, oldPath, fileA)
+				}
+			}
+			// Could add checks for other properties if needed
+		}
+
+		for sig := range expectedSignatures {
+			if _, ok := receivedEvents[sig]; !ok {
+				t.Errorf("Missing expected final event with signature: %s", sig)
+			}
+		}
+
+	})
+}
+
+// --- Helper functions for MixedRapidActions ---
+
+func mustWrite(t *testing.T, path, content string) {
+	t.Helper()
+	if err := os.WriteFile(path, []byte(content), 0644); err != nil {
+		t.Fatalf("mustWrite failed for %s: %v", path, err)
+	}
+	time.Sleep(10 * time.Millisecond) // Tiny sleep between actions
+}
+
+func mustAppend(t *testing.T, path, content string) {
+	t.Helper()
+	f, err := os.OpenFile(path, os.O_APPEND|os.O_WRONLY, 0644)
+	if err != nil {
+		t.Fatalf("mustAppend failed to open %s: %v", path, err)
+	}
+	_, err = f.WriteString(content)
+	f.Close()
+	if err != nil {
+		t.Fatalf("mustAppend failed to write %s: %v", path, err)
+	}
+	time.Sleep(10 * time.Millisecond) // Tiny sleep between actions
+}
+
+func mustRename(t *testing.T, oldPath, newPath string) {
+	t.Helper()
+	if err := os.Rename(oldPath, newPath); err != nil {
+		t.Fatalf("mustRename failed for %s -> %s: %v", oldPath, newPath, err)
+	}
+	time.Sleep(10 * time.Millisecond) // Tiny sleep between actions
+}
+
+func mustRemove(t *testing.T, path string) {
+	t.Helper()
+	if err := os.Remove(path); err != nil {
+		t.Fatalf("mustRemove failed for %s: %v", path, err)
+	}
+	time.Sleep(10 * time.Millisecond) // Tiny sleep between actions
 }

@@ -187,6 +187,7 @@ func (b *FSBroker) eventloop() {
 	defer ticker.Stop()
 
 	for {
+		fmt.Printf("[DEBUG - eventloop] Top of loop. Current queue size: %d\n", eventQueue.Len())
 		select {
 		case event := <-b.events:
 			// Add the event to the queue for grouping
@@ -209,30 +210,64 @@ func (b *FSBroker) Stop() {
 
 // AddEvent queues a new file system event into the broker.
 func (b *FSBroker) addEvent(op fsnotify.Op, name string) {
+	fmt.Printf("[DEBUG - addEvent] Received fsnotify event: Op=%s, Name=%s\n", op, name)
+
+	// --- System File Check ---
 	if b.config.IgnoreSysFiles {
 		if isSystemFile(name) {
+			fmt.Printf("[DEBUG - addEvent]   -> Ignored: System file\n")
 			return
 		}
 	}
 
+	// Map fsnotify Op first to check type before hidden check
+	eventType := mapOpToEventType(op)
+	if eventType == -1 { // Check for unknown event type
+		fmt.Printf("[DEBUG - addEvent]   -> Ignored: Unknown event type for Op %s\n", op)
+		return // Don't queue unknown events
+	}
+	fmt.Printf("[DEBUG - addEvent]   -> Mapped to EventType: %s\n", eventType.String())
+
+	// --- Hidden File Check ---
 	if b.config.IgnoreHiddenFiles {
-		hidden, err := isHiddenFile(name)
+		hidden, err := isHiddenFile(name) // Use name, not path
 		if err != nil {
-			return
+			// If file doesn't exist when we check hidden status, it's likely due to
+			// a rapid Rename/Remove. Log locally but don't treat as error or hidden.
+			if os.IsNotExist(err) {
+				fmt.Printf("[DEBUG - addEvent]   -> Info: Cannot check hidden status for file %s (likely gone due to rename/remove: %v). Assuming not hidden.\n", name, err)
+				// Don't send error to main channel, don't mark as hidden
+				hidden = false // Proceed as if not hidden
+				err = nil      // Clear error so we don't trigger general error handling
+			} else {
+				// For other errors, or errors, log to main channel
+				b.errors <- fmt.Errorf("error checking if file %s is hidden: %w", name, err)
+				fmt.Printf("[DEBUG - addEvent]   -> Warning: Error checking hidden status for %s: %v. Allowing event.\n", name, err)
+				// Allow event despite error, but report it
+				hidden = false
+				err = nil // Clear error as it's been reported
+			}
 		}
 		if hidden {
+			fmt.Printf("[DEBUG - addEvent]   -> Ignored: Hidden file\n")
 			return
 		}
 	}
 
-	eventType := mapOpToEventType(op)
-
+	// --- Create FSEvent Object ---
 	event := NewFSEvent(eventType, name, time.Now())
 
-	if b.Filter != nil && b.Filter(event) {
-		return
+	// --- Custom Filter Check ---
+	if b.Filter != nil {
+		filterResult := b.Filter(event)
+		fmt.Printf("[DEBUG - addEvent]   -> Custom filter result: %t\n", filterResult)
+		if filterResult { // Assuming filter returns true to EXCLUDE
+			fmt.Printf("[DEBUG - addEvent]   -> Ignored: Custom filter excluded\n")
+			return
+		}
 	}
 
+	fmt.Printf("[DEBUG - addEvent] Queuing event: Type=%s, Path=%s\n", event.Type.String(), event.Path)
 	b.events <- event
 }
 
