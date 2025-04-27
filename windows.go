@@ -201,11 +201,12 @@ func (b *FSBroker) resolveAndHandle(eventQueue *EventQueue, tickerLock *sync.Mut
 			processedPaths[action.Signature()] = true
 
 		case Write:
-			logDebug("Pass 2: Write: Processing", "signature", action.Signature(), "path", action.Path)
+			logDebug("Pass 2: Write: Checking", "signature", action.Signature(), "path", action.Path)
 
-			// Check if this Write immediately follows a Create for the same path in this batch (using eventList snapshot)
+			// Step 1: Check if it's part of a Create sequence in this batch.
+			// If so, the Create event handles everything.
 			foundPrecedingCreate := false
-			for _, prevAction := range eventList {
+			for _, prevAction := range eventList { // Check against the original snapshot
 				// Look for a Create event for the same path within this batch, occurring before or AT THE SAME TIME as the Write
 				// We ignore processedPaths here because the Create might have been processed earlier *in this same batch*.
 				if prevAction.Path == action.Path && prevAction.Type == Create && !action.Timestamp.Before(prevAction.Timestamp) { // Allow Create <= Write timestamp
@@ -216,45 +217,49 @@ func (b *FSBroker) resolveAndHandle(eventQueue *EventQueue, tickerLock *sync.Mut
 			}
 			if foundPrecedingCreate {
 				logDebug("Pass 2: Write: Marking WRITE as processed (part of create)", "signature", action.Signature())
-				processedPaths[action.Signature()] = true
-				continue // Ignore this write
+				processedPaths[action.Signature()] = true // Mark this specific Write as handled because the Create covers it
+				continue                                  // Ignore this write, let Create handle it
 			}
 
-			// Deduplicate writes: Check if a LATER write for the same path exists in eventList
+			// Step 2: Check if this is the *latest* Write event for this path in the current batch.
+			// We only want to process the *final* write in a sequence within a batch.
 			isLatestWrite := true
-			for _, laterAction := range eventList {
-				if laterAction.Path == action.Path && laterAction.Type == Write && laterAction.Timestamp.After(action.Timestamp) {
-					logDebug("Pass 2: Write: Found later WRITE in same batch. Ignoring this earlier WRITE.", "earlierSig", action.Signature(), "laterSig", laterAction.Signature())
+			for _, otherAction := range eventList { // Check against the original snapshot
+				if otherAction.Path == action.Path && otherAction.Type == Write && otherAction.Timestamp.After(action.Timestamp) {
+					// Found a later Write event for the same path in this batch
+					logDebug("Pass 2: Write: Found a later WRITE in the same batch.", "currentSig", action.Signature(), "laterSig", otherAction.Signature(), "currentTS", action.Timestamp, "laterTS", otherAction.Timestamp)
 					isLatestWrite = false
 					break
 				}
 			}
+
+			// Step 3: If this is NOT the latest write, skip it for now.
+			// Do NOT mark it as processed yet. The actual latest write will handle it when its turn comes.
 			if !isLatestWrite {
-				logDebug("Pass 2: Write: Marking WRITE as processed (superseded by later write)", "signature", action.Signature())
-				processedPaths[action.Signature()] = true
-				continue // Ignore this write
+				logDebug("Pass 2: Write: Not the latest write for this path in batch, skipping for now.", "signature", action.Signature())
+				// DO NOT mark as processed here.
+				continue
 			}
 
-			// If we got here, this is the latest Write event for this path in this batch,
-			// and it's not immediately following a Create for the same path.
+			// Step 4: If we reach here, this IS the latest relevant WRITE in the batch. Process it.
 			logDebug("Pass 2: Write: Processing as latest relevant WRITE", "signature", action.Signature())
 
 			stat, err := os.Stat(action.Path)
 			if err != nil {
 				if os.IsNotExist(err) {
-					logDebug("Pass 2: Write: File does not exist. Deleting from map.", "signature", action.Signature(), "path", action.Path)
+					logDebug("Pass 2: Write: File does not exist (likely removed after write). Deleting from map.", "signature", action.Signature(), "path", action.Path)
 					b.watchmap.Delete(action.Path)
 				} else {
 					slog.Warn("Pass 2: Write: Error stating file", "signature", action.Signature(), "path", action.Path, "error", err)
 				}
-				processedPaths[action.Signature()] = true
+				processedPaths[action.Signature()] = true // Mark processed even if error occurred during stat
 				continue
 			}
 
 			// Ignore WRITE events on directories (common noise on Windows)
 			if stat.IsDir() {
 				logDebug("Pass 2: Write: Ignoring WRITE on directory", "signature", action.Signature())
-				processedPaths[action.Signature()] = true
+				processedPaths[action.Signature()] = true // Mark processed
 				continue
 			}
 
@@ -270,7 +275,18 @@ func (b *FSBroker) resolveAndHandle(eventQueue *EventQueue, tickerLock *sync.Mut
 			}
 			logDebug("Pass 2: Write: Emitting standard WRITE event", "signature", action.Signature(), "event", action)
 			b.emitEvent(action)
-			processedPaths[action.Signature()] = true
+			processedPaths[action.Signature()] = true // Mark this latest Write as processed after successful handling
+
+			// Optimization: Mark all *earlier* Write events for the same path in this batch as processed now,
+			// since we've handled the latest one. This prevents them from being checked again needlessly.
+			for _, prevWriteAction := range eventList {
+				// Check if it's an earlier Write for the same path *and* it hasn't already been marked processed
+				// (e.g., if it was part of a Create sequence handled earlier).
+				if prevWriteAction.Path == action.Path && prevWriteAction.Type == Write && prevWriteAction.Timestamp.Before(action.Timestamp) && !processedPaths[prevWriteAction.Signature()] {
+					logDebug("Pass 2: Write: Marking earlier write as processed", "earlierSig", prevWriteAction.Signature(), "latestSig", action.Signature())
+					processedPaths[prevWriteAction.Signature()] = true
+				}
+			}
 
 		case Chmod:
 			logDebug("Pass 2: Chmod: Processing", "signature", action.Signature(), "path", action.Path)
