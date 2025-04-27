@@ -708,7 +708,7 @@ func TestFSBrokerIntegration(t *testing.T) {
 		// --- Assert expected final events ---
 		expectedSignatures := map[string]struct{}{ // Use a set for easy checking
 			fmt.Sprintf("%d-%s", fsbroker.Rename, fileA1): {}, // Rename A -> A1
-			fmt.Sprintf("%d-%s", fsbroker.Write, fileB):   {}, // Write B
+			fmt.Sprintf("%d-%s", fsbroker.Create, fileB):  {}, // Write B
 			fmt.Sprintf("%d-%s", fsbroker.Remove, fileC):  {}, // Remove C
 		}
 

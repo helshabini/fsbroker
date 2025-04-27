@@ -257,6 +257,25 @@ func (b *FSBroker) addEvent(op fsnotify.Op, name string) {
 	// --- Create FSEvent Object ---
 	event := NewFSEvent(eventType, name, time.Now())
 
+	// --- Update Watchmap Immediately for Creates ---
+	// if eventType == Create {
+	// 	fmt.Printf("[DEBUG - addEvent %s] Create event detected. Attempting immediate stat & map update.\n", event.Signature())
+	// 	stat, err := os.Stat(name)
+	// 	if err != nil {
+	// 		// Log error but proceed to queue event. Map won't be updated yet.
+	// 		fmt.Printf("[DEBUG - addEvent %s] Immediate os.Stat failed (%v). Map not updated.\n", event.Signature(), err)
+	// 	} else {
+	// 		info := FromOSInfo(name, stat)
+	// 		if info != nil {
+	// 			b.watchmap.Set(name, info)
+	// 			fmt.Printf("[DEBUG - addEvent %s] Immediate os.Stat successful. Watchmap updated with ID %d.\n", event.Signature(), info.Id)
+	// 		} else {
+	// 			// Should not happen if stat succeeded, but handle defensively
+	// 			fmt.Printf("[DEBUG - addEvent %s] Immediate os.Stat succeeded but FromOSInfo returned nil. Map not updated.\n", event.Signature())
+	// 		}
+	// 	}
+	// }
+
 	// --- Custom Filter Check ---
 	if b.Filter != nil {
 		filterResult := b.Filter(event)

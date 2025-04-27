@@ -25,6 +25,14 @@ func (b *FSBroker) resolveAndHandle(eventQueue *EventQueue, tickerLock *sync.Mut
 	// temporary list of events to process
 	eventList := eventQueue.List()
 
+	// items to be removed from watchmap
+	watchmapItemsToRemove := make(map[string]bool)
+
+	fmt.Printf("[DEBUG] Initial eventList snapshot (Size: %d):\n", len(eventList))
+	for _, evt := range eventList {
+		fmt.Printf("  - %s\n", evt.Signature())
+	}
+
 	if len(eventList) == 0 {
 		return
 	}
@@ -32,7 +40,7 @@ func (b *FSBroker) resolveAndHandle(eventQueue *EventQueue, tickerLock *sync.Mut
 	//Now we process the events remaining in the event queue, and stop the loop when it's empty
 	for action := eventQueue.Pop(); action != nil; action = eventQueue.Pop() {
 		// Ignore already processed paths
-		fmt.Printf("[DEBUG] Loop Start: Processing action: Type=%s, Path=%s, Sig=%s\n", action.Type.String(), action.Path, action.Signature())
+		fmt.Printf("[DEBUG] Loop Start: Popped action: Type=%s, Path=%s, Sig=%s\n", action.Type.String(), action.Path, action.Signature())
 		if processedPaths[action.Signature()] {
 			fmt.Printf("[DEBUG] Loop Skip: Action %s already processed.\n", action.Signature())
 			continue
@@ -75,18 +83,23 @@ func (b *FSBroker) resolveAndHandle(eventQueue *EventQueue, tickerLock *sync.Mut
 			processedPaths[action.Signature()] = true
 
 		case Create:
+			fmt.Printf("[DEBUG - Create %s] Entering Create handler\n", action.Signature())
 			// Get info about the created file
 			stat, err := os.Stat(action.Path)
 			if err != nil {
-				if os.IsNotExist(err) { // Created item no longet exists. Remove it from the watchmap if it exists
-					b.watchmap.Delete(action.Path)
+				if os.IsNotExist(err) { // Created item no longer exists. Remove it from the watchmap if it exists
+					fmt.Printf("[DEBUG - Create %s] os.Stat failed (NotExist), removing from watchmap and skipping.\n", action.Signature())
+					watchmapItemsToRemove[action.Path] = true
+				} else {
+					fmt.Printf("[DEBUG - Create %s] os.Stat failed (%v), skipping.\n", action.Signature(), err)
 				}
 				processedPaths[action.Signature()] = true
 				continue
 			}
+			fmt.Printf("[DEBUG - Create %s] os.Stat successful.\n", action.Signature())
 
 			info := FromOSInfo(action.Path, stat)
-			fmt.Printf("[DEBUG - Create] Path %s got info: %+v\n", action.Path, info)
+			fmt.Printf("[DEBUG - Create %s] Path %s got info: %+v\n", action.Signature(), action.Path, info)
 			if info == nil {
 				// We failed to get the file info (maybe permission error or transient issue), enrich with what we have
 				action.EnrichFromStat(stat)
@@ -98,7 +111,6 @@ func (b *FSBroker) resolveAndHandle(eventQueue *EventQueue, tickerLock *sync.Mut
 			var isRenameOrMove bool = false // Reset or ensure it's defined here
 
 			// check for following Rename event (Unix Rename/Move pattern)
-			// Only run this if the previous check didn't find a match
 			if !isRenameOrMove {
 				fmt.Printf("[DEBUG - Create %s] Entering Rename check block. isRenameOrMove=%t\n", action.Signature(), isRenameOrMove)
 				for _, relatedAction := range eventList {
@@ -139,12 +151,14 @@ func (b *FSBroker) resolveAndHandle(eventQueue *EventQueue, tickerLock *sync.Mut
 				}
 			}
 
+			fmt.Printf("[DEBUG - Create %s] Exited Rename check block. isRenameOrMove=%t\n", action.Signature(), isRenameOrMove)
+
 			// Now that we're sure it is not a rename or move. We need to check if it is non-empty file creation.
 			// If it is, there should be a corresponding write event which we need to ignore.
 			// We also need to check if it is a directory creation. If it is, we need to add a watch for it. Otherwise, we add the file to the watchmap.
 			// TODO: Make this optional. Maybe users want to also get write events for non-empty files?
 			if !isRenameOrMove {
-				fmt.Printf("[DEBUG - Create %s] Entering final processing block. isRenameOrMove=%t\n", action.Signature(), isRenameOrMove)
+				fmt.Printf("[DEBUG - Create %s] Processing as normal Create (not rename/move). isRenameOrMove=%t\n", action.Signature(), isRenameOrMove)
 				if b.watchrecursive && stat.IsDir() {
 					// Make sure AddWatch doesn't error due to existing map entry if called twice
 					_ = b.AddWatch(action.Path) // Add watch if not already present
@@ -160,9 +174,10 @@ func (b *FSBroker) resolveAndHandle(eventQueue *EventQueue, tickerLock *sync.Mut
 				if !stat.IsDir() {
 					foundWritePartner := false
 					// Check if there's a corresponding write event for the same path
+					fmt.Printf("[DEBUG - Create %s] Entering Write partner check block.\n", action.Signature())
 					for _, relatedAction := range eventList {
 						if relatedAction.Type == Write && relatedAction.Path == action.Path && relatedAction.Timestamp.After(action.Timestamp) {
-							fmt.Printf("[DEBUG - Create] Found subsequent WRITE partner %s for CREATE %s. Marking WRITE processed.\n", relatedAction.Signature(), action.Signature())
+							fmt.Printf("[DEBUG - Create %s] Found subsequent WRITE partner %s. Marking WRITE processed.\n", action.Signature(), relatedAction.Signature())
 							processedPaths[relatedAction.Signature()] = true
 							foundWritePartner = true
 							// We found the write event, so we can stop checking.
@@ -172,6 +187,7 @@ func (b *FSBroker) resolveAndHandle(eventQueue *EventQueue, tickerLock *sync.Mut
 							break
 						}
 					}
+					fmt.Printf("[DEBUG - Create %s] Exited Write partner check block. foundWritePartner=%t\n", action.Signature(), foundWritePartner)
 					if foundWritePartner {
 						fmt.Printf("[DEBUG - Create %s] Found write partner, emitting CREATE anyway (current logic).\n", action.Signature())
 					} else {
@@ -180,11 +196,13 @@ func (b *FSBroker) resolveAndHandle(eventQueue *EventQueue, tickerLock *sync.Mut
 				}
 
 				// Now we raise the create event normally
-				fmt.Printf("[DEBUG - Create] Emitting CREATE event: %v\n", action)
+				fmt.Printf("[DEBUG - Create %s] Emitting final CREATE event: %v\n", action.Signature(), action)
 				action.EnrichFromInfo(info) // Enrich with info we already have
 				b.emitEvent(action)
 				processedPaths[action.Signature()] = true
 			}
+
+			fmt.Printf("[DEBUG - Create %s] Exiting Create handler.\n", action.Signature())
 
 		case Rename:
 			// A rename event always carries a path that should no longer exist
@@ -349,6 +367,12 @@ func (b *FSBroker) resolveAndHandle(eventQueue *EventQueue, tickerLock *sync.Mut
 			// Unreachable
 		}
 	}
+
+	// Remove items from watchmap
+	for path := range watchmapItemsToRemove {
+		b.watchmap.Delete(path)
+	}
+
 	fmt.Printf("[DEBUG] Loop End: Final processed paths: %v\n", processedPaths)
 }
 

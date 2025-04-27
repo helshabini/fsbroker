@@ -1,0 +1,1016 @@
+Running tests...
+=== RUN   TestEventQueue
+=== RUN   TestEventQueue/Push_and_Pop_single_event
+=== RUN   TestEventQueue/Push_and_Pop_multiple_events
+=== RUN   TestEventQueue/Pop_from_empty_queue
+=== RUN   TestEventQueue/Concurrent_Push_and_List
+=== RUN   TestEventQueue/Concurrent_Push_and_Pop
+=== RUN   TestEventQueue/List_returns_copy_of_queue
+=== RUN   TestEventQueue/Queue_maintains_order_under_concurrent_operations
+--- PASS: TestEventQueue (0.00s)
+    --- PASS: TestEventQueue/Push_and_Pop_single_event (0.00s)
+    --- PASS: TestEventQueue/Push_and_Pop_multiple_events (0.00s)
+    --- PASS: TestEventQueue/Pop_from_empty_queue (0.00s)
+    --- PASS: TestEventQueue/Concurrent_Push_and_List (0.00s)
+    --- PASS: TestEventQueue/Concurrent_Push_and_Pop (0.00s)
+    --- PASS: TestEventQueue/List_returns_copy_of_queue (0.00s)
+    --- PASS: TestEventQueue/Queue_maintains_order_under_concurrent_operations (0.00s)
+=== RUN   TestNewFSEvent
+=== RUN   TestNewFSEvent/Basic_event_creation
+=== RUN   TestNewFSEvent/Event_with_properties
+=== RUN   TestNewFSEvent/Event_with_empty_path
+=== RUN   TestNewFSEvent/Event_with_nil_timestamp
+--- PASS: TestNewFSEvent (0.00s)
+    --- PASS: TestNewFSEvent/Basic_event_creation (0.00s)
+    --- PASS: TestNewFSEvent/Event_with_properties (0.00s)
+    --- PASS: TestNewFSEvent/Event_with_empty_path (0.00s)
+    --- PASS: TestNewFSEvent/Event_with_nil_timestamp (0.00s)
+=== RUN   TestEventTypeString
+=== RUN   TestEventTypeString/Create
+=== RUN   TestEventTypeString/Write
+=== RUN   TestEventTypeString/Rename
+=== RUN   TestEventTypeString/Remove
+=== RUN   TestEventTypeString/Chmod
+=== RUN   TestEventTypeString/Unknown
+--- PASS: TestEventTypeString (0.00s)
+    --- PASS: TestEventTypeString/Create (0.00s)
+    --- PASS: TestEventTypeString/Write (0.00s)
+    --- PASS: TestEventTypeString/Rename (0.00s)
+    --- PASS: TestEventTypeString/Remove (0.00s)
+    --- PASS: TestEventTypeString/Chmod (0.00s)
+    --- PASS: TestEventTypeString/Unknown (0.00s)
+=== RUN   TestFSEventSignature
+=== RUN   TestFSEventSignature/Basic_signature
+=== RUN   TestFSEventSignature/Signature_with_different_event_types
+=== RUN   TestFSEventSignature/Signature_with_different_event_types/0-/test/path
+=== RUN   TestFSEventSignature/Signature_with_different_event_types/1-/test/path
+=== RUN   TestFSEventSignature/Signature_with_different_event_types/2-/test/path
+=== RUN   TestFSEventSignature/Signature_with_different_event_types/3-/test/path
+=== RUN   TestFSEventSignature/Signature_with_different_event_types/4-/test/path
+=== RUN   TestFSEventSignature/Signature_with_empty_path
+=== RUN   TestFSEventSignature/Signature_with_special_characters_in_path
+--- PASS: TestFSEventSignature (0.00s)
+    --- PASS: TestFSEventSignature/Basic_signature (0.00s)
+    --- PASS: TestFSEventSignature/Signature_with_different_event_types (0.00s)
+        --- PASS: TestFSEventSignature/Signature_with_different_event_types/0-/test/path (0.00s)
+        --- PASS: TestFSEventSignature/Signature_with_different_event_types/1-/test/path (0.00s)
+        --- PASS: TestFSEventSignature/Signature_with_different_event_types/2-/test/path (0.00s)
+        --- PASS: TestFSEventSignature/Signature_with_different_event_types/3-/test/path (0.00s)
+        --- PASS: TestFSEventSignature/Signature_with_different_event_types/4-/test/path (0.00s)
+    --- PASS: TestFSEventSignature/Signature_with_empty_path (0.00s)
+    --- PASS: TestFSEventSignature/Signature_with_special_characters_in_path (0.00s)
+=== RUN   TestFSBrokerIntegration
+=== RUN   TestFSBrokerIntegration/CreateEmptyFile
+[DEBUG - eventloop] Top of loop. Current queue size: 0
+FSNotify Event: CREATE, File: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2987511022/watch/empty_file.txt
+[DEBUG - addEvent] Received fsnotify event: Op=CREATE, Name=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2987511022/watch/empty_file.txt
+[DEBUG - addEvent]   -> Mapped to EventType: Create
+[DEBUG - addEvent 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2987511022/watch/empty_file.txt] Create event detected. Attempting immediate stat & map update.
+[DEBUG - addEvent 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2987511022/watch/empty_file.txt] Immediate os.Stat successful. Watchmap updated with ID 62356822.
+[DEBUG - addEvent] Queuing event: Type=Create, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2987511022/watch/empty_file.txt
+[DEBUG - eventloop] Top of loop. Current queue size: 1
+[DEBUG] Initial eventList snapshot (Size: 1):
+  - 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2987511022/watch/empty_file.txt
+[DEBUG] Loop Start: Popped action: Type=Create, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2987511022/watch/empty_file.txt, Sig=0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2987511022/watch/empty_file.txt
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2987511022/watch/empty_file.txt] Entering Create handler
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2987511022/watch/empty_file.txt] os.Stat successful.
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2987511022/watch/empty_file.txt] Path /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2987511022/watch/empty_file.txt got info: Id: 62356822, Path: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2987511022/watch/empty_file.txt, Mode: 644
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2987511022/watch/empty_file.txt] Entering Rename check block. isRenameOrMove=false
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2987511022/watch/empty_file.txt] Exited Rename check block. isRenameOrMove=false
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2987511022/watch/empty_file.txt] Processing as normal Create (not rename/move). isRenameOrMove=false
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2987511022/watch/empty_file.txt] Updating watchmap: Setting /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2987511022/watch/empty_file.txt (not a dir)
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2987511022/watch/empty_file.txt] Entering Write partner check block.
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2987511022/watch/empty_file.txt] Exited Write partner check block. foundWritePartner=false
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2987511022/watch/empty_file.txt] No write partner found, emitting CREATE.
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2987511022/watch/empty_file.txt] Emitting final CREATE event: &{0 /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2987511022/watch/empty_file.txt 2025-04-27 13:48:47.891294 +0300 EEST m=+0.105366834 map[]}
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2987511022/watch/empty_file.txt] Exiting Create handler.
+[DEBUG] Loop End: Final processed paths: map[0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2987511022/watch/empty_file.txt:true]
+[DEBUG - eventloop] Top of loop. Current queue size: 0
+    fsbroker_test.go:153: Received expected event: Type=0, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2987511022/watch/empty_file.txt, Props=map[Id:62356822 ModTime:2025-04-27 13:48:47.891028121 +0300 EEST Mode:420 Size:0]
+=== RUN   TestFSBrokerIntegration/CreateNonEmptyFile
+[DEBUG - eventloop] Top of loop. Current queue size: 0
+FSNotify Event: CREATE, File: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_42775548/watch/non_empty_file.txt
+[DEBUG - addEvent] Received fsnotify event: Op=CREATE, Name=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_42775548/watch/non_empty_file.txt
+[DEBUG - addEvent]   -> Mapped to EventType: Create
+[DEBUG - addEvent 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_42775548/watch/non_empty_file.txt] Create event detected. Attempting immediate stat & map update.
+[DEBUG - addEvent 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_42775548/watch/non_empty_file.txt] Immediate os.Stat successful. Watchmap updated with ID 62356825.
+[DEBUG - addEvent] Queuing event: Type=Create, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_42775548/watch/non_empty_file.txt
+[DEBUG - eventloop] Top of loop. Current queue size: 1
+[DEBUG] Initial eventList snapshot (Size: 1):
+  - 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_42775548/watch/non_empty_file.txt
+[DEBUG] Loop Start: Popped action: Type=Create, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_42775548/watch/non_empty_file.txt, Sig=0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_42775548/watch/non_empty_file.txt
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_42775548/watch/non_empty_file.txt] Entering Create handler
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_42775548/watch/non_empty_file.txt] os.Stat successful.
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_42775548/watch/non_empty_file.txt] Path /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_42775548/watch/non_empty_file.txt got info: Id: 62356825, Path: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_42775548/watch/non_empty_file.txt, Mode: 644
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_42775548/watch/non_empty_file.txt] Entering Rename check block. isRenameOrMove=false
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_42775548/watch/non_empty_file.txt] Exited Rename check block. isRenameOrMove=false
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_42775548/watch/non_empty_file.txt] Processing as normal Create (not rename/move). isRenameOrMove=false
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_42775548/watch/non_empty_file.txt] Updating watchmap: Setting /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_42775548/watch/non_empty_file.txt (not a dir)
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_42775548/watch/non_empty_file.txt] Entering Write partner check block.
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_42775548/watch/non_empty_file.txt] Exited Write partner check block. foundWritePartner=false
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_42775548/watch/non_empty_file.txt] No write partner found, emitting CREATE.
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_42775548/watch/non_empty_file.txt] Emitting final CREATE event: &{0 /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_42775548/watch/non_empty_file.txt 2025-04-27 13:48:48.398472 +0300 EEST m=+0.612545292 map[]}
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_42775548/watch/non_empty_file.txt] Exiting Create handler.
+[DEBUG] Loop End: Final processed paths: map[0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_42775548/watch/non_empty_file.txt:true]
+[DEBUG - eventloop] Top of loop. Current queue size: 0
+    fsbroker_test.go:166: Received expected event: Type=0, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_42775548/watch/non_empty_file.txt, Props=map[Id:62356825 ModTime:2025-04-27 13:48:48.39828063 +0300 EEST Mode:420 Size:7]
+    fsbroker_test.go:170: Correctly received no event or error within 200ms
+=== RUN   TestFSBrokerIntegration/ModifyFile
+[DEBUG - eventloop] Top of loop. Current queue size: 0
+FSNotify Event: CREATE, File: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_888022213/watch/modify_file.txt
+[DEBUG - addEvent] Received fsnotify event: Op=CREATE, Name=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_888022213/watch/modify_file.txt
+[DEBUG - addEvent]   -> Mapped to EventType: Create
+[DEBUG - addEvent 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_888022213/watch/modify_file.txt] Create event detected. Attempting immediate stat & map update.
+[DEBUG - addEvent 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_888022213/watch/modify_file.txt] Immediate os.Stat successful. Watchmap updated with ID 62356828.
+[DEBUG - addEvent] Queuing event: Type=Create, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_888022213/watch/modify_file.txt
+[DEBUG - eventloop] Top of loop. Current queue size: 1
+[DEBUG] Initial eventList snapshot (Size: 1):
+  - 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_888022213/watch/modify_file.txt
+[DEBUG] Loop Start: Popped action: Type=Create, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_888022213/watch/modify_file.txt, Sig=0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_888022213/watch/modify_file.txt
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_888022213/watch/modify_file.txt] Entering Create handler
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_888022213/watch/modify_file.txt] os.Stat successful.
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_888022213/watch/modify_file.txt] Path /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_888022213/watch/modify_file.txt got info: Id: 62356828, Path: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_888022213/watch/modify_file.txt, Mode: 644
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_888022213/watch/modify_file.txt] Entering Rename check block. isRenameOrMove=false
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_888022213/watch/modify_file.txt] Exited Rename check block. isRenameOrMove=false
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_888022213/watch/modify_file.txt] Processing as normal Create (not rename/move). isRenameOrMove=false
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_888022213/watch/modify_file.txt] Updating watchmap: Setting /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_888022213/watch/modify_file.txt (not a dir)
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_888022213/watch/modify_file.txt] Entering Write partner check block.
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_888022213/watch/modify_file.txt] Exited Write partner check block. foundWritePartner=false
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_888022213/watch/modify_file.txt] No write partner found, emitting CREATE.
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_888022213/watch/modify_file.txt] Emitting final CREATE event: &{0 /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_888022213/watch/modify_file.txt 2025-04-27 13:48:49.102625 +0300 EEST m=+1.316698084 map[]}
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_888022213/watch/modify_file.txt] Exiting Create handler.
+[DEBUG] Loop End: Final processed paths: map[0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_888022213/watch/modify_file.txt:true]
+[DEBUG - eventloop] Top of loop. Current queue size: 0
+    fsbroker_test.go:182: Received expected event: Type=0, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_888022213/watch/modify_file.txt, Props=map[Id:62356828 ModTime:2025-04-27 13:48:49.102567803 +0300 EEST Mode:420 Size:7]
+FSNotify Event: WRITE, File: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_888022213/watch/modify_file.txt
+[DEBUG - addEvent] Received fsnotify event: Op=WRITE, Name=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_888022213/watch/modify_file.txt
+[DEBUG - addEvent]   -> Mapped to EventType: Write
+[DEBUG - addEvent] Queuing event: Type=Write, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_888022213/watch/modify_file.txt
+[DEBUG - eventloop] Top of loop. Current queue size: 1
+[DEBUG] Initial eventList snapshot (Size: 1):
+  - 1-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_888022213/watch/modify_file.txt
+[DEBUG] Loop Start: Popped action: Type=Write, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_888022213/watch/modify_file.txt, Sig=1-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_888022213/watch/modify_file.txt
+[DEBUG - Write] No preceding Create found or Create already processed. Emitting WRITE event: &{1 /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_888022213/watch/modify_file.txt 2025-04-27 13:48:49.402831 +0300 EEST m=+1.616904084 map[]}
+[DEBUG - Write 1-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_888022213/watch/modify_file.txt] Watchmap state before Set/Enrich/Emit:
+Watchmap size: 2
+/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_888022213/watch/modify_file.txt Id: 62356828, Path: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_888022213/watch/modify_file.txt, Mode: 644
+/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_888022213/watch Id: 62356827, Path: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_888022213/watch, Mode: 20000000755
+[DEBUG] Loop End: Final processed paths: map[1-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_888022213/watch/modify_file.txt:true]
+[DEBUG - eventloop] Top of loop. Current queue size: 0
+    fsbroker_test.go:196: Received expected event: Type=1, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_888022213/watch/modify_file.txt, Props=map[Id:62356828 ModTime:2025-04-27 13:48:49.402729443 +0300 EEST Mode:420 Size:16]
+=== RUN   TestFSBrokerIntegration/ClearFile
+[DEBUG - eventloop] Top of loop. Current queue size: 0
+FSNotify Event: CREATE, File: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_937349025/watch/clear_file.txt
+[DEBUG - addEvent] Received fsnotify event: Op=CREATE, Name=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_937349025/watch/clear_file.txt
+[DEBUG - addEvent]   -> Mapped to EventType: Create
+[DEBUG - addEvent 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_937349025/watch/clear_file.txt] Create event detected. Attempting immediate stat & map update.
+[DEBUG - addEvent 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_937349025/watch/clear_file.txt] Immediate os.Stat successful. Watchmap updated with ID 62356831.
+[DEBUG - addEvent] Queuing event: Type=Create, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_937349025/watch/clear_file.txt
+[DEBUG - eventloop] Top of loop. Current queue size: 1
+[DEBUG] Initial eventList snapshot (Size: 1):
+  - 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_937349025/watch/clear_file.txt
+[DEBUG] Loop Start: Popped action: Type=Create, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_937349025/watch/clear_file.txt, Sig=0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_937349025/watch/clear_file.txt
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_937349025/watch/clear_file.txt] Entering Create handler
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_937349025/watch/clear_file.txt] os.Stat successful.
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_937349025/watch/clear_file.txt] Path /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_937349025/watch/clear_file.txt got info: Id: 62356831, Path: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_937349025/watch/clear_file.txt, Mode: 644
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_937349025/watch/clear_file.txt] Entering Rename check block. isRenameOrMove=false
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_937349025/watch/clear_file.txt] Exited Rename check block. isRenameOrMove=false
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_937349025/watch/clear_file.txt] Processing as normal Create (not rename/move). isRenameOrMove=false
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_937349025/watch/clear_file.txt] Updating watchmap: Setting /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_937349025/watch/clear_file.txt (not a dir)
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_937349025/watch/clear_file.txt] Entering Write partner check block.
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_937349025/watch/clear_file.txt] Exited Write partner check block. foundWritePartner=false
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_937349025/watch/clear_file.txt] No write partner found, emitting CREATE.
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_937349025/watch/clear_file.txt] Emitting final CREATE event: &{0 /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_937349025/watch/clear_file.txt 2025-04-27 13:48:50.007362 +0300 EEST m=+2.221435417 map[]}
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_937349025/watch/clear_file.txt] Exiting Create handler.
+[DEBUG] Loop End: Final processed paths: map[0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_937349025/watch/clear_file.txt:true]
+[DEBUG - eventloop] Top of loop. Current queue size: 0
+    fsbroker_test.go:209: Received expected event: Type=0, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_937349025/watch/clear_file.txt, Props=map[Id:62356831 ModTime:2025-04-27 13:48:50.007222263 +0300 EEST Mode:420 Size:9]
+FSNotify Event: CHMOD, File: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_937349025/watch/clear_file.txt
+[DEBUG - addEvent] Received fsnotify event: Op=CHMOD, Name=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_937349025/watch/clear_file.txt
+[DEBUG - addEvent]   -> Mapped to EventType: Chmod
+[DEBUG - addEvent] Queuing event: Type=Chmod, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_937349025/watch/clear_file.txt
+[DEBUG - eventloop] Top of loop. Current queue size: 1
+[DEBUG] Initial eventList snapshot (Size: 1):
+  - 4-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_937349025/watch/clear_file.txt
+[DEBUG] Loop Start: Popped action: Type=Chmod, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_937349025/watch/clear_file.txt, Sig=4-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_937349025/watch/clear_file.txt
+[DEBUG] Loop End: Final processed paths: map[4-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_937349025/watch/clear_file.txt:true]
+[DEBUG - eventloop] Top of loop. Current queue size: 0
+    fsbroker_test.go:216: Received expected event: Type=1, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_937349025/watch/clear_file.txt, Props=map[Id:62356831 ModTime:2025-04-27 13:48:50.307355694 +0300 EEST Mode:420 Size:0]
+=== RUN   TestFSBrokerIntegration/RenameFileInplace
+[DEBUG - eventloop] Top of loop. Current queue size: 0
+FSNotify Event: CREATE, File: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3375675871/watch/old_name.txt
+[DEBUG - addEvent] Received fsnotify event: Op=CREATE, Name=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3375675871/watch/old_name.txt
+[DEBUG - addEvent]   -> Mapped to EventType: Create
+[DEBUG - addEvent 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3375675871/watch/old_name.txt] Create event detected. Attempting immediate stat & map update.
+[DEBUG - addEvent 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3375675871/watch/old_name.txt] Immediate os.Stat successful. Watchmap updated with ID 62356834.
+[DEBUG - addEvent] Queuing event: Type=Create, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3375675871/watch/old_name.txt
+[DEBUG - eventloop] Top of loop. Current queue size: 1
+[DEBUG] Initial eventList snapshot (Size: 1):
+  - 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3375675871/watch/old_name.txt
+[DEBUG] Loop Start: Popped action: Type=Create, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3375675871/watch/old_name.txt, Sig=0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3375675871/watch/old_name.txt
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3375675871/watch/old_name.txt] Entering Create handler
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3375675871/watch/old_name.txt] os.Stat successful.
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3375675871/watch/old_name.txt] Path /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3375675871/watch/old_name.txt got info: Id: 62356834, Path: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3375675871/watch/old_name.txt, Mode: 644
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3375675871/watch/old_name.txt] Entering Rename check block. isRenameOrMove=false
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3375675871/watch/old_name.txt] Exited Rename check block. isRenameOrMove=false
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3375675871/watch/old_name.txt] Processing as normal Create (not rename/move). isRenameOrMove=false
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3375675871/watch/old_name.txt] Updating watchmap: Setting /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3375675871/watch/old_name.txt (not a dir)
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3375675871/watch/old_name.txt] Entering Write partner check block.
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3375675871/watch/old_name.txt] Exited Write partner check block. foundWritePartner=false
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3375675871/watch/old_name.txt] No write partner found, emitting CREATE.
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3375675871/watch/old_name.txt] Emitting final CREATE event: &{0 /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3375675871/watch/old_name.txt 2025-04-27 13:48:50.912628 +0300 EEST m=+3.126701459 map[]}
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3375675871/watch/old_name.txt] Exiting Create handler.
+[DEBUG] Loop End: Final processed paths: map[0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3375675871/watch/old_name.txt:true]
+[DEBUG - eventloop] Top of loop. Current queue size: 0
+    fsbroker_test.go:230: Received expected event: Type=0, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3375675871/watch/old_name.txt, Props=map[Id:62356834 ModTime:2025-04-27 13:48:50.912555098 +0300 EEST Mode:420 Size:7]
+FSNotify Event: CREATE, File: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3375675871/watch/new_name.txt
+[DEBUG - addEvent] Received fsnotify event: Op=CREATE, Name=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3375675871/watch/new_name.txt
+[DEBUG - addEvent]   -> Mapped to EventType: Create
+[DEBUG - addEvent 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3375675871/watch/new_name.txt] Create event detected. Attempting immediate stat & map update.
+[DEBUG - addEvent 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3375675871/watch/new_name.txt] Immediate os.Stat successful. Watchmap updated with ID 62356834.
+[DEBUG - addEvent] Queuing event: Type=Create, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3375675871/watch/new_name.txt
+FSNotify Event: RENAME, File: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3375675871/watch/old_name.txt
+[DEBUG - addEvent] Received fsnotify event: Op=RENAME, Name=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3375675871/watch/old_name.txt
+[DEBUG - addEvent]   -> Mapped to EventType: Rename
+[DEBUG - addEvent] Queuing event: Type=Rename, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3375675871/watch/old_name.txt
+[DEBUG - eventloop] Top of loop. Current queue size: 1
+[DEBUG - eventloop] Top of loop. Current queue size: 2
+[DEBUG] Initial eventList snapshot (Size: 2):
+  - 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3375675871/watch/new_name.txt
+  - 2-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3375675871/watch/old_name.txt
+[DEBUG] Loop Start: Popped action: Type=Create, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3375675871/watch/new_name.txt, Sig=0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3375675871/watch/new_name.txt
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3375675871/watch/new_name.txt] Entering Create handler
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3375675871/watch/new_name.txt] os.Stat successful.
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3375675871/watch/new_name.txt] Path /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3375675871/watch/new_name.txt got info: Id: 62356834, Path: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3375675871/watch/new_name.txt, Mode: 644
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3375675871/watch/new_name.txt] Entering Rename check block. isRenameOrMove=false
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3375675871/watch/new_name.txt] Checking potential RENAME partner: 2-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3375675871/watch/old_name.txt
+Watchmap size: 3
+/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3375675871/watch Id: 62356833, Path: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3375675871/watch, Mode: 20000000755
+/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3375675871/watch/old_name.txt Id: 62356834, Path: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3375675871/watch/old_name.txt, Mode: 644
+/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3375675871/watch/new_name.txt Id: 62356834, Path: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3375675871/watch/new_name.txt, Mode: 644
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3375675871/watch/new_name.txt] Info for potential old path /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3375675871/watch/old_name.txt from watchmap: Id: 62356834, Path: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3375675871/watch/old_name.txt, Mode: 644
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3375675871/watch/new_name.txt] Comparing IDs: potentialRename.Id (62356834) == info.Id (62356834) -> true
+[DEBUG - Create] Found RENAME partner 2-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3375675871/watch/old_name.txt for CREATE 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3375675871/watch/new_name.txt via ID match (62356834). Synthesizing.
+[DEBUG - Create] Emitting synthesized RENAME: &{2 /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3375675871/watch/new_name.txt 2025-04-27 13:48:51.213045 +0300 EEST m=+3.427118167 map[Id:62356834 ModTime:2025-04-27 13:48:50.912555098 +0300 EEST Mode:420 OldPath:/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3375675871/watch/old_name.txt Size:7]}
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3375675871/watch/new_name.txt] Updating watchmap: Deleting /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3375675871/watch/old_name.txt, Setting /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3375675871/watch/new_name.txt
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3375675871/watch/new_name.txt] Exited Rename check block. isRenameOrMove=true
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3375675871/watch/new_name.txt] Exiting Create handler.
+[DEBUG] Loop Start: Popped action: Type=Rename, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3375675871/watch/old_name.txt, Sig=2-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3375675871/watch/old_name.txt
+[DEBUG] Loop Skip: Action 2-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3375675871/watch/old_name.txt already processed.
+[DEBUG] Loop End: Final processed paths: map[0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3375675871/watch/new_name.txt:true 2-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3375675871/watch/old_name.txt:true]
+[DEBUG - eventloop] Top of loop. Current queue size: 0
+    fsbroker_test.go:237: Received expected event: Type=2, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3375675871/watch/new_name.txt, Props=map[Id:62356834 ModTime:2025-04-27 13:48:50.912555098 +0300 EEST Mode:420 OldPath:/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3375675871/watch/old_name.txt Size:7]
+=== RUN   TestFSBrokerIntegration/MoveFileWatchedToWatched
+[DEBUG - eventloop] Top of loop. Current queue size: 0
+FSNotify Event: CREATE, File: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1165448329/watch/subdir
+[DEBUG - addEvent] Received fsnotify event: Op=CREATE, Name=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1165448329/watch/subdir
+[DEBUG - addEvent]   -> Mapped to EventType: Create
+[DEBUG - addEvent 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1165448329/watch/subdir] Create event detected. Attempting immediate stat & map update.
+[DEBUG - addEvent 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1165448329/watch/subdir] Immediate os.Stat successful. Watchmap updated with ID 62356837.
+[DEBUG - addEvent] Queuing event: Type=Create, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1165448329/watch/subdir
+[DEBUG - eventloop] Top of loop. Current queue size: 1
+[DEBUG] Initial eventList snapshot (Size: 1):
+  - 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1165448329/watch/subdir
+[DEBUG] Loop Start: Popped action: Type=Create, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1165448329/watch/subdir, Sig=0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1165448329/watch/subdir
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1165448329/watch/subdir] Entering Create handler
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1165448329/watch/subdir] os.Stat successful.
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1165448329/watch/subdir] Path /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1165448329/watch/subdir got info: Id: 62356837, Path: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1165448329/watch/subdir, Mode: 20000000755
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1165448329/watch/subdir] Entering Rename check block. isRenameOrMove=false
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1165448329/watch/subdir] Exited Rename check block. isRenameOrMove=false
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1165448329/watch/subdir] Processing as normal Create (not rename/move). isRenameOrMove=false
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1165448329/watch/subdir] Added recursive watch for directory /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1165448329/watch/subdir
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1165448329/watch/subdir] Emitting final CREATE event: &{0 /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1165448329/watch/subdir 2025-04-27 13:48:51.817042 +0300 EEST m=+4.031115084 map[]}
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1165448329/watch/subdir] Exiting Create handler.
+[DEBUG] Loop End: Final processed paths: map[0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1165448329/watch/subdir:true]
+[DEBUG - eventloop] Top of loop. Current queue size: 0
+    fsbroker_test.go:253: Received expected event: Type=0, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1165448329/watch/subdir, Props=map[Id:62356837 ModTime:2025-04-27 13:48:51.816563642 +0300 EEST Mode:2147484141 Size:64]
+FSNotify Event: CREATE, File: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1165448329/watch/move_me.txt
+[DEBUG - addEvent] Received fsnotify event: Op=CREATE, Name=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1165448329/watch/move_me.txt
+[DEBUG - addEvent]   -> Mapped to EventType: Create
+[DEBUG - addEvent 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1165448329/watch/move_me.txt] Create event detected. Attempting immediate stat & map update.
+[DEBUG - addEvent 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1165448329/watch/move_me.txt] Immediate os.Stat successful. Watchmap updated with ID 62356838.
+[DEBUG - addEvent] Queuing event: Type=Create, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1165448329/watch/move_me.txt
+[DEBUG - eventloop] Top of loop. Current queue size: 1
+[DEBUG] Initial eventList snapshot (Size: 1):
+  - 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1165448329/watch/move_me.txt
+[DEBUG] Loop Start: Popped action: Type=Create, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1165448329/watch/move_me.txt, Sig=0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1165448329/watch/move_me.txt
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1165448329/watch/move_me.txt] Entering Create handler
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1165448329/watch/move_me.txt] os.Stat successful.
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1165448329/watch/move_me.txt] Path /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1165448329/watch/move_me.txt got info: Id: 62356838, Path: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1165448329/watch/move_me.txt, Mode: 644
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1165448329/watch/move_me.txt] Entering Rename check block. isRenameOrMove=false
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1165448329/watch/move_me.txt] Exited Rename check block. isRenameOrMove=false
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1165448329/watch/move_me.txt] Processing as normal Create (not rename/move). isRenameOrMove=false
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1165448329/watch/move_me.txt] Updating watchmap: Setting /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1165448329/watch/move_me.txt (not a dir)
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1165448329/watch/move_me.txt] Entering Write partner check block.
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1165448329/watch/move_me.txt] Exited Write partner check block. foundWritePartner=false
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1165448329/watch/move_me.txt] No write partner found, emitting CREATE.
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1165448329/watch/move_me.txt] Emitting final CREATE event: &{0 /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1165448329/watch/move_me.txt 2025-04-27 13:48:52.317819 +0300 EEST m=+4.531892334 map[]}
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1165448329/watch/move_me.txt] Exiting Create handler.
+[DEBUG] Loop End: Final processed paths: map[0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1165448329/watch/move_me.txt:true]
+[DEBUG - eventloop] Top of loop. Current queue size: 0
+    fsbroker_test.go:264: Received expected event: Type=0, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1165448329/watch/move_me.txt, Props=map[Id:62356838 ModTime:2025-04-27 13:48:52.317760527 +0300 EEST Mode:420 Size:7]
+FSNotify Event: RENAME, File: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1165448329/watch/move_me.txt
+[DEBUG - addEvent] Received fsnotify event: Op=RENAME, Name=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1165448329/watch/move_me.txt
+[DEBUG - addEvent]   -> Mapped to EventType: Rename
+[DEBUG - addEvent] Queuing event: Type=Rename, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1165448329/watch/move_me.txt
+[DEBUG - eventloop] Top of loop. Current queue size: 1
+[DEBUG] Initial eventList snapshot (Size: 1):
+  - 2-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1165448329/watch/move_me.txt
+[DEBUG] Loop Start: Popped action: Type=Rename, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1165448329/watch/move_me.txt, Sig=2-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1165448329/watch/move_me.txt
+[DEBUG - Rename 2-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1165448329/watch/move_me.txt] Processing. Dumping watchmap BEFORE Get:
+Watchmap size: 3
+/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1165448329/watch/subdir Id: 62356837, Path: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1165448329/watch/subdir, Mode: 20000000755
+/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1165448329/watch/move_me.txt Id: 62356838, Path: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1165448329/watch/move_me.txt, Mode: 644
+/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1165448329/watch Id: 62356836, Path: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1165448329/watch, Mode: 20000000755
+[DEBUG - Rename] No CREATE partner found for RENAME 2-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1165448329/watch/move_me.txt. Synthesizing Remove.
+[DEBUG - Rename 2-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1165448329/watch/move_me.txt] Watchmap state before potential delete of /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1165448329/watch/move_me.txt:
+Watchmap size: 3
+/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1165448329/watch Id: 62356836, Path: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1165448329/watch, Mode: 20000000755
+/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1165448329/watch/subdir Id: 62356837, Path: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1165448329/watch/subdir, Mode: 20000000755
+/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1165448329/watch/move_me.txt Id: 62356838, Path: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1165448329/watch/move_me.txt, Mode: 644
+[DEBUG - Rename] Emitting synthesized REMOVE: &{3 /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1165448329/watch/move_me.txt 2025-04-27 13:48:52.518209 +0300 EEST m=+4.732282417 map[Id:62356838 ModTime:2025-04-27 13:48:52.317760527 +0300 EEST Mode:420 Size:7 Type:Soft]}
+[DEBUG] Loop End: Final processed paths: map[2-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1165448329/watch/move_me.txt:true]
+[DEBUG - eventloop] Top of loop. Current queue size: 0
+    fsbroker_test.go:271: Expected event type 2, but got 3 for path /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1165448329/watch/move_me.txt
+=== RUN   TestFSBrokerIntegration/MoveFileUnwatchedToWatched
+[DEBUG - eventloop] Top of loop. Current queue size: 0
+FSNotify Event: CREATE, File: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1999771675/watch/external.txt
+[DEBUG - addEvent] Received fsnotify event: Op=CREATE, Name=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1999771675/watch/external.txt
+[DEBUG - addEvent]   -> Mapped to EventType: Create
+[DEBUG - addEvent 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1999771675/watch/external.txt] Create event detected. Attempting immediate stat & map update.
+[DEBUG - addEvent 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1999771675/watch/external.txt] Immediate os.Stat successful. Watchmap updated with ID 62356841.
+[DEBUG - addEvent] Queuing event: Type=Create, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1999771675/watch/external.txt
+[DEBUG - eventloop] Top of loop. Current queue size: 1
+[DEBUG] Initial eventList snapshot (Size: 1):
+  - 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1999771675/watch/external.txt
+[DEBUG] Loop Start: Popped action: Type=Create, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1999771675/watch/external.txt, Sig=0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1999771675/watch/external.txt
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1999771675/watch/external.txt] Entering Create handler
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1999771675/watch/external.txt] os.Stat successful.
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1999771675/watch/external.txt] Path /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1999771675/watch/external.txt got info: Id: 62356841, Path: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1999771675/watch/external.txt, Mode: 644
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1999771675/watch/external.txt] Entering Rename check block. isRenameOrMove=false
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1999771675/watch/external.txt] Exited Rename check block. isRenameOrMove=false
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1999771675/watch/external.txt] Processing as normal Create (not rename/move). isRenameOrMove=false
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1999771675/watch/external.txt] Updating watchmap: Setting /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1999771675/watch/external.txt (not a dir)
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1999771675/watch/external.txt] Entering Write partner check block.
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1999771675/watch/external.txt] Exited Write partner check block. foundWritePartner=false
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1999771675/watch/external.txt] No write partner found, emitting CREATE.
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1999771675/watch/external.txt] Emitting final CREATE event: &{0 /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1999771675/watch/external.txt 2025-04-27 13:48:53.123661 +0300 EEST m=+5.337735001 map[]}
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1999771675/watch/external.txt] Exiting Create handler.
+[DEBUG] Loop End: Final processed paths: map[0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1999771675/watch/external.txt:true]
+[DEBUG - eventloop] Top of loop. Current queue size: 0
+    fsbroker_test.go:296: Received expected event: Type=0, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1999771675/watch/external.txt, Props=map[Id:62356841 ModTime:2025-04-27 13:48:53.122673385 +0300 EEST Mode:420 Size:16]
+=== RUN   TestFSBrokerIntegration/MoveFileWatchedToUnwatched
+[DEBUG - eventloop] Top of loop. Current queue size: 0
+FSNotify Event: CREATE, File: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4139378576/watch/internal.txt
+[DEBUG - addEvent] Received fsnotify event: Op=CREATE, Name=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4139378576/watch/internal.txt
+[DEBUG - addEvent]   -> Mapped to EventType: Create
+[DEBUG - addEvent 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4139378576/watch/internal.txt] Create event detected. Attempting immediate stat & map update.
+[DEBUG - addEvent 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4139378576/watch/internal.txt] Immediate os.Stat successful. Watchmap updated with ID 62356846.
+[DEBUG - addEvent] Queuing event: Type=Create, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4139378576/watch/internal.txt
+[DEBUG - eventloop] Top of loop. Current queue size: 1
+[DEBUG] Initial eventList snapshot (Size: 1):
+  - 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4139378576/watch/internal.txt
+[DEBUG] Loop Start: Popped action: Type=Create, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4139378576/watch/internal.txt, Sig=0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4139378576/watch/internal.txt
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4139378576/watch/internal.txt] Entering Create handler
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4139378576/watch/internal.txt] os.Stat successful.
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4139378576/watch/internal.txt] Path /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4139378576/watch/internal.txt got info: Id: 62356846, Path: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4139378576/watch/internal.txt, Mode: 644
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4139378576/watch/internal.txt] Entering Rename check block. isRenameOrMove=false
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4139378576/watch/internal.txt] Exited Rename check block. isRenameOrMove=false
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4139378576/watch/internal.txt] Processing as normal Create (not rename/move). isRenameOrMove=false
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4139378576/watch/internal.txt] Updating watchmap: Setting /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4139378576/watch/internal.txt (not a dir)
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4139378576/watch/internal.txt] Entering Write partner check block.
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4139378576/watch/internal.txt] Exited Write partner check block. foundWritePartner=false
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4139378576/watch/internal.txt] No write partner found, emitting CREATE.
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4139378576/watch/internal.txt] Emitting final CREATE event: &{0 /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4139378576/watch/internal.txt 2025-04-27 13:48:53.627123 +0300 EEST m=+5.841197001 map[]}
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4139378576/watch/internal.txt] Exiting Create handler.
+[DEBUG] Loop End: Final processed paths: map[0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4139378576/watch/internal.txt:true]
+[DEBUG - eventloop] Top of loop. Current queue size: 0
+    fsbroker_test.go:311: Received expected event: Type=0, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4139378576/watch/internal.txt, Props=map[Id:62356846 ModTime:2025-04-27 13:48:53.626898395 +0300 EEST Mode:420 Size:16]
+FSNotify Event: RENAME, File: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4139378576/watch/internal.txt
+[DEBUG - addEvent] Received fsnotify event: Op=RENAME, Name=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4139378576/watch/internal.txt
+[DEBUG - addEvent]   -> Mapped to EventType: Rename
+[DEBUG - addEvent] Queuing event: Type=Rename, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4139378576/watch/internal.txt
+[DEBUG - eventloop] Top of loop. Current queue size: 1
+[DEBUG] Initial eventList snapshot (Size: 1):
+  - 2-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4139378576/watch/internal.txt
+[DEBUG] Loop Start: Popped action: Type=Rename, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4139378576/watch/internal.txt, Sig=2-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4139378576/watch/internal.txt
+[DEBUG - Rename 2-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4139378576/watch/internal.txt] Processing. Dumping watchmap BEFORE Get:
+Watchmap size: 2
+/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4139378576/watch/internal.txt Id: 62356846, Path: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4139378576/watch/internal.txt, Mode: 644
+/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4139378576/watch Id: 62356845, Path: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4139378576/watch, Mode: 20000000755
+[DEBUG - Rename] No CREATE partner found for RENAME 2-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4139378576/watch/internal.txt. Synthesizing Remove.
+[DEBUG - Rename 2-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4139378576/watch/internal.txt] Watchmap state before potential delete of /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4139378576/watch/internal.txt:
+Watchmap size: 2
+/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4139378576/watch Id: 62356845, Path: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4139378576/watch, Mode: 20000000755
+/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4139378576/watch/internal.txt Id: 62356846, Path: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4139378576/watch/internal.txt, Mode: 644
+[DEBUG - Rename] Emitting synthesized REMOVE: &{3 /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4139378576/watch/internal.txt 2025-04-27 13:48:54.128778 +0300 EEST m=+6.342852209 map[Id:62356846 ModTime:2025-04-27 13:48:53.626898395 +0300 EEST Mode:420 Size:16 Type:Soft]}
+[DEBUG] Loop End: Final processed paths: map[2-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4139378576/watch/internal.txt:true]
+[DEBUG - eventloop] Top of loop. Current queue size: 0
+    fsbroker_test.go:320: Received expected event: Type=3, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4139378576/watch/internal.txt, Props=map[Id:62356846 ModTime:2025-04-27 13:48:53.626898395 +0300 EEST Mode:420 Size:16 Type:Soft]
+=== RUN   TestFSBrokerIntegration/HardDeleteFile
+[DEBUG - eventloop] Top of loop. Current queue size: 0
+FSNotify Event: CREATE, File: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3886832291/watch/delete_me.txt
+[DEBUG - addEvent] Received fsnotify event: Op=CREATE, Name=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3886832291/watch/delete_me.txt
+[DEBUG - addEvent]   -> Mapped to EventType: Create
+[DEBUG - addEvent 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3886832291/watch/delete_me.txt] Create event detected. Attempting immediate stat & map update.
+[DEBUG - addEvent 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3886832291/watch/delete_me.txt] Immediate os.Stat successful. Watchmap updated with ID 62356849.
+[DEBUG - addEvent] Queuing event: Type=Create, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3886832291/watch/delete_me.txt
+[DEBUG - eventloop] Top of loop. Current queue size: 1
+[DEBUG] Initial eventList snapshot (Size: 1):
+  - 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3886832291/watch/delete_me.txt
+[DEBUG] Loop Start: Popped action: Type=Create, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3886832291/watch/delete_me.txt, Sig=0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3886832291/watch/delete_me.txt
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3886832291/watch/delete_me.txt] Entering Create handler
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3886832291/watch/delete_me.txt] os.Stat successful.
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3886832291/watch/delete_me.txt] Path /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3886832291/watch/delete_me.txt got info: Id: 62356849, Path: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3886832291/watch/delete_me.txt, Mode: 644
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3886832291/watch/delete_me.txt] Entering Rename check block. isRenameOrMove=false
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3886832291/watch/delete_me.txt] Exited Rename check block. isRenameOrMove=false
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3886832291/watch/delete_me.txt] Processing as normal Create (not rename/move). isRenameOrMove=false
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3886832291/watch/delete_me.txt] Updating watchmap: Setting /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3886832291/watch/delete_me.txt (not a dir)
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3886832291/watch/delete_me.txt] Entering Write partner check block.
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3886832291/watch/delete_me.txt] Exited Write partner check block. foundWritePartner=false
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3886832291/watch/delete_me.txt] No write partner found, emitting CREATE.
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3886832291/watch/delete_me.txt] Emitting final CREATE event: &{0 /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3886832291/watch/delete_me.txt 2025-04-27 13:48:54.531509 +0300 EEST m=+6.745583084 map[]}
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3886832291/watch/delete_me.txt] Exiting Create handler.
+[DEBUG] Loop End: Final processed paths: map[0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3886832291/watch/delete_me.txt:true]
+[DEBUG - eventloop] Top of loop. Current queue size: 0
+    fsbroker_test.go:332: Received expected event: Type=0, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3886832291/watch/delete_me.txt, Props=map[Id:62356849 ModTime:2025-04-27 13:48:54.531426064 +0300 EEST Mode:420 Size:13]
+FSNotify Event: REMOVE, File: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3886832291/watch/delete_me.txt
+[DEBUG - addEvent] Received fsnotify event: Op=REMOVE, Name=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3886832291/watch/delete_me.txt
+[DEBUG - addEvent]   -> Mapped to EventType: Remove
+[DEBUG - addEvent] Queuing event: Type=Remove, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3886832291/watch/delete_me.txt
+[DEBUG - eventloop] Top of loop. Current queue size: 1
+[DEBUG] Initial eventList snapshot (Size: 1):
+  - 3-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3886832291/watch/delete_me.txt
+[DEBUG] Loop Start: Popped action: Type=Remove, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3886832291/watch/delete_me.txt, Sig=3-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3886832291/watch/delete_me.txt
+[DEBUG] Loop End: Final processed paths: map[3-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3886832291/watch/delete_me.txt:true]
+[DEBUG - eventloop] Top of loop. Current queue size: 0
+    fsbroker_test.go:339: Received expected event: Type=3, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3886832291/watch/delete_me.txt, Props=map[Id:62356849 ModTime:2025-04-27 13:48:54.531426064 +0300 EEST Mode:420 Size:13 Type:Hard]
+=== RUN   TestFSBrokerIntegration/CreateDirectory
+[DEBUG - eventloop] Top of loop. Current queue size: 0
+FSNotify Event: CREATE, File: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3172013105/watch/new_dir
+[DEBUG - addEvent] Received fsnotify event: Op=CREATE, Name=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3172013105/watch/new_dir
+[DEBUG - addEvent]   -> Mapped to EventType: Create
+[DEBUG - addEvent 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3172013105/watch/new_dir] Create event detected. Attempting immediate stat & map update.
+[DEBUG - addEvent 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3172013105/watch/new_dir] Immediate os.Stat successful. Watchmap updated with ID 62356852.
+[DEBUG - addEvent] Queuing event: Type=Create, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3172013105/watch/new_dir
+[DEBUG - eventloop] Top of loop. Current queue size: 1
+[DEBUG] Initial eventList snapshot (Size: 1):
+  - 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3172013105/watch/new_dir
+[DEBUG] Loop Start: Popped action: Type=Create, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3172013105/watch/new_dir, Sig=0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3172013105/watch/new_dir
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3172013105/watch/new_dir] Entering Create handler
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3172013105/watch/new_dir] os.Stat successful.
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3172013105/watch/new_dir] Path /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3172013105/watch/new_dir got info: Id: 62356852, Path: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3172013105/watch/new_dir, Mode: 20000000755
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3172013105/watch/new_dir] Entering Rename check block. isRenameOrMove=false
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3172013105/watch/new_dir] Exited Rename check block. isRenameOrMove=false
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3172013105/watch/new_dir] Processing as normal Create (not rename/move). isRenameOrMove=false
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3172013105/watch/new_dir] Added recursive watch for directory /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3172013105/watch/new_dir
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3172013105/watch/new_dir] Emitting final CREATE event: &{0 /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3172013105/watch/new_dir 2025-04-27 13:48:55.436196 +0300 EEST m=+7.650270376 map[]}
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3172013105/watch/new_dir] Exiting Create handler.
+[DEBUG] Loop End: Final processed paths: map[0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3172013105/watch/new_dir:true]
+[DEBUG - eventloop] Top of loop. Current queue size: 0
+    fsbroker_test.go:354: Received expected event: Type=0, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3172013105/watch/new_dir, Props=map[Id:62356852 ModTime:2025-04-27 13:48:55.435671857 +0300 EEST Mode:2147484141 Size:64]
+=== RUN   TestFSBrokerIntegration/RenameDirectoryInplace
+[DEBUG - eventloop] Top of loop. Current queue size: 0
+FSNotify Event: CREATE, File: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3075661653/watch/old_dir
+[DEBUG - addEvent] Received fsnotify event: Op=CREATE, Name=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3075661653/watch/old_dir
+[DEBUG - addEvent]   -> Mapped to EventType: Create
+[DEBUG - addEvent 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3075661653/watch/old_dir] Create event detected. Attempting immediate stat & map update.
+[DEBUG - addEvent 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3075661653/watch/old_dir] Immediate os.Stat successful. Watchmap updated with ID 62356855.
+[DEBUG - addEvent] Queuing event: Type=Create, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3075661653/watch/old_dir
+[DEBUG - eventloop] Top of loop. Current queue size: 1
+[DEBUG] Initial eventList snapshot (Size: 1):
+  - 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3075661653/watch/old_dir
+[DEBUG] Loop Start: Popped action: Type=Create, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3075661653/watch/old_dir, Sig=0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3075661653/watch/old_dir
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3075661653/watch/old_dir] Entering Create handler
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3075661653/watch/old_dir] os.Stat successful.
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3075661653/watch/old_dir] Path /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3075661653/watch/old_dir got info: Id: 62356855, Path: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3075661653/watch/old_dir, Mode: 20000000755
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3075661653/watch/old_dir] Entering Rename check block. isRenameOrMove=false
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3075661653/watch/old_dir] Exited Rename check block. isRenameOrMove=false
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3075661653/watch/old_dir] Processing as normal Create (not rename/move). isRenameOrMove=false
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3075661653/watch/old_dir] Added recursive watch for directory /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3075661653/watch/old_dir
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3075661653/watch/old_dir] Emitting final CREATE event: &{0 /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3075661653/watch/old_dir 2025-04-27 13:48:55.942124 +0300 EEST m=+8.156198626 map[]}
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3075661653/watch/old_dir] Exiting Create handler.
+[DEBUG] Loop End: Final processed paths: map[0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3075661653/watch/old_dir:true]
+[DEBUG - eventloop] Top of loop. Current queue size: 0
+    fsbroker_test.go:368: Received expected event: Type=0, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3075661653/watch/old_dir, Props=map[Id:62356855 ModTime:2025-04-27 13:48:55.941435033 +0300 EEST Mode:2147484141 Size:64]
+FSNotify Event: CREATE, File: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3075661653/watch/new_dir
+[DEBUG - addEvent] Received fsnotify event: Op=CREATE, Name=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3075661653/watch/new_dir
+[DEBUG - addEvent]   -> Mapped to EventType: Create
+[DEBUG - addEvent 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3075661653/watch/new_dir] Create event detected. Attempting immediate stat & map update.
+[DEBUG - addEvent 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3075661653/watch/new_dir] Immediate os.Stat successful. Watchmap updated with ID 62356855.
+[DEBUG - addEvent] Queuing event: Type=Create, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3075661653/watch/new_dir
+FSNotify Event: RENAME, File: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3075661653/watch/old_dir
+[DEBUG - addEvent] Received fsnotify event: Op=RENAME, Name=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3075661653/watch/old_dir
+[DEBUG - addEvent]   -> Mapped to EventType: Rename
+[DEBUG - eventloop] Top of loop. Current queue size: 1
+[DEBUG - addEvent] Queuing event: Type=Rename, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3075661653/watch/old_dir
+[DEBUG - eventloop] Top of loop. Current queue size: 2
+[DEBUG] Initial eventList snapshot (Size: 2):
+  - 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3075661653/watch/new_dir
+  - 2-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3075661653/watch/old_dir
+[DEBUG] Loop Start: Popped action: Type=Create, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3075661653/watch/new_dir, Sig=0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3075661653/watch/new_dir
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3075661653/watch/new_dir] Entering Create handler
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3075661653/watch/new_dir] os.Stat successful.
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3075661653/watch/new_dir] Path /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3075661653/watch/new_dir got info: Id: 62356855, Path: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3075661653/watch/new_dir, Mode: 20000000755
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3075661653/watch/new_dir] Entering Rename check block. isRenameOrMove=false
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3075661653/watch/new_dir] Checking potential RENAME partner: 2-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3075661653/watch/old_dir
+Watchmap size: 3
+/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3075661653/watch Id: 62356854, Path: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3075661653/watch, Mode: 20000000755
+/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3075661653/watch/old_dir Id: 62356855, Path: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3075661653/watch/old_dir, Mode: 20000000755
+/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3075661653/watch/new_dir Id: 62356855, Path: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3075661653/watch/new_dir, Mode: 20000000755
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3075661653/watch/new_dir] Info for potential old path /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3075661653/watch/old_dir from watchmap: Id: 62356855, Path: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3075661653/watch/old_dir, Mode: 20000000755
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3075661653/watch/new_dir] Comparing IDs: potentialRename.Id (62356855) == info.Id (62356855) -> true
+[DEBUG - Create] Found RENAME partner 2-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3075661653/watch/old_dir for CREATE 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3075661653/watch/new_dir via ID match (62356855). Synthesizing.
+[DEBUG - Create] Emitting synthesized RENAME: &{2 /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3075661653/watch/new_dir 2025-04-27 13:48:56.243518 +0300 EEST m=+8.457592917 map[Id:62356855 ModTime:2025-04-27 13:48:55.941435033 +0300 EEST Mode:2147484141 OldPath:/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3075661653/watch/old_dir Size:64]}
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3075661653/watch/new_dir] Updating watchmap: Deleting /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3075661653/watch/old_dir, Setting /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3075661653/watch/new_dir
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3075661653/watch/new_dir] Exited Rename check block. isRenameOrMove=true
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3075661653/watch/new_dir] Exiting Create handler.
+[DEBUG] Loop Start: Popped action: Type=Rename, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3075661653/watch/old_dir, Sig=2-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3075661653/watch/old_dir
+[DEBUG] Loop Skip: Action 2-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3075661653/watch/old_dir already processed.
+[DEBUG] Loop End: Final processed paths: map[0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3075661653/watch/new_dir:true 2-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3075661653/watch/old_dir:true]
+[DEBUG - eventloop] Top of loop. Current queue size: 0
+    fsbroker_test.go:375: Received expected event: Type=2, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3075661653/watch/new_dir, Props=map[Id:62356855 ModTime:2025-04-27 13:48:55.941435033 +0300 EEST Mode:2147484141 OldPath:/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3075661653/watch/old_dir Size:64]
+=== RUN   TestFSBrokerIntegration/MoveDirectoryWatchedToWatched
+[DEBUG - eventloop] Top of loop. Current queue size: 0
+FSNotify Event: CREATE, File: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_901479879/watch/parent_dir
+[DEBUG - addEvent] Received fsnotify event: Op=CREATE, Name=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_901479879/watch/parent_dir
+[DEBUG - addEvent]   -> Mapped to EventType: Create
+[DEBUG - addEvent 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_901479879/watch/parent_dir] Create event detected. Attempting immediate stat & map update.
+[DEBUG - addEvent 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_901479879/watch/parent_dir] Immediate os.Stat successful. Watchmap updated with ID 62356858.
+[DEBUG - addEvent] Queuing event: Type=Create, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_901479879/watch/parent_dir
+[DEBUG - eventloop] Top of loop. Current queue size: 1
+[DEBUG] Initial eventList snapshot (Size: 1):
+  - 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_901479879/watch/parent_dir
+[DEBUG] Loop Start: Popped action: Type=Create, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_901479879/watch/parent_dir, Sig=0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_901479879/watch/parent_dir
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_901479879/watch/parent_dir] Entering Create handler
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_901479879/watch/parent_dir] os.Stat successful.
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_901479879/watch/parent_dir] Path /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_901479879/watch/parent_dir got info: Id: 62356858, Path: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_901479879/watch/parent_dir, Mode: 20000000755
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_901479879/watch/parent_dir] Entering Rename check block. isRenameOrMove=false
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_901479879/watch/parent_dir] Exited Rename check block. isRenameOrMove=false
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_901479879/watch/parent_dir] Processing as normal Create (not rename/move). isRenameOrMove=false
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_901479879/watch/parent_dir] Added recursive watch for directory /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_901479879/watch/parent_dir
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_901479879/watch/parent_dir] Emitting final CREATE event: &{0 /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_901479879/watch/parent_dir 2025-04-27 13:48:56.846307 +0300 EEST m=+9.060381959 map[]}
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_901479879/watch/parent_dir] Exiting Create handler.
+[DEBUG] Loop End: Final processed paths: map[0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_901479879/watch/parent_dir:true]
+[DEBUG - eventloop] Top of loop. Current queue size: 0
+    fsbroker_test.go:391: Received expected event: Type=0, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_901479879/watch/parent_dir, Props=map[Id:62356858 ModTime:2025-04-27 13:48:56.846069327 +0300 EEST Mode:2147484141 Size:64]
+FSNotify Event: CREATE, File: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_901479879/watch/move_this_dir
+[DEBUG - addEvent] Received fsnotify event: Op=CREATE, Name=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_901479879/watch/move_this_dir
+[DEBUG - addEvent]   -> Mapped to EventType: Create
+[DEBUG - addEvent 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_901479879/watch/move_this_dir] Create event detected. Attempting immediate stat & map update.
+[DEBUG - addEvent 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_901479879/watch/move_this_dir] Immediate os.Stat successful. Watchmap updated with ID 62356859.
+[DEBUG - addEvent] Queuing event: Type=Create, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_901479879/watch/move_this_dir
+[DEBUG - eventloop] Top of loop. Current queue size: 1
+[DEBUG] Initial eventList snapshot (Size: 1):
+  - 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_901479879/watch/move_this_dir
+[DEBUG] Loop Start: Popped action: Type=Create, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_901479879/watch/move_this_dir, Sig=0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_901479879/watch/move_this_dir
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_901479879/watch/move_this_dir] Entering Create handler
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_901479879/watch/move_this_dir] os.Stat successful.
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_901479879/watch/move_this_dir] Path /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_901479879/watch/move_this_dir got info: Id: 62356859, Path: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_901479879/watch/move_this_dir, Mode: 20000000755
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_901479879/watch/move_this_dir] Entering Rename check block. isRenameOrMove=false
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_901479879/watch/move_this_dir] Exited Rename check block. isRenameOrMove=false
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_901479879/watch/move_this_dir] Processing as normal Create (not rename/move). isRenameOrMove=false
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_901479879/watch/move_this_dir] Added recursive watch for directory /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_901479879/watch/move_this_dir
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_901479879/watch/move_this_dir] Emitting final CREATE event: &{0 /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_901479879/watch/move_this_dir 2025-04-27 13:48:57.147743 +0300 EEST m=+9.361817334 map[]}
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_901479879/watch/move_this_dir] Exiting Create handler.
+[DEBUG] Loop End: Final processed paths: map[0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_901479879/watch/move_this_dir:true]
+[DEBUG - eventloop] Top of loop. Current queue size: 0
+    fsbroker_test.go:400: Received expected event: Type=0, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_901479879/watch/move_this_dir, Props=map[Id:62356859 ModTime:2025-04-27 13:48:57.147111008 +0300 EEST Mode:2147484141 Size:64]
+FSNotify Event: RENAME, File: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_901479879/watch/move_this_dir
+[DEBUG - addEvent] Received fsnotify event: Op=RENAME, Name=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_901479879/watch/move_this_dir
+[DEBUG - addEvent]   -> Mapped to EventType: Rename
+[DEBUG - addEvent] Queuing event: Type=Rename, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_901479879/watch/move_this_dir
+[DEBUG - eventloop] Top of loop. Current queue size: 1
+[DEBUG] Initial eventList snapshot (Size: 1):
+  - 2-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_901479879/watch/move_this_dir
+[DEBUG] Loop Start: Popped action: Type=Rename, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_901479879/watch/move_this_dir, Sig=2-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_901479879/watch/move_this_dir
+[DEBUG - Rename 2-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_901479879/watch/move_this_dir] Processing. Dumping watchmap BEFORE Get:
+Watchmap size: 3
+/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_901479879/watch Id: 62356857, Path: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_901479879/watch, Mode: 20000000755
+/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_901479879/watch/parent_dir Id: 62356858, Path: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_901479879/watch/parent_dir, Mode: 20000000755
+/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_901479879/watch/move_this_dir Id: 62356859, Path: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_901479879/watch/move_this_dir, Mode: 20000000755
+[DEBUG - Rename] No CREATE partner found for RENAME 2-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_901479879/watch/move_this_dir. Synthesizing Remove.
+[DEBUG - Rename 2-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_901479879/watch/move_this_dir] Watchmap state before potential delete of /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_901479879/watch/move_this_dir:
+Watchmap size: 3
+/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_901479879/watch Id: 62356857, Path: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_901479879/watch, Mode: 20000000755
+/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_901479879/watch/parent_dir Id: 62356858, Path: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_901479879/watch/parent_dir, Mode: 20000000755
+/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_901479879/watch/move_this_dir Id: 62356859, Path: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_901479879/watch/move_this_dir, Mode: 20000000755
+[DEBUG - Rename] Emitting synthesized REMOVE: &{3 /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_901479879/watch/move_this_dir 2025-04-27 13:48:57.548247 +0300 EEST m=+9.762322417 map[Id:62356859 ModTime:2025-04-27 13:48:57.147111008 +0300 EEST Mode:2147484141 Size:64 Type:Soft]}
+[DEBUG] Loop End: Final processed paths: map[2-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_901479879/watch/move_this_dir:true]
+[DEBUG - eventloop] Top of loop. Current queue size: 0
+    fsbroker_test.go:407: Expected event type 2, but got 3 for path /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_901479879/watch/move_this_dir
+=== RUN   TestFSBrokerIntegration/MoveDirectoryUnwatchedToWatched
+[DEBUG - eventloop] Top of loop. Current queue size: 0
+FSNotify Event: CREATE, File: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4008673221/watch/external_dir
+[DEBUG - addEvent] Received fsnotify event: Op=CREATE, Name=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4008673221/watch/external_dir
+[DEBUG - addEvent]   -> Mapped to EventType: Create
+[DEBUG - addEvent 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4008673221/watch/external_dir] Create event detected. Attempting immediate stat & map update.
+[DEBUG - addEvent 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4008673221/watch/external_dir] Immediate os.Stat successful. Watchmap updated with ID 62356862.
+[DEBUG - addEvent] Queuing event: Type=Create, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4008673221/watch/external_dir
+[DEBUG - eventloop] Top of loop. Current queue size: 1
+[DEBUG] Initial eventList snapshot (Size: 1):
+  - 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4008673221/watch/external_dir
+[DEBUG] Loop Start: Popped action: Type=Create, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4008673221/watch/external_dir, Sig=0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4008673221/watch/external_dir
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4008673221/watch/external_dir] Entering Create handler
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4008673221/watch/external_dir] os.Stat successful.
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4008673221/watch/external_dir] Path /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4008673221/watch/external_dir got info: Id: 62356862, Path: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4008673221/watch/external_dir, Mode: 20000000755
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4008673221/watch/external_dir] Entering Rename check block. isRenameOrMove=false
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4008673221/watch/external_dir] Exited Rename check block. isRenameOrMove=false
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4008673221/watch/external_dir] Processing as normal Create (not rename/move). isRenameOrMove=false
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4008673221/watch/external_dir] Added recursive watch for directory /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4008673221/watch/external_dir
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4008673221/watch/external_dir] Emitting final CREATE event: &{0 /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4008673221/watch/external_dir 2025-04-27 13:48:58.154328 +0300 EEST m=+10.368402584 map[]}
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4008673221/watch/external_dir] Exiting Create handler.
+[DEBUG] Loop End: Final processed paths: map[0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4008673221/watch/external_dir:true]
+[DEBUG - eventloop] Top of loop. Current queue size: 0
+    fsbroker_test.go:430: Received expected event: Type=0, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4008673221/watch/external_dir, Props=map[Id:62356862 ModTime:2025-04-27 13:48:58.152777654 +0300 EEST Mode:2147484141 Size:64]
+=== RUN   TestFSBrokerIntegration/MoveDirectoryWatchedToUnwatched
+[DEBUG - eventloop] Top of loop. Current queue size: 0
+FSNotify Event: CREATE, File: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2136396486/watch/internal_dir
+[DEBUG - addEvent] Received fsnotify event: Op=CREATE, Name=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2136396486/watch/internal_dir
+[DEBUG - addEvent]   -> Mapped to EventType: Create
+[DEBUG - addEvent 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2136396486/watch/internal_dir] Create event detected. Attempting immediate stat & map update.
+[DEBUG - addEvent 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2136396486/watch/internal_dir] Immediate os.Stat successful. Watchmap updated with ID 62356865.
+[DEBUG - addEvent] Queuing event: Type=Create, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2136396486/watch/internal_dir
+[DEBUG - eventloop] Top of loop. Current queue size: 1
+[DEBUG] Initial eventList snapshot (Size: 1):
+  - 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2136396486/watch/internal_dir
+[DEBUG] Loop Start: Popped action: Type=Create, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2136396486/watch/internal_dir, Sig=0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2136396486/watch/internal_dir
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2136396486/watch/internal_dir] Entering Create handler
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2136396486/watch/internal_dir] os.Stat successful.
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2136396486/watch/internal_dir] Path /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2136396486/watch/internal_dir got info: Id: 62356865, Path: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2136396486/watch/internal_dir, Mode: 20000000755
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2136396486/watch/internal_dir] Entering Rename check block. isRenameOrMove=false
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2136396486/watch/internal_dir] Exited Rename check block. isRenameOrMove=false
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2136396486/watch/internal_dir] Processing as normal Create (not rename/move). isRenameOrMove=false
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2136396486/watch/internal_dir] Added recursive watch for directory /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2136396486/watch/internal_dir
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2136396486/watch/internal_dir] Emitting final CREATE event: &{0 /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2136396486/watch/internal_dir 2025-04-27 13:48:58.658739 +0300 EEST m=+10.872814001 map[]}
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2136396486/watch/internal_dir] Exiting Create handler.
+[DEBUG] Loop End: Final processed paths: map[0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2136396486/watch/internal_dir:true]
+[DEBUG - eventloop] Top of loop. Current queue size: 0
+    fsbroker_test.go:444: Received expected event: Type=0, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2136396486/watch/internal_dir, Props=map[Id:62356865 ModTime:2025-04-27 13:48:58.65814008 +0300 EEST Mode:2147484141 Size:64]
+FSNotify Event: RENAME, File: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2136396486/watch/internal_dir
+[DEBUG - addEvent] Received fsnotify event: Op=RENAME, Name=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2136396486/watch/internal_dir
+[DEBUG - addEvent]   -> Mapped to EventType: Rename
+[DEBUG - addEvent] Queuing event: Type=Rename, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2136396486/watch/internal_dir
+[DEBUG - eventloop] Top of loop. Current queue size: 1
+[DEBUG] Initial eventList snapshot (Size: 1):
+  - 2-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2136396486/watch/internal_dir
+[DEBUG] Loop Start: Popped action: Type=Rename, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2136396486/watch/internal_dir, Sig=2-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2136396486/watch/internal_dir
+[DEBUG - Rename 2-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2136396486/watch/internal_dir] Processing. Dumping watchmap BEFORE Get:
+Watchmap size: 2
+/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2136396486/watch Id: 62356864, Path: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2136396486/watch, Mode: 20000000755
+/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2136396486/watch/internal_dir Id: 62356865, Path: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2136396486/watch/internal_dir, Mode: 20000000755
+[DEBUG - Rename] No CREATE partner found for RENAME 2-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2136396486/watch/internal_dir. Synthesizing Remove.
+[DEBUG - Rename 2-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2136396486/watch/internal_dir] Watchmap state before potential delete of /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2136396486/watch/internal_dir:
+Watchmap size: 2
+/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2136396486/watch Id: 62356864, Path: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2136396486/watch, Mode: 20000000755
+/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2136396486/watch/internal_dir Id: 62356865, Path: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2136396486/watch/internal_dir, Mode: 20000000755
+[DEBUG - Rename] Emitting synthesized REMOVE: &{3 /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2136396486/watch/internal_dir 2025-04-27 13:48:58.959306 +0300 EEST m=+11.173381292 map[Id:62356865 ModTime:2025-04-27 13:48:58.65814008 +0300 EEST Mode:2147484141 Size:64 Type:Soft]}
+[DEBUG] Loop End: Final processed paths: map[2-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2136396486/watch/internal_dir:true]
+[DEBUG - eventloop] Top of loop. Current queue size: 0
+    fsbroker_test.go:451: Received expected event: Type=3, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2136396486/watch/internal_dir, Props=map[Id:62356865 ModTime:2025-04-27 13:48:58.65814008 +0300 EEST Mode:2147484141 Size:64 Type:Soft]
+=== RUN   TestFSBrokerIntegration/HardDeleteDirectory
+[DEBUG - eventloop] Top of loop. Current queue size: 0
+FSNotify Event: CREATE, File: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_393724012/watch/delete_this_dir
+[DEBUG - addEvent] Received fsnotify event: Op=CREATE, Name=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_393724012/watch/delete_this_dir
+[DEBUG - addEvent]   -> Mapped to EventType: Create
+[DEBUG - addEvent 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_393724012/watch/delete_this_dir] Create event detected. Attempting immediate stat & map update.
+[DEBUG - addEvent 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_393724012/watch/delete_this_dir] Immediate os.Stat successful. Watchmap updated with ID 62356868.
+[DEBUG - addEvent] Queuing event: Type=Create, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_393724012/watch/delete_this_dir
+[DEBUG - eventloop] Top of loop. Current queue size: 1
+[DEBUG] Initial eventList snapshot (Size: 1):
+  - 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_393724012/watch/delete_this_dir
+[DEBUG] Loop Start: Popped action: Type=Create, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_393724012/watch/delete_this_dir, Sig=0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_393724012/watch/delete_this_dir
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_393724012/watch/delete_this_dir] Entering Create handler
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_393724012/watch/delete_this_dir] os.Stat successful.
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_393724012/watch/delete_this_dir] Path /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_393724012/watch/delete_this_dir got info: Id: 62356868, Path: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_393724012/watch/delete_this_dir, Mode: 20000000755
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_393724012/watch/delete_this_dir] Entering Rename check block. isRenameOrMove=false
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_393724012/watch/delete_this_dir] Exited Rename check block. isRenameOrMove=false
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_393724012/watch/delete_this_dir] Processing as normal Create (not rename/move). isRenameOrMove=false
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_393724012/watch/delete_this_dir] Added recursive watch for directory /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_393724012/watch/delete_this_dir
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_393724012/watch/delete_this_dir] Emitting final CREATE event: &{0 /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_393724012/watch/delete_this_dir 2025-04-27 13:48:59.564233 +0300 EEST m=+11.778308084 map[]}
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_393724012/watch/delete_this_dir] Exiting Create handler.
+[DEBUG] Loop End: Final processed paths: map[0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_393724012/watch/delete_this_dir:true]
+[DEBUG - eventloop] Top of loop. Current queue size: 0
+    fsbroker_test.go:470: Received expected event: Type=0, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_393724012/watch/delete_this_dir, Props=map[Id:62356868 ModTime:2025-04-27 13:48:59.564102998 +0300 EEST Mode:2147484141 Size:96]
+    fsbroker_test.go:480: Waiting for first Remove event after RemoveAll(/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_393724012/watch/delete_this_dir)
+FSNotify Event: REMOVE, File: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_393724012/watch/delete_this_dir
+[DEBUG - addEvent] Received fsnotify event: Op=REMOVE, Name=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_393724012/watch/delete_this_dir
+[DEBUG - addEvent]   -> Mapped to EventType: Remove
+[DEBUG - addEvent] Queuing event: Type=Remove, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_393724012/watch/delete_this_dir
+[DEBUG - eventloop] Top of loop. Current queue size: 1
+[DEBUG] Initial eventList snapshot (Size: 1):
+  - 3-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_393724012/watch/delete_this_dir
+[DEBUG] Loop Start: Popped action: Type=Remove, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_393724012/watch/delete_this_dir, Sig=3-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_393724012/watch/delete_this_dir
+[DEBUG] Loop End: Final processed paths: map[3-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_393724012/watch/delete_this_dir:true]
+[DEBUG - eventloop] Top of loop. Current queue size: 0
+    fsbroker_test.go:488: Received first remove event: Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_393724012/watch/delete_this_dir
+    fsbroker_test.go:503: Received Remove event path 'delete_this_dir' matches expected paths ('delete_this_dir' or 'delete_this_dir/inner_file.txt')
+    fsbroker_test.go:508: Draining potential subsequent Remove event...
+[DEBUG] Initial eventList snapshot (Size: 0):
+[DEBUG - eventloop] Top of loop. Current queue size: 0
+    fsbroker_test.go:513: Checking for further unexpected events...
+[DEBUG] Initial eventList snapshot (Size: 0):
+[DEBUG - eventloop] Top of loop. Current queue size: 0
+    fsbroker_test.go:514: Correctly received no event or error within 200ms
+=== RUN   TestFSBrokerIntegration/IgnoreHiddenFile
+[DEBUG - eventloop] Top of loop. Current queue size: 0
+FSNotify Event: CREATE, File: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1854330727/watch/.hidden_external
+[DEBUG - addEvent] Received fsnotify event: Op=CREATE, Name=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1854330727/watch/.hidden_external
+[DEBUG - addEvent]   -> Mapped to EventType: Create
+[DEBUG - addEvent]   -> Ignored: Hidden file
+[DEBUG] Initial eventList snapshot (Size: 0):
+[DEBUG - eventloop] Top of loop. Current queue size: 0
+    fsbroker_test.go:550: Correctly received no event or error within 600ms
+=== RUN   TestFSBrokerIntegration/IgnoreSystemFile
+[DEBUG - eventloop] Top of loop. Current queue size: 0
+FSNotify Event: CREATE, File: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_22896067/watch/.DS_Store
+[DEBUG - addEvent] Received fsnotify event: Op=CREATE, Name=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_22896067/watch/.DS_Store
+[DEBUG - addEvent]   -> Ignored: System file
+[DEBUG] Initial eventList snapshot (Size: 0):
+[DEBUG - eventloop] Top of loop. Current queue size: 0
+    fsbroker_test.go:579: Correctly received no event or error within 600ms
+=== RUN   TestFSBrokerIntegration/WriteDeduplication
+[DEBUG - eventloop] Top of loop. Current queue size: 0
+FSNotify Event: CREATE, File: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_963261278/watch/dedup_write.txt
+[DEBUG - addEvent] Received fsnotify event: Op=CREATE, Name=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_963261278/watch/dedup_write.txt
+[DEBUG - addEvent]   -> Mapped to EventType: Create
+[DEBUG - addEvent 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_963261278/watch/dedup_write.txt] Create event detected. Attempting immediate stat & map update.
+[DEBUG - addEvent 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_963261278/watch/dedup_write.txt] Immediate os.Stat successful. Watchmap updated with ID 62357308.
+[DEBUG - addEvent] Queuing event: Type=Create, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_963261278/watch/dedup_write.txt
+[DEBUG - eventloop] Top of loop. Current queue size: 1
+[DEBUG] Initial eventList snapshot (Size: 1):
+  - 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_963261278/watch/dedup_write.txt
+[DEBUG] Loop Start: Popped action: Type=Create, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_963261278/watch/dedup_write.txt, Sig=0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_963261278/watch/dedup_write.txt
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_963261278/watch/dedup_write.txt] Entering Create handler
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_963261278/watch/dedup_write.txt] os.Stat successful.
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_963261278/watch/dedup_write.txt] Path /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_963261278/watch/dedup_write.txt got info: Id: 62357308, Path: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_963261278/watch/dedup_write.txt, Mode: 644
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_963261278/watch/dedup_write.txt] Entering Rename check block. isRenameOrMove=false
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_963261278/watch/dedup_write.txt] Exited Rename check block. isRenameOrMove=false
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_963261278/watch/dedup_write.txt] Processing as normal Create (not rename/move). isRenameOrMove=false
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_963261278/watch/dedup_write.txt] Updating watchmap: Setting /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_963261278/watch/dedup_write.txt (not a dir)
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_963261278/watch/dedup_write.txt] Entering Write partner check block.
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_963261278/watch/dedup_write.txt] Exited Write partner check block. foundWritePartner=false
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_963261278/watch/dedup_write.txt] No write partner found, emitting CREATE.
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_963261278/watch/dedup_write.txt] Emitting final CREATE event: &{0 /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_963261278/watch/dedup_write.txt 2025-04-27 13:49:02.878423 +0300 EEST m=+15.092498751 map[]}
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_963261278/watch/dedup_write.txt] Exiting Create handler.
+[DEBUG] Loop End: Final processed paths: map[0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_963261278/watch/dedup_write.txt:true]
+[DEBUG - eventloop] Top of loop. Current queue size: 0
+    fsbroker_test.go:595: Received expected event: Type=0, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_963261278/watch/dedup_write.txt, Props=map[Id:62357308 ModTime:2025-04-27 13:49:02.878226117 +0300 EEST Mode:420 Size:5]
+    fsbroker_test.go:598: Performing rapid writes...
+FSNotify Event: WRITE, File: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_963261278/watch/dedup_write.txt
+[DEBUG - addEvent] Received fsnotify event: Op=WRITE, Name=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_963261278/watch/dedup_write.txt
+[DEBUG - addEvent]   -> Mapped to EventType: Write
+[DEBUG - addEvent] Queuing event: Type=Write, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_963261278/watch/dedup_write.txt
+[DEBUG - eventloop] Top of loop. Current queue size: 1
+FSNotify Event: WRITE, File: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_963261278/watch/dedup_write.txt
+[DEBUG - addEvent] Received fsnotify event: Op=WRITE, Name=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_963261278/watch/dedup_write.txt
+[DEBUG - addEvent]   -> Mapped to EventType: Write
+[DEBUG - addEvent] Queuing event: Type=Write, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_963261278/watch/dedup_write.txt
+[DEBUG - eventloop] Top of loop. Current queue size: 2
+FSNotify Event: WRITE, File: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_963261278/watch/dedup_write.txt
+[DEBUG - addEvent] Received fsnotify event: Op=WRITE, Name=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_963261278/watch/dedup_write.txt
+[DEBUG - addEvent]   -> Mapped to EventType: Write
+[DEBUG - addEvent] Queuing event: Type=Write, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_963261278/watch/dedup_write.txt
+[DEBUG - eventloop] Top of loop. Current queue size: 3
+FSNotify Event: WRITE, File: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_963261278/watch/dedup_write.txt
+[DEBUG - addEvent] Received fsnotify event: Op=WRITE, Name=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_963261278/watch/dedup_write.txt
+[DEBUG - addEvent]   -> Mapped to EventType: Write
+[DEBUG - addEvent] Queuing event: Type=Write, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_963261278/watch/dedup_write.txt
+[DEBUG - eventloop] Top of loop. Current queue size: 4
+FSNotify Event: WRITE, File: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_963261278/watch/dedup_write.txt
+[DEBUG - addEvent] Received fsnotify event: Op=WRITE, Name=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_963261278/watch/dedup_write.txt
+[DEBUG - addEvent]   -> Mapped to EventType: Write
+[DEBUG - addEvent] Queuing event: Type=Write, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_963261278/watch/dedup_write.txt
+[DEBUG - eventloop] Top of loop. Current queue size: 5
+    fsbroker_test.go:612: Finished rapid writes.
+[DEBUG] Initial eventList snapshot (Size: 5):
+  - 1-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_963261278/watch/dedup_write.txt
+  - 1-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_963261278/watch/dedup_write.txt
+  - 1-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_963261278/watch/dedup_write.txt
+  - 1-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_963261278/watch/dedup_write.txt
+  - 1-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_963261278/watch/dedup_write.txt
+[DEBUG] Loop Start: Popped action: Type=Write, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_963261278/watch/dedup_write.txt, Sig=1-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_963261278/watch/dedup_write.txt
+[DEBUG - Write] No preceding Create found or Create already processed. Emitting WRITE event: &{1 /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_963261278/watch/dedup_write.txt 2025-04-27 13:49:03.383736 +0300 EEST m=+15.597811876 map[]}
+[DEBUG - Write 1-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_963261278/watch/dedup_write.txt] Watchmap state before Set/Enrich/Emit:
+Watchmap size: 2
+/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_963261278/watch Id: 62357307, Path: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_963261278/watch, Mode: 20000000755
+/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_963261278/watch/dedup_write.txt Id: 62357308, Path: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_963261278/watch/dedup_write.txt, Mode: 644
+[DEBUG] Loop Start: Popped action: Type=Write, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_963261278/watch/dedup_write.txt, Sig=1-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_963261278/watch/dedup_write.txt
+[DEBUG] Loop Skip: Action 1-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_963261278/watch/dedup_write.txt already processed.
+[DEBUG] Loop Start: Popped action: Type=Write, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_963261278/watch/dedup_write.txt, Sig=1-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_963261278/watch/dedup_write.txt
+[DEBUG] Loop Skip: Action 1-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_963261278/watch/dedup_write.txt already processed.
+[DEBUG] Loop Start: Popped action: Type=Write, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_963261278/watch/dedup_write.txt, Sig=1-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_963261278/watch/dedup_write.txt
+[DEBUG] Loop Skip: Action 1-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_963261278/watch/dedup_write.txt already processed.
+[DEBUG] Loop Start: Popped action: Type=Write, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_963261278/watch/dedup_write.txt, Sig=1-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_963261278/watch/dedup_write.txt
+[DEBUG] Loop Skip: Action 1-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_963261278/watch/dedup_write.txt already processed.
+[DEBUG] Loop End: Final processed paths: map[1-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_963261278/watch/dedup_write.txt:true]
+[DEBUG - eventloop] Top of loop. Current queue size: 0
+    fsbroker_test.go:615: Received expected event: Type=1, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_963261278/watch/dedup_write.txt, Props=map[Id:62357308 ModTime:2025-04-27 13:49:03.383597585 +0300 EEST Mode:420 Size:45]
+[DEBUG] Initial eventList snapshot (Size: 0):
+[DEBUG - eventloop] Top of loop. Current queue size: 0
+[DEBUG] Initial eventList snapshot (Size: 0):
+[DEBUG - eventloop] Top of loop. Current queue size: 0
+[DEBUG] Initial eventList snapshot (Size: 0):
+[DEBUG - eventloop] Top of loop. Current queue size: 0
+    fsbroker_test.go:618: Correctly received no event or error within 1.5s
+=== RUN   TestFSBrokerIntegration/DeleteDeduplication
+[DEBUG - eventloop] Top of loop. Current queue size: 0
+FSNotify Event: CREATE, File: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1070768823/watch/dedup_delete.txt
+[DEBUG - addEvent] Received fsnotify event: Op=CREATE, Name=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1070768823/watch/dedup_delete.txt
+[DEBUG - addEvent]   -> Mapped to EventType: Create
+[DEBUG - addEvent 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1070768823/watch/dedup_delete.txt] Create event detected. Attempting immediate stat & map update.
+[DEBUG - addEvent 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1070768823/watch/dedup_delete.txt] Immediate os.Stat successful. Watchmap updated with ID 62357311.
+[DEBUG - addEvent] Queuing event: Type=Create, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1070768823/watch/dedup_delete.txt
+[DEBUG - eventloop] Top of loop. Current queue size: 1
+[DEBUG] Initial eventList snapshot (Size: 1):
+  - 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1070768823/watch/dedup_delete.txt
+[DEBUG] Loop Start: Popped action: Type=Create, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1070768823/watch/dedup_delete.txt, Sig=0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1070768823/watch/dedup_delete.txt
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1070768823/watch/dedup_delete.txt] Entering Create handler
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1070768823/watch/dedup_delete.txt] os.Stat successful.
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1070768823/watch/dedup_delete.txt] Path /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1070768823/watch/dedup_delete.txt got info: Id: 62357311, Path: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1070768823/watch/dedup_delete.txt, Mode: 644
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1070768823/watch/dedup_delete.txt] Entering Rename check block. isRenameOrMove=false
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1070768823/watch/dedup_delete.txt] Exited Rename check block. isRenameOrMove=false
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1070768823/watch/dedup_delete.txt] Processing as normal Create (not rename/move). isRenameOrMove=false
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1070768823/watch/dedup_delete.txt] Updating watchmap: Setting /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1070768823/watch/dedup_delete.txt (not a dir)
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1070768823/watch/dedup_delete.txt] Entering Write partner check block.
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1070768823/watch/dedup_delete.txt] Exited Write partner check block. foundWritePartner=false
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1070768823/watch/dedup_delete.txt] No write partner found, emitting CREATE.
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1070768823/watch/dedup_delete.txt] Emitting final CREATE event: &{0 /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1070768823/watch/dedup_delete.txt 2025-04-27 13:49:05.283121 +0300 EEST m=+17.497197959 map[]}
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1070768823/watch/dedup_delete.txt] Exiting Create handler.
+[DEBUG] Loop End: Final processed paths: map[0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1070768823/watch/dedup_delete.txt:true]
+[DEBUG - eventloop] Top of loop. Current queue size: 0
+    fsbroker_test.go:634: Received expected event: Type=0, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1070768823/watch/dedup_delete.txt, Props=map[Id:62357311 ModTime:2025-04-27 13:49:05.283043318 +0300 EEST Mode:420 Size:13]
+    fsbroker_test.go:637: Performing rapid write then delete...
+FSNotify Event: WRITE, File: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1070768823/watch/dedup_delete.txt
+[DEBUG - addEvent] Received fsnotify event: Op=WRITE, Name=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1070768823/watch/dedup_delete.txt
+[DEBUG - addEvent]   -> Mapped to EventType: Write
+[DEBUG - addEvent] Queuing event: Type=Write, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1070768823/watch/dedup_delete.txt
+[DEBUG - eventloop] Top of loop. Current queue size: 1
+    fsbroker_test.go:653: Finished rapid write then delete.
+FSNotify Event: REMOVE, File: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1070768823/watch/dedup_delete.txt
+[DEBUG - addEvent] Received fsnotify event: Op=REMOVE, Name=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1070768823/watch/dedup_delete.txt
+[DEBUG - addEvent]   -> Mapped to EventType: Remove
+[DEBUG - addEvent] Queuing event: Type=Remove, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1070768823/watch/dedup_delete.txt
+[DEBUG - eventloop] Top of loop. Current queue size: 2
+[DEBUG] Initial eventList snapshot (Size: 2):
+  - 1-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1070768823/watch/dedup_delete.txt
+  - 3-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1070768823/watch/dedup_delete.txt
+[DEBUG] Loop Start: Popped action: Type=Write, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1070768823/watch/dedup_delete.txt, Sig=1-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1070768823/watch/dedup_delete.txt
+[DEBUG] Loop Start: Popped action: Type=Remove, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1070768823/watch/dedup_delete.txt, Sig=3-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1070768823/watch/dedup_delete.txt
+[DEBUG] Loop End: Final processed paths: map[1-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1070768823/watch/dedup_delete.txt:true 3-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1070768823/watch/dedup_delete.txt:true]
+[DEBUG - eventloop] Top of loop. Current queue size: 0
+    fsbroker_test.go:656: Received expected event: Type=3, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1070768823/watch/dedup_delete.txt, Props=map[Type:Hard]
+[DEBUG] Initial eventList snapshot (Size: 0):
+[DEBUG - eventloop] Top of loop. Current queue size: 0
+[DEBUG] Initial eventList snapshot (Size: 0):
+[DEBUG - eventloop] Top of loop. Current queue size: 0
+[DEBUG] Initial eventList snapshot (Size: 0):
+[DEBUG - eventloop] Top of loop. Current queue size: 0
+    fsbroker_test.go:659: Correctly received no event or error within 1.5s
+=== RUN   TestFSBrokerIntegration/MixedRapidActions
+[DEBUG - eventloop] Top of loop. Current queue size: 0
+    fsbroker_test.go:675: Performing mixed rapid actions...
+FSNotify Event: CREATE, File: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_a.txt
+[DEBUG - addEvent] Received fsnotify event: Op=CREATE, Name=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_a.txt
+[DEBUG - addEvent]   -> Mapped to EventType: Create
+[DEBUG - addEvent 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_a.txt] Create event detected. Attempting immediate stat & map update.
+[DEBUG - addEvent 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_a.txt] Immediate os.Stat successful. Watchmap updated with ID 62357333.
+[DEBUG - addEvent] Queuing event: Type=Create, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_a.txt
+[DEBUG - eventloop] Top of loop. Current queue size: 1
+FSNotify Event: CREATE, File: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_b.txt
+[DEBUG - addEvent] Received fsnotify event: Op=CREATE, Name=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_b.txt
+[DEBUG - addEvent]   -> Mapped to EventType: Create
+[DEBUG - addEvent 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_b.txt] Create event detected. Attempting immediate stat & map update.
+[DEBUG - addEvent 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_b.txt] Immediate os.Stat successful. Watchmap updated with ID 62357334.
+[DEBUG - addEvent] Queuing event: Type=Create, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_b.txt
+[DEBUG - eventloop] Top of loop. Current queue size: 2
+FSNotify Event: CREATE, File: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_c.txt
+[DEBUG - addEvent] Received fsnotify event: Op=CREATE, Name=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_c.txt
+[DEBUG - addEvent]   -> Mapped to EventType: Create
+[DEBUG - addEvent 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_c.txt] Create event detected. Attempting immediate stat & map update.
+[DEBUG - addEvent 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_c.txt] Immediate os.Stat successful. Watchmap updated with ID 62357335.
+[DEBUG - addEvent] Queuing event: Type=Create, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_c.txt
+[DEBUG - eventloop] Top of loop. Current queue size: 3
+FSNotify Event: CREATE, File: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_a_renamed.txt
+[DEBUG - addEvent] Received fsnotify event: Op=CREATE, Name=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_a_renamed.txt
+[DEBUG - addEvent]   -> Mapped to EventType: Create
+[DEBUG - addEvent 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_a_renamed.txt] Create event detected. Attempting immediate stat & map update.
+[DEBUG - addEvent 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_a_renamed.txt] Immediate os.Stat successful. Watchmap updated with ID 62357333.
+[DEBUG - addEvent] Queuing event: Type=Create, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_a_renamed.txt
+[DEBUG - eventloop] Top of loop. Current queue size: 4
+FSNotify Event: RENAME, File: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_a.txt
+[DEBUG - addEvent] Received fsnotify event: Op=RENAME, Name=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_a.txt
+[DEBUG - addEvent]   -> Mapped to EventType: Rename
+[DEBUG - addEvent] Queuing event: Type=Rename, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_a.txt
+[DEBUG - eventloop] Top of loop. Current queue size: 5
+FSNotify Event: WRITE, File: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_b.txt
+[DEBUG - addEvent] Received fsnotify event: Op=WRITE, Name=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_b.txt
+[DEBUG - addEvent]   -> Mapped to EventType: Write
+[DEBUG - addEvent] Queuing event: Type=Write, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_b.txt
+[DEBUG - eventloop] Top of loop. Current queue size: 6
+FSNotify Event: REMOVE, File: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_c.txt
+[DEBUG - addEvent] Received fsnotify event: Op=REMOVE, Name=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_c.txt
+[DEBUG - addEvent]   -> Mapped to EventType: Remove
+[DEBUG - addEvent] Queuing event: Type=Remove, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_c.txt
+[DEBUG - eventloop] Top of loop. Current queue size: 7
+    fsbroker_test.go:686: Finished mixed rapid actions.
+    fsbroker_test.go:689: Collecting events...
+[DEBUG] Initial eventList snapshot (Size: 7):
+  - 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_a.txt
+  - 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_b.txt
+  - 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_c.txt
+  - 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_a_renamed.txt
+  - 2-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_a.txt
+  - 1-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_b.txt
+  - 3-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_c.txt
+[DEBUG] Loop Start: Popped action: Type=Create, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_a.txt, Sig=0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_a.txt
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_a.txt] Entering Create handler
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_a.txt] os.Stat failed (NotExist), removing from watchmap and skipping.
+[DEBUG] Loop Start: Popped action: Type=Create, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_b.txt, Sig=0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_b.txt
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_b.txt] Entering Create handler
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_b.txt] os.Stat successful.
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_b.txt] Path /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_b.txt got info: Id: 62357334, Path: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_b.txt, Mode: 644
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_b.txt] Entering Rename check block. isRenameOrMove=false
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_b.txt] Checking potential RENAME partner: 2-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_a.txt
+Watchmap size: 5
+/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_b.txt Id: 62357334, Path: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_b.txt, Mode: 644
+/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_c.txt Id: 62357335, Path: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_c.txt, Mode: 644
+/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_a_renamed.txt Id: 62357333, Path: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_a_renamed.txt, Mode: 644
+/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch Id: 62357332, Path: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch, Mode: 20000000755
+/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_a.txt Id: 62357333, Path: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_a.txt, Mode: 644
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_b.txt] Info for potential old path /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_a.txt from watchmap: Id: 62357333, Path: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_a.txt, Mode: 644
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_b.txt] Comparing IDs: potentialRename.Id (62357333) == info.Id (62357334) -> false
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_b.txt] Exited Rename check block. isRenameOrMove=false
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_b.txt] Processing as normal Create (not rename/move). isRenameOrMove=false
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_b.txt] Updating watchmap: Setting /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_b.txt (not a dir)
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_b.txt] Entering Write partner check block.
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_b.txt] Found subsequent WRITE partner 1-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_b.txt. Marking WRITE processed.
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_b.txt] Exited Write partner check block. foundWritePartner=true
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_b.txt] Found write partner, emitting CREATE anyway (current logic).
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_b.txt] Emitting final CREATE event: &{0 /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_b.txt 2025-04-27 13:49:07.701151 +0300 EEST m=+19.915228792 map[]}
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_b.txt] Exiting Create handler.
+[DEBUG] Loop Start: Popped action: Type=Create, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_c.txt, Sig=0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_c.txt
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_c.txt] Entering Create handler
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_c.txt] os.Stat failed (NotExist), removing from watchmap and skipping.
+[DEBUG] Loop Start: Popped action: Type=Create, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_a_renamed.txt, Sig=0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_a_renamed.txt
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_a_renamed.txt] Entering Create handler
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_a_renamed.txt] os.Stat successful.
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_a_renamed.txt] Path /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_a_renamed.txt got info: Id: 62357333, Path: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_a_renamed.txt, Mode: 644
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_a_renamed.txt] Entering Rename check block. isRenameOrMove=false
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_a_renamed.txt] Checking potential RENAME partner: 2-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_a.txt
+Watchmap size: 5
+/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_c.txt Id: 62357335, Path: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_c.txt, Mode: 644
+    fsbroker_test.go:696: Collected Event: Type=0, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_b.txt, OldPath=<nil>
+/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_a_renamed.txt Id: 62357333, Path: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_a_renamed.txt, Mode: 644
+/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch Id: 62357332, Path: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch, Mode: 20000000755
+/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_a.txt Id: 62357333, Path: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_a.txt, Mode: 644
+/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_b.txt Id: 62357334, Path: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_b.txt, Mode: 644
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_a_renamed.txt] Info for potential old path /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_a.txt from watchmap: Id: 62357333, Path: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_a.txt, Mode: 644
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_a_renamed.txt] Comparing IDs: potentialRename.Id (62357333) == info.Id (62357333) -> true
+[DEBUG - Create] Found RENAME partner 2-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_a.txt for CREATE 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_a_renamed.txt via ID match (62357333). Synthesizing.
+[DEBUG - Create] Emitting synthesized RENAME: &{2 /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_a_renamed.txt 2025-04-27 13:49:07.725038 +0300 EEST m=+19.939114667 map[Id:62357333 ModTime:2025-04-27 13:49:07.689401561 +0300 EEST Mode:420 OldPath:/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_a.txt Size:9]}
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_a_renamed.txt] Updating watchmap: Deleting /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_a.txt, Setting /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_a_renamed.txt
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_a_renamed.txt] Exited Rename check block. isRenameOrMove=true
+[DEBUG - Create 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_a_renamed.txt] Exiting Create handler.
+[DEBUG] Loop Start: Popped action: Type=Rename, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_a.txt, Sig=2-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_a.txt
+[DEBUG] Loop Skip: Action 2-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_a.txt already processed.
+[DEBUG] Loop Start: Popped action: Type=Write, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_b.txt, Sig=1-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_b.txt
+[DEBUG] Loop Skip: Action 1-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_b.txt already processed.
+[DEBUG] Loop Start: Popped action: Type=Remove, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_c.txt, Sig=3-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_c.txt
+    fsbroker_test.go:696: Collected Event: Type=2, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_a_renamed.txt, OldPath=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_a.txt
+    fsbroker_test.go:696: Collected Event: Type=3, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_c.txt, OldPath=<nil>
+[DEBUG] Loop End: Final processed paths: map[0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_a.txt:true 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_a_renamed.txt:true 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_b.txt:true 0-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_c.txt:true 1-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_b.txt:true 2-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_a.txt:true 3-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3322858344/watch/file_c.txt:true]
+[DEBUG - eventloop] Top of loop. Current queue size: 0
+[DEBUG] Initial eventList snapshot (Size: 0):
+[DEBUG - eventloop] Top of loop. Current queue size: 0
+[DEBUG] Initial eventList snapshot (Size: 0):
+[DEBUG - eventloop] Top of loop. Current queue size: 0
+[DEBUG] Initial eventList snapshot (Size: 0):
+[DEBUG - eventloop] Top of loop. Current queue size: 0
+[DEBUG] Initial eventList snapshot (Size: 0):
+[DEBUG - eventloop] Top of loop. Current queue size: 0
+    fsbroker_test.go:706: Finished collecting events. Got 3 events.
+--- FAIL: TestFSBrokerIntegration (22.07s)
+    --- PASS: TestFSBrokerIntegration/CreateEmptyFile (0.51s)
+    --- PASS: TestFSBrokerIntegration/CreateNonEmptyFile (0.70s)
+    --- PASS: TestFSBrokerIntegration/ModifyFile (0.90s)
+    --- PASS: TestFSBrokerIntegration/ClearFile (0.90s)
+    --- PASS: TestFSBrokerIntegration/RenameFileInplace (0.90s)
+    --- FAIL: TestFSBrokerIntegration/MoveFileWatchedToWatched (1.31s)
+    --- PASS: TestFSBrokerIntegration/MoveFileUnwatchedToWatched (0.50s)
+    --- PASS: TestFSBrokerIntegration/MoveFileWatchedToUnwatched (0.90s)
+    --- PASS: TestFSBrokerIntegration/HardDeleteFile (0.90s)
+    --- PASS: TestFSBrokerIntegration/CreateDirectory (0.51s)
+    --- PASS: TestFSBrokerIntegration/RenameDirectoryInplace (0.90s)
+    --- FAIL: TestFSBrokerIntegration/MoveDirectoryWatchedToWatched (1.31s)
+    --- PASS: TestFSBrokerIntegration/MoveDirectoryUnwatchedToWatched (0.51s)
+    --- PASS: TestFSBrokerIntegration/MoveDirectoryWatchedToUnwatched (0.91s)
+    --- PASS: TestFSBrokerIntegration/HardDeleteDirectory (1.70s)
+    --- PASS: TestFSBrokerIntegration/IgnoreHiddenFile (0.80s)
+    --- PASS: TestFSBrokerIntegration/IgnoreSystemFile (0.80s)
+    --- PASS: TestFSBrokerIntegration/WriteDeduplication (2.41s)
+    --- PASS: TestFSBrokerIntegration/DeleteDeduplication (2.41s)
+    --- PASS: TestFSBrokerIntegration/MixedRapidActions (2.28s)
+FAIL
+FAIL	github.com/helshabini/fsbroker	24.110s
+FAIL
