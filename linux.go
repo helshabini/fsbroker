@@ -21,6 +21,9 @@ func (b *FSBroker) resolveAndHandle(eventQueue *EventQueue, tickerLock *sync.Mut
 	// Process grouped events, detecting related Create and Rename events
 	processedPaths := make(map[string]bool)
 
+	// items to be removed from watchmap
+	watchmapItemsToRemove := make(map[string]bool)
+
 	// temporary list of events to process
 	eventList := eventQueue.List()
 
@@ -76,7 +79,7 @@ func (b *FSBroker) resolveAndHandle(eventQueue *EventQueue, tickerLock *sync.Mut
 			stat, err := os.Stat(action.Path)
 			if err != nil {
 				if os.IsNotExist(err) { // Created item no longer exists. Remove it from the watchmap if it exists
-					b.watchmap.Delete(action.Path)
+					watchmapItemsToRemove[action.Path] = true
 				}
 				continue
 			}
@@ -93,42 +96,32 @@ func (b *FSBroker) resolveAndHandle(eventQueue *EventQueue, tickerLock *sync.Mut
 			var isRenameOrMove bool = false // Reset or ensure it's defined here
 
 			// check for preceding Rename event (Linux Rename/Move pattern: RENAME(old) -> CREATE(new))
-			if !isRenameOrMove {
-				for _, relatedAction := range eventList {
-					// Look for RENAME *before* this CREATE
-					if relatedAction.Type == Rename && relatedAction.Timestamp.Before(action.Timestamp) {
-						potentialRename := b.watchmap.Get(relatedAction.Path)
-						// Check potentialRename is not nil before accessing Id
-						if potentialRename != nil && potentialRename.Id == info.Id {
-							// We found the matching RENAME event
-							result := NewFSEvent(Rename, action.Path, action.Timestamp)
-							result.Properties["OldPath"] = potentialRename.Path
-							result.EnrichFromInfo(info)
-							b.emitEvent(result)
-							processedPaths[action.Signature()] = true
-							processedPaths[relatedAction.Signature()] = true
-							isRenameOrMove = true
+			for _, relatedAction := range eventList {
+				// Look for RENAME *before* this CREATE
+				if relatedAction.Type == Rename && relatedAction.Timestamp.Before(action.Timestamp) {
+					potentialRename := b.watchmap.Get(relatedAction.Path)
+					// Check potentialRename is not nil before accessing Id
+					if potentialRename != nil && potentialRename.Id == info.Id {
+						// We found the matching RENAME event
+						result := NewFSEvent(Rename, action.Path, action.Timestamp)
+						result.Properties["OldPath"] = potentialRename.Path
+						result.EnrichFromInfo(info)
+						b.emitEvent(result)
+						processedPaths[action.Signature()] = true
+						processedPaths[relatedAction.Signature()] = true
+						isRenameOrMove = true
 
-							// Update watchmap
-							b.watchmap.Delete(potentialRename.Path)
-							b.watchmap.Set(action.Path, info)
+						// Update watchmap
+						b.watchmap.Delete(potentialRename.Path)
+						b.watchmap.Set(action.Path, info)
 
-							break // Found the match
-						}
+						break // Found the match
 					}
 				}
 			}
 
 			// If it wasn't a rename/move, process as a standard Create
 			if !isRenameOrMove {
-				// Handle directory creation and watching
-				if b.watchrecursive && stat.IsDir() {
-					_ = b.AddWatch(action.Path)
-				} else if !stat.IsDir() {
-					// Add file to watchmap
-					b.watchmap.Set(action.Path, info)
-				}
-
 				// Check for subsequent Write events (non-empty file creation)
 				if !stat.IsDir() {
 					for _, relatedAction := range eventList {
@@ -253,6 +246,11 @@ func (b *FSBroker) resolveAndHandle(eventQueue *EventQueue, tickerLock *sync.Mut
 		default:
 			// Unreachable
 		}
+	}
+
+	// Remove items from watchmap
+	for path := range watchmapItemsToRemove {
+		b.watchmap.Delete(path)
 	}
 }
 

@@ -110,43 +110,42 @@ func (b *FSBroker) resolveAndHandle(eventQueue *EventQueue, tickerLock *sync.Mut
 
 			var isRenameOrMove bool = false // Reset or ensure it's defined here
 
-			// check for following Rename event (Unix Rename/Move pattern)
-			if !isRenameOrMove {
-				fmt.Printf("[DEBUG - Create %s] Entering Rename check block. isRenameOrMove=%t\n", action.Signature(), isRenameOrMove)
-				for _, relatedAction := range eventList {
-					// Look for RENAME *after* this CREATE
-					if relatedAction.Type == Rename && relatedAction.Timestamp.After(action.Timestamp) { // Check time relationship if needed
-						fmt.Printf("[DEBUG - Create %s] Checking potential RENAME partner: %s\n", action.Signature(), relatedAction.Signature())
-						// --- Log Watchmap State BEFORE potential rename handling ---
-						b.PrintMap()
-						potentialRename := b.watchmap.Get(relatedAction.Path)
-						fmt.Printf("[DEBUG - Create %s] Info for potential old path %s from watchmap: %+v\n", action.Signature(), relatedAction.Path, potentialRename)
-						// Safely log IDs, handling potential nil pointer for potentialRename
-						var potentialRenameId uint64
-						if potentialRename != nil {
-							potentialRenameId = potentialRename.Id
-						}
-						idsMatch := potentialRename != nil && potentialRename.Id == info.Id
-						fmt.Printf("[DEBUG - Create %s] Comparing IDs: potentialRename.Id (%d) == info.Id (%d) -> %t\n", action.Signature(), potentialRenameId, info.Id, idsMatch)
-						if idsMatch {
-							// We found the rename event, ignore the create event and only raise the Rename event
-							fmt.Printf("[DEBUG - Create] Found RENAME partner %s for CREATE %s via ID match (%d). Synthesizing.\n", relatedAction.Signature(), action.Signature(), info.Id)
-							result := NewFSEvent(Rename, action.Path, action.Timestamp) // Use NEW path/time
-							result.Properties["OldPath"] = potentialRename.Path         // Store OLD path
-							result.EnrichFromInfo(info)                                 // Enrich with NEW info
-							fmt.Printf("[DEBUG - Create] Emitting synthesized RENAME: %v\n", result)
-							b.emitEvent(result)
-							processedPaths[action.Signature()] = true
-							processedPaths[relatedAction.Signature()] = true
-							fmt.Printf("[DEBUG - Create %s] Updating watchmap: Deleting %s, Setting %s\n", action.Signature(), potentialRename.Path, action.Path)
-							isRenameOrMove = true
+			// Check for following Rename event (Unix Rename/Move pattern)
 
-							// Update watchmap
-							b.watchmap.Delete(potentialRename.Path)
-							b.watchmap.Set(action.Path, info)
+			fmt.Printf("[DEBUG - Create %s] Entering Rename check block. isRenameOrMove=%t\n", action.Signature(), isRenameOrMove)
+			for _, relatedAction := range eventList {
+				// Look for RENAME *after* this CREATE
+				if relatedAction.Type == Rename && relatedAction.Timestamp.After(action.Timestamp) { // Check time relationship if needed
+					fmt.Printf("[DEBUG - Create %s] Checking potential RENAME partner: %s\n", action.Signature(), relatedAction.Signature())
+					// --- Log Watchmap State BEFORE potential rename handling ---
+					b.PrintMap()
+					potentialRename := b.watchmap.Get(relatedAction.Path)
+					fmt.Printf("[DEBUG - Create %s] Info for potential old path %s from watchmap: %+v\n", action.Signature(), relatedAction.Path, potentialRename)
+					// Safely log IDs, handling potential nil pointer for potentialRename
+					var potentialRenameId uint64
+					if potentialRename != nil {
+						potentialRenameId = potentialRename.Id
+					}
+					idsMatch := potentialRename != nil && potentialRename.Id == info.Id
+					fmt.Printf("[DEBUG - Create %s] Comparing IDs: potentialRename.Id (%d) == info.Id (%d) -> %t\n", action.Signature(), potentialRenameId, info.Id, idsMatch)
+					if idsMatch {
+						// We found the rename event, ignore the create event and only raise the Rename event
+						fmt.Printf("[DEBUG - Create] Found RENAME partner %s for CREATE %s via ID match (%d). Synthesizing.\n", relatedAction.Signature(), action.Signature(), info.Id)
+						result := NewFSEvent(Rename, action.Path, action.Timestamp) // Use NEW path/time
+						result.Properties["OldPath"] = potentialRename.Path         // Store OLD path
+						result.EnrichFromInfo(info)                                 // Enrich with NEW info
+						fmt.Printf("[DEBUG - Create] Emitting synthesized RENAME: %v\n", result)
+						b.emitEvent(result)
+						processedPaths[action.Signature()] = true
+						processedPaths[relatedAction.Signature()] = true
+						fmt.Printf("[DEBUG - Create %s] Updating watchmap: Deleting %s, Setting %s\n", action.Signature(), potentialRename.Path, action.Path)
+						isRenameOrMove = true
 
-							break
-						}
+						// Update watchmap
+						b.watchmap.Delete(potentialRename.Path)
+						b.watchmap.Set(action.Path, info)
+
+						break
 					}
 				}
 			}
@@ -159,17 +158,17 @@ func (b *FSBroker) resolveAndHandle(eventQueue *EventQueue, tickerLock *sync.Mut
 			// TODO: Make this optional. Maybe users want to also get write events for non-empty files?
 			if !isRenameOrMove {
 				fmt.Printf("[DEBUG - Create %s] Processing as normal Create (not rename/move). isRenameOrMove=%t\n", action.Signature(), isRenameOrMove)
-				if b.watchrecursive && stat.IsDir() {
-					// Make sure AddWatch doesn't error due to existing map entry if called twice
-					_ = b.AddWatch(action.Path) // Add watch if not already present
-					fmt.Printf("[DEBUG - Create %s] Added recursive watch for directory %s\n", action.Signature(), action.Path)
-				} else {
-					// Update watchmap only if it's not a directory being handled by AddWatch
-					if !stat.IsDir() {
-						fmt.Printf("[DEBUG - Create %s] Updating watchmap: Setting %s (not a dir)\n", action.Signature(), action.Path)
-						b.watchmap.Set(action.Path, info)
-					}
-				}
+				// if b.watchrecursive && stat.IsDir() {
+				// 	// Make sure AddWatch doesn't error due to existing map entry if called twice
+				// 	_ = b.AddWatch(action.Path) // Add watch if not already present
+				// 	fmt.Printf("[DEBUG - Create %s] Added recursive watch for directory %s\n", action.Signature(), action.Path)
+				// } else {
+				// 	// Update watchmap only if it's not a directory being handled by AddWatch
+				// 	if !stat.IsDir() {
+				// 		fmt.Printf("[DEBUG - Create %s] Updating watchmap: Setting %s (not a dir)\n", action.Signature(), action.Path)
+				// 		b.watchmap.Set(action.Path, info)
+				// 	}
+				// }
 
 				if !stat.IsDir() {
 					foundWritePartner := false

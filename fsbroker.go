@@ -123,16 +123,6 @@ func (b *FSBroker) AddWatch(path string) error {
 		return err
 	}
 
-	stat, err := os.Stat(path)
-	if err != nil {
-		return err
-	}
-	if !stat.IsDir() {
-		return errors.New("path is not a directory")
-	}
-
-	b.watchmap.Set(path, FromOSInfo(path, stat))
-
 	// List all files in the directory
 	files, err := os.ReadDir(path)
 	if err != nil {
@@ -141,9 +131,9 @@ func (b *FSBroker) AddWatch(path string) error {
 
 	// Add the files to the watchmap. No need to add FSNotify watches, because we're already watching the directory.
 	for _, file := range files {
-		// Skip directories, we'll watch them later if recursive watch is being requested
-		if file.IsDir() {
-			continue
+		// Recursively watch directories if recursive watch is being requested
+		if b.watchrecursive && file.IsDir() {
+			b.AddWatch(filepath.Join(path, file.Name()))
 		}
 		stat, err := file.Info()
 		if err != nil {
@@ -258,23 +248,26 @@ func (b *FSBroker) addEvent(op fsnotify.Op, name string) {
 	event := NewFSEvent(eventType, name, time.Now())
 
 	// --- Update Watchmap Immediately for Creates ---
-	// if eventType == Create {
-	// 	fmt.Printf("[DEBUG - addEvent %s] Create event detected. Attempting immediate stat & map update.\n", event.Signature())
-	// 	stat, err := os.Stat(name)
-	// 	if err != nil {
-	// 		// Log error but proceed to queue event. Map won't be updated yet.
-	// 		fmt.Printf("[DEBUG - addEvent %s] Immediate os.Stat failed (%v). Map not updated.\n", event.Signature(), err)
-	// 	} else {
-	// 		info := FromOSInfo(name, stat)
-	// 		if info != nil {
-	// 			b.watchmap.Set(name, info)
-	// 			fmt.Printf("[DEBUG - addEvent %s] Immediate os.Stat successful. Watchmap updated with ID %d.\n", event.Signature(), info.Id)
-	// 		} else {
-	// 			// Should not happen if stat succeeded, but handle defensively
-	// 			fmt.Printf("[DEBUG - addEvent %s] Immediate os.Stat succeeded but FromOSInfo returned nil. Map not updated.\n", event.Signature())
-	// 		}
-	// 	}
-	// }
+	if eventType == Create {
+		fmt.Printf("[DEBUG - addEvent %s] Create event detected. Attempting immediate stat & map update.\n", event.Signature())
+		stat, err := os.Stat(name)
+		if err != nil {
+			// Log error but proceed to queue event. Map won't be updated yet.
+			fmt.Printf("[DEBUG - addEvent %s] Immediate os.Stat failed (%v). Map not updated.\n", event.Signature(), err)
+		} else {
+			info := FromOSInfo(name, stat)
+			if info != nil {
+				if b.watchrecursive && info.IsDir() {
+					b.AddWatch(name)
+				}
+				b.watchmap.Set(name, info)
+				fmt.Printf("[DEBUG - addEvent %s] Immediate os.Stat successful. Watchmap updated with ID %d.\n", event.Signature(), info.Id)
+			} else {
+				// Should not happen if stat succeeded, but handle defensively
+				fmt.Printf("[DEBUG - addEvent %s] Immediate os.Stat succeeded but FromOSInfo returned nil. Map not updated.\n", event.Signature())
+			}
+		}
+	}
 
 	// --- Custom Filter Check ---
 	if b.Filter != nil {
