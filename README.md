@@ -150,6 +150,24 @@ Returns a channel that receives file system events.
 
 Returns a channel that receives errors.
 
++## Debugging
++
++FSBroker uses the standard `log/slog` package for logging. By default, only messages with `INFO` level or higher are shown.
++
++To enable detailed debug logging (using `slog.LevelDebug`), compile or test the package with the `fsbroker_debug` build tag. This enables verbose logging of internal event processing steps, which can be helpful for troubleshooting.
++
++**Examples:**
++
++```sh
++# Run tests with debug logging enabled
++go test -v -tags fsbroker_debug ./...
++
++# Build your application with debug logging enabled
++go build -tags fsbroker_debug -o myapp main.go
++```
++
++When the tag is *not* provided, the `slog` level defaults to `INFO`, and the `slog.Debug` calls in the code have minimal performance impact.
+
 ## Missing features:
 
 Here is a list of features I would like to add in the future, please feel free to submit pull requests:

@@ -3,6 +3,7 @@ package fsbroker
 import (
 	"errors"
 	"fmt"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"strings"
@@ -72,7 +73,7 @@ func (b *FSBroker) Start() {
 			case event := <-b.watcher.Events:
 				switch event.Op {
 				case fsnotify.Create, fsnotify.Write, fsnotify.Remove, fsnotify.Rename, fsnotify.Chmod:
-					fmt.Printf("FSNotify Event: %s, File: %s\n", event.Op, event.Name)
+					logDebug("Received fsnotify event", "op", event.Op.String(), "name", event.Name)
 					b.addEvent(event.Op, event.Name)
 				default:
 					b.errors <- errors.New("unknown fsnotify event")
@@ -177,7 +178,7 @@ func (b *FSBroker) eventloop() {
 	defer ticker.Stop()
 
 	for {
-		fmt.Printf("[DEBUG - eventloop] Top of loop. Current queue size: %d\n", eventQueue.Len())
+		logDebug("Event loop tick", "queueSize", eventQueue.Len())
 		select {
 		case event := <-b.events:
 			// Add the event to the queue for grouping
@@ -200,12 +201,13 @@ func (b *FSBroker) Stop() {
 
 // AddEvent queues a new file system event into the broker.
 func (b *FSBroker) addEvent(op fsnotify.Op, name string) {
-	fmt.Printf("[DEBUG - addEvent] Received fsnotify event: Op=%s, Name=%s\n", op, name)
+	// This duplicates the log in the Start() goroutine, but keeping for potential direct calls to addEvent if ever added.
+	// slog.Debug("addEvent called", "op", op.String(), "name", name)
 
 	// --- System File Check ---
 	if b.config.IgnoreSysFiles {
 		if isSystemFile(name) {
-			fmt.Printf("[DEBUG - addEvent]   -> Ignored: System file\n")
+			logDebug("Ignoring event: System file", "name", name)
 			return
 		}
 	}
@@ -213,10 +215,10 @@ func (b *FSBroker) addEvent(op fsnotify.Op, name string) {
 	// Map fsnotify Op first to check type before hidden check
 	eventType := mapOpToEventType(op)
 	if eventType == -1 { // Check for unknown event type
-		fmt.Printf("[DEBUG - addEvent]   -> Ignored: Unknown event type for Op %s\n", op)
+		logDebug("Ignoring event: Unknown event type", "op", op.String(), "name", name)
 		return // Don't queue unknown events
 	}
-	fmt.Printf("[DEBUG - addEvent]   -> Mapped to EventType: %s\n", eventType.String())
+	// slog.Debug("Mapped fsnotify op to event type", "op", op.String(), "eventType", eventType.String(), "name", name)
 
 	// --- Hidden File Check ---
 	if b.config.IgnoreHiddenFiles {
@@ -225,21 +227,21 @@ func (b *FSBroker) addEvent(op fsnotify.Op, name string) {
 			// If file doesn't exist when we check hidden status, it's likely due to
 			// a rapid Rename/Remove. Log locally but don't treat as error or hidden.
 			if os.IsNotExist(err) {
-				fmt.Printf("[DEBUG - addEvent]   -> Info: Cannot check hidden status for file %s (likely gone due to rename/remove: %v). Assuming not hidden.\n", name, err)
+				logDebug("Cannot check hidden status (likely gone), assuming not hidden", "name", name, "error", err)
 				// Don't send error to main channel, don't mark as hidden
 				hidden = false // Proceed as if not hidden
 				err = nil      // Clear error so we don't trigger general error handling
 			} else {
 				// For other errors, or errors, log to main channel
 				b.errors <- fmt.Errorf("error checking if file %s is hidden: %w", name, err)
-				fmt.Printf("[DEBUG - addEvent]   -> Warning: Error checking hidden status for %s: %v. Allowing event.\n", name, err)
+				slog.Warn("Error checking hidden status, allowing event", "name", name, "error", err)
 				// Allow event despite error, but report it
 				hidden = false
 				err = nil // Clear error as it's been reported
 			}
 		}
 		if hidden {
-			fmt.Printf("[DEBUG - addEvent]   -> Ignored: Hidden file\n")
+			logDebug("Ignoring event: Hidden file", "name", name)
 			return
 		}
 	}
@@ -249,11 +251,11 @@ func (b *FSBroker) addEvent(op fsnotify.Op, name string) {
 
 	// --- Update Watchmap Immediately for Creates ---
 	if eventType == Create {
-		fmt.Printf("[DEBUG - addEvent %s] Create event detected. Attempting immediate stat & map update.\n", event.Signature())
+		logDebug("Create event: Attempting immediate stat & map update", "signature", event.Signature(), "name", name)
 		stat, err := os.Stat(name)
 		if err != nil {
 			// Log error but proceed to queue event. Map won't be updated yet.
-			fmt.Printf("[DEBUG - addEvent %s] Immediate os.Stat failed (%v). Map not updated.\n", event.Signature(), err)
+			logDebug("Immediate os.Stat failed, map not updated", "signature", event.Signature(), "name", name, "error", err)
 		} else {
 			info := FromOSInfo(name, stat)
 			if info != nil {
@@ -261,10 +263,10 @@ func (b *FSBroker) addEvent(op fsnotify.Op, name string) {
 					b.AddWatch(name)
 				}
 				b.watchmap.Set(name, info)
-				fmt.Printf("[DEBUG - addEvent %s] Immediate os.Stat successful. Watchmap updated with ID %d.\n", event.Signature(), info.Id)
+				logDebug("Immediate os.Stat successful, watchmap updated", "signature", event.Signature(), "name", name, "id", info.Id)
 			} else {
 				// Should not happen if stat succeeded, but handle defensively
-				fmt.Printf("[DEBUG - addEvent %s] Immediate os.Stat succeeded but FromOSInfo returned nil. Map not updated.\n", event.Signature())
+				slog.Warn("Immediate os.Stat succeeded but FromOSInfo is nil, map not updated", "signature", event.Signature(), "name", name)
 			}
 		}
 	}
@@ -272,14 +274,14 @@ func (b *FSBroker) addEvent(op fsnotify.Op, name string) {
 	// --- Custom Filter Check ---
 	if b.Filter != nil {
 		filterResult := b.Filter(event)
-		fmt.Printf("[DEBUG - addEvent]   -> Custom filter result: %t\n", filterResult)
+		// slog.Debug("Custom filter result", "signature", event.Signature(), "name", name, "exclude", filterResult)
 		if filterResult { // Assuming filter returns true to EXCLUDE
-			fmt.Printf("[DEBUG - addEvent]   -> Ignored: Custom filter excluded\n")
+			logDebug("Ignoring event: Custom filter excluded", "signature", event.Signature(), "name", name)
 			return
 		}
 	}
 
-	fmt.Printf("[DEBUG - addEvent] Queuing event: Type=%s, Path=%s\n", event.Type.String(), event.Path)
+	logDebug("Queuing event", "signature", event.Signature(), "type", event.Type.String(), "path", event.Path)
 	b.events <- event
 }
 
