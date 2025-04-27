@@ -40,7 +40,8 @@ While manually tested across these platforms, contributions towards automated mu
 
 ## Changelog
 
-- (New v1.0.0) First release. See release notes.
+- Coming soon... (New v1.0.0) First complete release.
+- (New v0.1.8) Update fsnotify to v1.9.0
 - (New v0.1.7) Update fsnotify to v1.9.0
 - (New v0.1.6) Added the option to ignore hidden files.
 - (New v0.1.5) Fix more bugs, added the option to emit chmod events (defaults to false).
