@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-type Info struct {
+type FSInfo struct {
 	Id      uint64
 	Path    string
 	Size    uint64
@@ -14,11 +14,11 @@ type Info struct {
 	Mode    uint32
 }
 
-func (info *Info) IsDir() bool {
+func (info *FSInfo) IsDir() bool {
 	return os.FileMode(info.Mode).IsDir()
 }
 
-func (info *Info) String() string {
+func (info *FSInfo) String() string {
 	return fmt.Sprintf("Id: %d, Path: %s, Mode: %o",
 		info.Id, info.Path, info.Mode)
 }

@@ -15,7 +15,7 @@ import (
 	"golang.org/x/sys/windows"
 )
 
-func (b *FSBroker) resolveAndHandle(eventQueue *EventQueue, tickerLock *sync.Mutex) {
+func (b *FSBroker) resolveAndHandle(eventQueue *ActionStack, tickerLock *sync.Mutex) {
 	logDebug("resolveAndHandle triggered. Trying to acquire lock...")
 	// We only want one instance of this method to run at a time, so we lock it
 	if !tickerLock.TryLock() {
@@ -87,12 +87,12 @@ func (b *FSBroker) resolveAndHandle(eventQueue *EventQueue, tickerLock *sync.Mut
 					logDebug("Pass 1: ID MATCH! Synthesizing RENAME.", "partnerSig", partnerAction.Signature(), "createSig", createAction.Signature())
 					// Synthesize the Rename event
 					// Use the CREATE event's path/time as the definitive state
-					renameEvent := NewFSEvent(Rename, createAction.Path, createAction.Timestamp)
+					renameEvent := NewFSAction(Rename, createAction.Path, createAction.Timestamp)
 					renameEvent.Properties["OldPath"] = partnerAction.Path // Use REMOVE/RENAME event's path as OldPath
-					renameEvent.EnrichFromInfo(createdFileInfo)            // Enrich with *new* file info
+					renameEvent.Subject = info            // Enrich with *new* file info
 
 					logDebug("Pass 1: Emitting synthesized RENAME", "event", renameEvent)
-					b.emitEvent(renameEvent)
+					b.emitAction(renameEvent)
 
 					// Mark *both* original events as processed
 					logDebug("Pass 1: Marking original events processed", "partnerSig", partnerAction.Signature(), "createSig", createAction.Signature())
@@ -154,7 +154,7 @@ func (b *FSBroker) resolveAndHandle(eventQueue *EventQueue, tickerLock *sync.Mut
 
 			// Emit the standard REMOVE event
 			logDebug("Pass 2: Remove: Emitting standard REMOVE event", "signature", action.Signature(), "event", action)
-			b.emitEvent(action)
+			b.emitAction(action)
 			processedPaths[action.Signature()] = true // Mark processed (mostly for clarity, already skipped if true)
 
 		case Create:
@@ -191,7 +191,7 @@ func (b *FSBroker) resolveAndHandle(eventQueue *EventQueue, tickerLock *sync.Mut
 
 			// Emit the create event
 			logDebug("Pass 2: Create: Emitting standard CREATE event", "signature", action.Signature(), "event", action)
-			b.emitEvent(action)
+			b.emitAction(action)
 			processedPaths[action.Signature()] = true
 
 		case Rename:
@@ -274,7 +274,7 @@ func (b *FSBroker) resolveAndHandle(eventQueue *EventQueue, tickerLock *sync.Mut
 				action.EnrichFromStat(stat)
 			}
 			logDebug("Pass 2: Write: Emitting standard WRITE event", "signature", action.Signature(), "event", action)
-			b.emitEvent(action)
+			b.emitAction(action)
 			processedPaths[action.Signature()] = true // Mark this latest Write as processed after successful handling
 
 			// Optimization: Mark all *earlier* Write events for the same path in this batch as processed now,
@@ -292,7 +292,7 @@ func (b *FSBroker) resolveAndHandle(eventQueue *EventQueue, tickerLock *sync.Mut
 			logDebug("Pass 2: Chmod: Processing", "signature", action.Signature(), "path", action.Path)
 			if b.config.EmitChmod {
 				logDebug("Pass 2: Chmod: Emitting CHMOD event", "signature", action.Signature())
-				b.emitEvent(action)
+			b.emitAction(action)
 			} else {
 				logDebug("Pass 2: Chmod: Ignoring CHMOD event (EmitChmod=false)", "signature", action.Signature())
 			}
@@ -343,14 +343,14 @@ func isHiddenFile(path string) (bool, error) {
 	return attributes&syscall.FILE_ATTRIBUTE_HIDDEN != 0, nil
 }
 
-func FromOSInfo(path string, fileinfo os.FileInfo) *Info {
+func FromOSInfo(path string, fileinfo os.FileInfo) *FSInfo {
 	id, err := getFileID(path)
 	if err != nil {
 		return nil
 	}
 
 	// Enrich with size and modtime for Windows, as they are generally reliable
-	return &Info{
+	return &FSInfo{
 		Id:      id,
 		Path:    path,
 		Size:    uint64(fileinfo.Size()),

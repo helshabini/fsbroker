@@ -231,7 +231,7 @@ I've ran manual tests on all platforms. Yet, your contibution to writing multi-p
 	| Rename file inplace within a watched directory | - RENAME (old file path)<br>- CREATE (new file path) | - CREATE (new file path)<br>- RENAME (old file path) | - RENAME (old file path)<br>- CREATE (new file path) | Rename | |
 	| Move file from a watched directory to another watched directory | - REMOVE (old file path)<br>- CREATE (new file path) | - CREATE (new file path)<br>- RENAME (old file path) | - RENAME (old file path)<br>- CREATE (new file path) | Rename | |
 	| Move file from an unwatched directory to a watched directory | - | - | - | Create | Similar to creating a non-empty file |
-	| Soft delete file (move to trash) or Move file from a watched directory to an unwatched directory | - REMOVE (file path) | - RENAME (file path) | - RENAME (file path) | Create | |
+	| Soft delete file (move to trash) or Move file from a watched directory to an unwatched directory | - REMOVE (file path) | - RENAME (file path) | - RENAME (file path) | Remove | |
 	| Hard delete file (permenantly) | - REMOVE (file path) | - REMOVE (file path) | - REMOVE (file path) | Remove | |
 	| Create a directory | - CREATE (dir path) | - CREATE (dir path) | - CREATE (dir path) | Create | |
 	| Rename directory inplace within a watched directory | - RENAME (old dir path)<br>- CREATE (new dir path) | - CREATE (new dir path)<br>- RENAME (old dir path) | - RENAME (old dir path)<br>- CREATE (new dir path)<br>- RENAME (old dir path) | Rename | |
