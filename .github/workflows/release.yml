@@ -2,8 +2,6 @@ name: release
 
 on:
   push:
-    branches:
-      - main
     tags:
       - 'release-major'
       - 'release-minor'
