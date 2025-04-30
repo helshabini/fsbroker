@@ -1,6 +1,7 @@
 package fsbroker
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/fsnotify/fsnotify"
@@ -23,7 +24,7 @@ type FSAction struct {
 	Type      OpType
 	Timestamp time.Time
 	Subject   *FSInfo
-	Events    []*fsnotify.Event
+	Events    []*FSEvent
 	Properties map[string]any
 }
 
@@ -32,7 +33,7 @@ func NewFSAction(op OpType, path string, timestamp time.Time) *FSAction {
 		Type:      op,
 		Timestamp: timestamp,
 		Subject:   nil,
-		Events:    make([]*fsnotify.Event, 0),
+		Events:    make([]*FSEvent, 0),
 		Properties: make(map[string]any, 0),
 	}
 }
@@ -42,12 +43,28 @@ func FromFSEvent(event *FSEvent) *FSAction {
 		Type:      event.Type,
 		Timestamp: event.Timestamp,
 		Subject:   nil,
-		Events:    make([]*fsnotify.Event, 0),
+		Events:    make([]*FSEvent, 0),
 		Properties: make(map[string]any, 0),
 	}
 
-	action.Events = append(action.Events, event.Event)
+	action.Events = append(action.Events, event)
 
+	return action
+}
+
+func (a *FSAction) Signature() string {
+	return fmt.Sprintf("%s-%s", a.Type, a.Subject.Path)
+}
+
+func AppendEvent(actions map[uint64]*FSAction, event *FSEvent, id uint64) *FSAction {
+	action, found := actions[id]
+	if found {
+		action.Events = append(action.Events, event)
+		return action
+	}
+	
+	action = FromFSEvent(event)
+	actions[id] = action
 	return action
 }
 

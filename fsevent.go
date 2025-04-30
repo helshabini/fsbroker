@@ -1,6 +1,7 @@
 package fsbroker
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/fsnotify/fsnotify"
@@ -21,4 +22,8 @@ func NewFSEvent(event *fsnotify.Event) *FSEvent {
 		Path: 		event.Name,
 		Timestamp: time.Now(),
 	}
+}
+
+func (e *FSEvent) Signature() string {
+	return fmt.Sprintf("%s-%s", e.Type, e.Path)
 }

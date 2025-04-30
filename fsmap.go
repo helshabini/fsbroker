@@ -36,6 +36,10 @@ func (m *FSMap) Set(value *FSInfo) error {
 	*/
 
 	// m.uuids[value.UId] = value // Removed
+	oldEntry, found := m.ids[value.Id]
+	if found {
+		delete(m.paths, oldEntry.Path)
+	}
 	m.ids[value.Id] = value
 	m.paths[value.Path] = value
 

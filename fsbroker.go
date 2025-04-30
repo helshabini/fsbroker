@@ -13,14 +13,12 @@ import (
 	"github.com/fsnotify/fsnotify"
 )
 
-
-
 // FSBroker collects fsnotify events, groups them, dedupes them, and processes them as a single event.
 type FSBroker struct {
 	watcher        *fsnotify.Watcher
-	watchrecursive bool          // watch recursively on directories, set by AddRecursiveWatch
-	watchmap       *FSMap          // local map of watched files and directories
-	events        chan *FSEvent // internal events channel, processes FSEvent(s) for every FSNotify Op
+	watchrecursive bool           // watch recursively on directories, set by AddRecursiveWatch
+	watchmap       *FSMap         // local map of watched files and directories
+	events         chan *FSEvent  // internal events channel, processes FSEvent(s) for every FSNotify Op
 	emit           chan *FSAction // emitted events channel, sends FSAction(s) to the user after processing
 	errors         chan error
 	quit           chan struct{}
@@ -42,7 +40,7 @@ func NewFSBroker(config *FSConfig) (*FSBroker, error) {
 		watchmap:       NewFSMap(),
 		watchrecursive: false,
 		events:         make(chan *FSEvent),
-		emit:						make(chan *FSAction),
+		emit:           make(chan *FSAction),
 		errors:         make(chan error),
 		quit:           make(chan struct{}),
 		config:         config,
@@ -245,4 +243,3 @@ func (b *FSBroker) handleEvent(event fsnotify.Event) {
 func (b *FSBroker) emitAction(action *FSAction) {
 	b.emit <- action
 }
-

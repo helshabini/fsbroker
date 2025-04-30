@@ -79,7 +79,7 @@ func TestFromFSEvent(t *testing.T) {
 		t.Errorf("FSAction.Events length = %d, want 1", len(action.Events))
 		return // Avoid panic on next line
 	}
-	if action.Events[0] != fsEvent {
+	if action.Events[0] != fse {
 		t.Errorf("FSAction.Events[0] = %p, want %p", action.Events[0], fsEvent)
 	}
 	if action.Properties == nil {
