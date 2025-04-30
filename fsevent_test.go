@@ -3,131 +3,87 @@ package fsbroker
 import (
 	"testing"
 	"time"
+
+	"github.com/fsnotify/fsnotify"
 )
 
 func TestNewFSEvent(t *testing.T) {
-	t.Run("Basic event creation", func(t *testing.T) {
-		path := "/test/path"
-		now := time.Now()
-		event := NewFSEvent(Create, path, now)
+	now := time.Now()
+	// Allow a small buffer for timestamp comparison
+	buffer := 50 * time.Millisecond
 
-		if event.Type != Create {
-			t.Errorf("Expected event type Create, got %v", event.Type)
-		}
-		if event.Path != path {
-			t.Errorf("Expected path %s, got %s", path, event.Path)
-		}
-		if event.Timestamp != now {
-			t.Errorf("Expected timestamp %v, got %v", now, event.Timestamp)
-		}
-		if event.Properties == nil {
-			t.Errorf("Expected Properties map to be initialized, got nil")
-		}
-	})
-
-	t.Run("Event with properties", func(t *testing.T) {
-		path := "/test/path"
-		now := time.Now()
-		event := NewFSEvent(Write, path, now)
-
-		// Add some properties
-		event.Properties["size"] = "1024"
-		event.Properties["modified"] = "true"
-
-		if len(event.Properties) != 2 {
-			t.Errorf("Expected 2 properties, got %d", len(event.Properties))
-		}
-		if event.Properties["size"] != "1024" {
-			t.Errorf("Expected size property to be 1024, got %s", event.Properties["size"])
-		}
-		if event.Properties["modified"] != "true" {
-			t.Errorf("Expected modified property to be true, got %s", event.Properties["modified"])
-		}
-	})
-
-	t.Run("Event with empty path", func(t *testing.T) {
-		event := NewFSEvent(Remove, "", time.Now())
-		if event.Path != "" {
-			t.Errorf("Expected empty path, got %s", event.Path)
-		}
-	})
-
-	t.Run("Event with nil timestamp", func(t *testing.T) {
-		event := NewFSEvent(Chmod, "/test/path", time.Time{})
-		if !event.Timestamp.IsZero() {
-			t.Errorf("Expected zero timestamp, got %v", event.Timestamp)
-		}
-	})
-}
-
-func TestEventTypeString(t *testing.T) {
 	tests := []struct {
-		eventType EventType
-		expected  string
+		name         string
+		fsnotifyOp   fsnotify.Op
+		expectedType OpType
+		path         string
 	}{
-		{Create, "Create"},
-		{Write, "Write"},
-		{Rename, "Rename"},
-		{Remove, "Remove"},
-		{Chmod, "Chmod"},
-		{EventType(999), "Unknown"}, // Test unknown event type
+		{
+			name:         "Create Event",
+			fsnotifyOp:   fsnotify.Create,
+			expectedType: Create,
+			path:         "/tmp/create.txt",
+		},
+		{
+			name:         "Write Event",
+			fsnotifyOp:   fsnotify.Write,
+			expectedType: Write,
+			path:         "/var/log/app.log",
+		},
+		{
+			name:         "Remove Event",
+			fsnotifyOp:   fsnotify.Remove,
+			expectedType: Remove,
+			path:         "/home/user/file_to_remove",
+		},
+		{
+			name:         "Rename Event",
+			fsnotifyOp:   fsnotify.Rename,
+			expectedType: Rename,
+			path:         "/docs/old_name.doc",
+		},
+		{
+			name:         "Chmod Event",
+			fsnotifyOp:   fsnotify.Chmod,
+			expectedType: Chmod,
+			path:         "/config/settings.conf",
+		},
+		{
+			name:         "Combined Write+Chmod", // Should map to Write
+			fsnotifyOp:   fsnotify.Write | fsnotify.Chmod,
+			expectedType: Write, // mapOpToOpType prioritizes Write
+			path:         "/data/combined.dat",
+		},
 	}
 
 	for _, tt := range tests {
-		t.Run(tt.expected, func(t *testing.T) {
-			if tt.eventType.String() != tt.expected {
-				t.Errorf("Expected %s, got %s", tt.expected, tt.eventType.String())
+		t.Run(tt.name, func(t *testing.T) {
+			fsEvent := &fsnotify.Event{
+				Name: tt.path,
+				Op:   tt.fsnotifyOp,
+			}
+
+			got := NewFSEvent(fsEvent)
+
+			if got == nil {
+				t.Fatal("NewFSEvent returned nil")
+			}
+			if got.Event != fsEvent {
+				t.Errorf("FSEvent.Event = %p, want %p", got.Event, fsEvent)
+			}
+			if got.Type != tt.expectedType {
+				t.Errorf("FSEvent.Type = %v, want %v", got.Type, tt.expectedType)
+			}
+			if got.Path != tt.path {
+				t.Errorf("FSEvent.Path = %q, want %q", got.Path, tt.path)
+			}
+			if got.Timestamp.IsZero() {
+				t.Error("FSEvent.Timestamp was not set (is zero)")
+			}
+			// Check if timestamp is reasonably close to now
+			if got.Timestamp.Before(now.Add(-buffer)) || got.Timestamp.After(now.Add(buffer)) {
+				t.Errorf("FSEvent.Timestamp = %v, expected to be close to %v (within %v)", got.Timestamp, now, buffer)
 			}
 		})
 	}
-}
-
-func TestFSEventSignature(t *testing.T) {
-	t.Run("Basic signature", func(t *testing.T) {
-		event := NewFSEvent(Create, "/test/path", time.Now())
-		expectedSignature := "0-/test/path"
-		if event.Signature() != expectedSignature {
-			t.Errorf("Expected signature %s, got %s", expectedSignature, event.Signature())
-		}
-	})
-
-	t.Run("Signature with different event types", func(t *testing.T) {
-		tests := []struct {
-			eventType EventType
-			path      string
-			expected  string
-		}{
-			{Create, "/test/path", "0-/test/path"},
-			{Write, "/test/path", "1-/test/path"},
-			{Rename, "/test/path", "2-/test/path"},
-			{Remove, "/test/path", "3-/test/path"},
-			{Chmod, "/test/path", "4-/test/path"},
-		}
-
-		for _, tt := range tests {
-			t.Run(tt.expected, func(t *testing.T) {
-				event := NewFSEvent(tt.eventType, tt.path, time.Now())
-				if event.Signature() != tt.expected {
-					t.Errorf("Expected signature %s, got %s", tt.expected, event.Signature())
-				}
-			})
-		}
-	})
-
-	t.Run("Signature with empty path", func(t *testing.T) {
-		event := NewFSEvent(Create, "", time.Now())
-		expectedSignature := "0-"
-		if event.Signature() != expectedSignature {
-			t.Errorf("Expected signature %s, got %s", expectedSignature, event.Signature())
-		}
-	})
-
-	t.Run("Signature with special characters in path", func(t *testing.T) {
-		path := "/test/path with spaces/and/special@characters"
-		event := NewFSEvent(Create, path, time.Now())
-		expectedSignature := "0-" + path
-		if event.Signature() != expectedSignature {
-			t.Errorf("Expected signature %s, got %s", expectedSignature, event.Signature())
-		}
-	})
 }

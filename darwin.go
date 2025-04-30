@@ -4,7 +4,6 @@
 package fsbroker
 
 import (
-	"log/slog"
 	"os"
 	"path/filepath"
 	"strings"
@@ -12,380 +11,276 @@ import (
 	"syscall"
 )
 
-func (b *FSBroker) resolveAndHandle(eventQueue *EventQueue, tickerLock *sync.Mutex) {
+func (b *FSBroker) resolveAndHandle(stack *EventStack, tickerLock *sync.Mutex) {
 	// We only want one instance of this method to run at a time, so we lock it
 	if !tickerLock.TryLock() {
 		return
 	}
 	defer tickerLock.Unlock()
 
-	// Process grouped events, detecting related Create and Rename events
-	processedPaths := make(map[string]bool)
-
-	// temporary list of events to process
-	eventList := eventQueue.List()
-
-	// items to be removed from watchmap
-	watchmapItemsToRemove := make(map[string]bool)
-
-	// Log the initial snapshot if debug is enabled
-	if slog.Default().Enabled(nil, slog.LevelDebug) {
-		signatures := make([]string, len(eventList))
-		for i, evt := range eventList {
-			signatures[i] = evt.Signature()
-		}
-		logDebug("Initial event list snapshot", "size", len(eventList), "signatures", signatures)
-	}
-
-	if len(eventList) == 0 {
+	if stack.Len() == 0 {
 		return
 	}
 
-	//Now we process the events remaining in the event queue, and stop the loop when it's empty
-	for action := eventQueue.Pop(); action != nil; action = eventQueue.Pop() {
-		// Ignore already processed paths
-		logDebug("Loop Start: Popped action", "signature", action.Signature(), "type", action.Type.String(), "path", action.Path, "time", action.Timestamp)
-		if processedPaths[action.Signature()] {
-			logDebug("Loop Skip: Action already processed", "signature", action.Signature())
-			continue
-		}
+	// Prep: To avoid stating the same path multiple times (since many events may occur for the same file)
+	// We pre-stat all unique paths from incoming events into a statmap
+	statmap := make(map[string]*FSInfo)
+	events := stack.List()
 
-		switch action.Type {
-		case Remove:
-			// Check if there's any earlier event for the same path within the queue, ignore it and only raise the remove event
-			for _, relatedAction := range eventList {
-				if relatedAction.Path == action.Path && relatedAction.Timestamp.Before(action.Timestamp) {
-					processedPaths[relatedAction.Signature()] = true
-					logDebug("Remove: Marked earlier action processed", "removedSig", action.Signature(), "earlierSig", relatedAction.Signature())
-				}
-			}
-
-			// Get the file that was deleted from the watchmap
-			deletedFile := b.watchmap.Get(action.Path)
-			logDebug("Remove: Info from watchmap", "signature", action.Signature(), "info", deletedFile)
-
-			// Process the Remove event normally (hard delete on macOS)
-			// Check if the deleted item was a directory, and if so, remove the watch
-			if deletedFile != nil && deletedFile.IsDir() { // Check deletedFile is not nil
-				logDebug("Remove: Path is directory, removing watch", "signature", action.Signature(), "path", action.Path)
-				b.RemoveWatch(action.Path)
-				// No need to delete from watchmap here, RemoveWatch handles prefix deletion
-			} else {
-				// Ensure regular files are also removed from map on remove, only if deletedFile was found
-				if deletedFile != nil {
-					logDebug("Remove: Path is file, adding to deferred removal", "signature", action.Signature(), "path", action.Path)
-					watchmapItemsToRemove[action.Path] = true
-				}
-			}
-
-			if deletedFile != nil { // Only enrich if we have info
-				action.EnrichFromInfo(deletedFile)
-				logDebug("Remove: Enriched event from map info", "signature", action.Signature())
-			}
-			// Assuming hard delete, because macOS doesn't emit a Remove event for soft deletes
-			action.Properties["Type"] = "Hard"
-
-			logDebug("Remove: Emitting Hard Remove", "signature", action.Signature(), "event", action)
-			b.emitEvent(action)
-			processedPaths[action.Signature()] = true
-
-		case Create:
-			logDebug("Create: Entering handler", "signature", action.Signature())
-			// Get info about the created file
-			stat, err := os.Stat(action.Path)
+	for _, event := range events {
+		logDebug("Stating event file", "operation", event.Type, "path", event.Path)
+		_, found := statmap[event.Path]
+		if !found {
+			stat, err := os.Stat(event.Path)
 			if err != nil {
-				if os.IsNotExist(err) { // Created item no longer exists. Remove it from the watchmap if it exists
-					logDebug("Create: os.Stat failed (NotExist), adding to deferred removal and skipping", "signature", action.Signature(), "path", action.Path, "error", err)
-					watchmapItemsToRemove[action.Path] = true
+				if os.IsNotExist(err) {
+					logDebug("File not found", "operation", event.Type, "path", event.Path)
 				} else {
-					slog.Warn("Create: os.Stat failed, skipping", "signature", action.Signature(), "path", action.Path, "error", err)
+					logDebug("Failed to stat file", "operation", event.Type, "path", event.Path)
 				}
-				processedPaths[action.Signature()] = true
 				continue
 			}
-			logDebug("Create: os.Stat successful", "signature", action.Signature(), "path", action.Path)
-
-			info := FromOSInfo(action.Path, stat)
-			logDebug("Create: Got info from stat", "signature", action.Signature(), "path", action.Path, "info", info)
+			info := FromOSInfo(event.Path, stat)
 			if info == nil {
-				// We failed to get the file info (maybe permission error or transient issue), enrich with what we have
-				slog.Warn("Create: FromOSInfo returned nil after stat, enriching from stat and emitting raw Create", "signature", action.Signature(), "path", action.Path)
-				action.EnrichFromStat(stat)
-				b.emitEvent(action)
-				processedPaths[action.Signature()] = true
+				logDebug("Failed to get file info", "operation", event.Type, "path", event.Path)
+				continue
+			}
+			statmap[event.Path] = info
+		}
+	}
+
+	// Pass 1: transform events into grouped action
+	actions := make(map[uint64]*FSAction)
+	//created := make(map[uint64]*FSAction)
+	//written := make(map[uint64]*FSAction)
+	//removed := make(map[uint64]*FSAction)
+	//renamed := make(map[uint64]*FSAction)
+	//modded := make(map[uint64]*FSAction)
+	noop := make([]*FSAction, 0)
+
+	for event := stack.Pop(); event != nil; event = stack.Pop() {
+		logDebug("Popped event", "operation", event.Type, "path", event.Path)
+
+		switch event.Type {
+		case Create:
+			//--------------------------------------------------------------
+			//  - this is either a new file or rename/move
+			//    - stat/getId:
+			//      - File doesn't exist on disk:
+			//        - Irrelevant event, file no longer exists -> add noop
+			//      - File exists on disk:
+			//        - query the map by Id
+			//          - Found: rename/move -> add rename (new & old path)
+			//          - Not Found: new file -> add create
+			//--------------------------------------------------------------
+
+			// We pre-stated all unique paths before entering Pass 1
+			// So now we seek the statmap for information about our file on disk
+			info, found := statmap[event.Path]
+			if !found {
+				logDebug("Create: Since file no longer exists on disk, this event is irrelevant", "path", event.Path)
+				action := FromFSEvent(event)
+				action.Type = NoOp
+				action.Properties["Message"] = "Event irrelevant. File no longer exists"
+				noop = append(noop, action)
+				logDebug("Create: Added action to noop", "path", event.Path)
+				continue
+			}
+			// Found file on disk, now we query the watchmap by file Id to check whether we already know about that file or not
+			watchmapInfo := b.watchmap.GetById(info.Id)
+
+			if watchmapInfo == nil { // Not found: new file
+				logDebug("Create: No entry found in watchmap. This is a new path", "path", event.Path)
+				action := AppendEvent(actions, event, info.Id)
+				action.Subject = info
+				logDebug("Create: Adding watch if recursive watch is enabled")
+				if b.watchrecursive && info.IsDir() {
+					// Make sure AddWatch doesn't error due to existing map entry if called twice
+					_ = b.AddWatch(info.Path) // Add watch if not already present
+					logDebug("Create: Added recursive watch for directory", "signature", action.Signature(), "path", info.Path)
+				}
+				b.watchmap.Set(info)
+				logDebug("Create: Added action to createdmap", "path", event.Path)
 				continue
 			}
 
-			var isRenameOrMove bool = false // Reset or ensure it's defined here
-
-			// Check for following Rename event (Unix Rename/Move pattern)
-			logDebug("Create: Entering Rename partner check", "signature", action.Signature())
-			for _, relatedAction := range eventList {
-				// Look for RENAME *after* this CREATE
-				if relatedAction.Type == Rename && relatedAction.Timestamp.After(action.Timestamp) { // Check time relationship if needed
-					logDebug("Create: Checking potential RENAME partner", "createSig", action.Signature(), "renameSig", relatedAction.Signature())
-					// --- Log Watchmap State BEFORE potential rename handling ---
-					// b.PrintMap()
-					potentialRename := b.watchmap.Get(relatedAction.Path)
-					logDebug("Create: Info for potential rename path from watchmap", "createSig", action.Signature(), "renamePath", relatedAction.Path, "renameInfo", potentialRename)
-					// Safely log IDs, handling potential nil pointer for potentialRename
-					var potentialRenameId uint64
-					if potentialRename != nil {
-						potentialRenameId = potentialRename.Id
-					}
-					idsMatch := potentialRename != nil && potentialRename.Id == info.Id
-					logDebug("Create: Comparing IDs for rename", "createSig", action.Signature(), "renameSig", relatedAction.Signature(), "renameId", potentialRenameId, "createId", info.Id, "match", idsMatch)
-					if idsMatch {
-						// We found the rename event, ignore the create event and only raise the Rename event
-						logDebug("Create: Found RENAME partner via ID match, synthesizing Rename", "createSig", action.Signature(), "renameSig", relatedAction.Signature(), "id", info.Id)
-						result := NewFSEvent(Rename, action.Path, action.Timestamp) // Use NEW path/time
-						result.Properties["OldPath"] = potentialRename.Path         // Store OLD path
-						result.EnrichFromInfo(info)                                 // Enrich with NEW info
-						logDebug("Create: Emitting synthesized RENAME", "createSig", action.Signature(), "event", result)
-						b.emitEvent(result)
-						processedPaths[action.Signature()] = true
-						processedPaths[relatedAction.Signature()] = true
-						logDebug("Create: Marked Create and Rename processed", "createSig", action.Signature(), "renameSig", relatedAction.Signature())
-						isRenameOrMove = true
-
-						// Update watchmap
-						logDebug("Create: Updating watchmap for rename", "createSig", action.Signature(), "deletePath", potentialRename.Path, "setPath", action.Path)
-						watchmapItemsToRemove[potentialRename.Path] = true
-						b.watchmap.Set(action.Path, info)
-
-						break
-					}
-				}
+			// Found: rename/move
+			logDebug("Create: Entry found in watchmap. This is a rename/move", "path", event.Path)
+			oldpath := watchmapInfo.Path
+			if oldpath == info.Path {
+				_ = AppendEvent(actions, event, info.Id)
+			} else {
+				action := AppendEvent(actions, event, info.Id)
+				action.Subject = info
+				action.Type = Rename
+				action.Properties["OldPath"] = oldpath
+				b.watchmap.Set(info)
+				logDebug("Create: Added action to renamedmap", "path", event.Path)
 			}
-			logDebug("Create: Exited Rename partner check", "signature", action.Signature(), "isRenameOrMove", isRenameOrMove)
 
-			// Now that we're sure it is not a rename or move. We need to check if it is non-empty file creation.
-			// If it is, there should be a corresponding write event which we need to ignore.
-			// Also handle directory creation for recursive watch.
-			if !isRenameOrMove {
-				logDebug("Create: Processing as normal Create (not rename/move)", "signature", action.Signature())
-				if b.watchrecursive && stat.IsDir() {
+			logDebug("Create: Done", "path", event.Path)
+		case Write:
+			//--------------------------------------------------------------------------
+			//	- this is either associated with a create (non-empty) or normal write
+			//		- query the map by path
+			//			- Not found: non-empty create -> add create
+			//			- Found: normal write event -> add write
+			//--------------------------------------------------------------------------
+
+			// Need to get new stats for the file
+			info, found := statmap[event.Path]
+			if !found {
+				// File no longer exists. NoOp
+				logDebug("Write: File no longer exists", "path", event.Path)
+				action := FromFSEvent(event)
+				action.Type = NoOp
+				action.Properties["Message"] = "Event irrelevant. File no longer exists"
+				noop = append(noop, action)
+				logDebug("Write: Added action to noop", "path", event.Path)
+				continue
+			}
+
+			watchmapInfo := b.watchmap.GetById(info.Id)
+
+			if watchmapInfo == nil { // Not found: this is a non-empty file creation
+				logDebug("Write: No entry found in watchmap. This is a non-empty file creation", "path", event.Path)
+				action := AppendEvent(actions, event, info.Id)
+				action.Type = Create
+				action.Subject = info
+				logDebug("Create: Adding watch if recursive watch is enabled")
+				if b.watchrecursive && info.IsDir() {
 					// Make sure AddWatch doesn't error due to existing map entry if called twice
-					_ = b.AddWatch(action.Path) // Add watch if not already present
-					logDebug("Create: Added recursive watch for directory", "signature", action.Signature(), "path", action.Path)
-				} else {
-					// Update watchmap only if it's not a directory being handled by AddWatch
-					if !stat.IsDir() {
-						logDebug("Create: Updating watchmap for non-dir create", "signature", action.Signature(), "path", action.Path)
-						b.watchmap.Set(action.Path, info)
-					}
+					_ = b.AddWatch(info.Path) // Add watch if not already present
+					logDebug("Create: Added recursive watch for directory", "signature", action.Signature(), "path", info.Path)
 				}
-
-				if !stat.IsDir() {
-					foundWritePartner := false
-					// Check if there's a corresponding write event for the same path
-					logDebug("Create: Entering Write partner check", "signature", action.Signature())
-					for _, relatedAction := range eventList {
-						if relatedAction.Type == Write && relatedAction.Path == action.Path && relatedAction.Timestamp.After(action.Timestamp) {
-							logDebug("Create: Found subsequent WRITE partner, marking Write processed", "createSig", action.Signature(), "writeSig", relatedAction.Signature())
-							processedPaths[relatedAction.Signature()] = true
-							foundWritePartner = true
-							// We found the write event, so we can stop checking.
-							break
-						}
-					}
-					logDebug("Create: Exited Write partner check", "signature", action.Signature(), "foundWritePartner", foundWritePartner)
-					// Note: Even if foundWritePartner is true, we still emit the Create event.
-					// The write event itself is simply marked processed.
-				}
-
-				// Now we raise the create event normally
-				logDebug("Create: Emitting final CREATE event", "signature", action.Signature(), "event", action)
-				action.EnrichFromInfo(info) // Enrich with info we already have
-				b.emitEvent(action)
-				processedPaths[action.Signature()] = true
+				b.watchmap.Set(info)
+				logDebug("Write: Added action to createdmap", "path", event.Path)
+				continue
 			}
-			logDebug("Create: Exiting handler", "signature", action.Signature())
+
+			// Found: normal write event
+			logDebug("Write: Found watchmap entry. This is a normal write", "path", event.Path)
+			action := AppendEvent(actions, event, info.Id)
+			action.Subject = info
+			b.watchmap.Set(info)
+			logDebug("Write: Added action to writtenmap", "path", event.Path)
+
+			logDebug("Write: Done", "path", event.Path)
+
+		case Remove:
+			//-----------------------------------------------------------------------------------------
+			// - Check if we already have an entry about this file
+			// 	- Not found: irrelevant event, file never captured and now is gone -> add noop
+			//	- Found: Relevant, we know about the file -> ensure file is actually removed from disk
+			//		- Still Exists: irrelevant event, file still exists -> add noop
+			//		- Doesn't exist: file actually gone -> add remove
+			//-----------------------------------------------------------------------------------------
+
+			// Seek file info from our watchmap
+			watchmapInfo := b.watchmap.GetByPath(event.Path)
+			if watchmapInfo == nil {
+				logDebug("Remove: No watchmap entry found, file must have been created then removed quickly", "path", event.Path)
+				action := FromFSEvent(event)
+				action.Type = NoOp
+				noop = append(noop, action)
+				logDebug("Remove: Added action to noop", "path", event.Path)
+				continue
+			}
+
+			logDebug("Remove: Found watchmap entry.", "path", event.Path)
+			action := AppendEvent(actions, event, watchmapInfo.Id)
+			action.Subject = watchmapInfo // Last known info about the deleted file
+			logDebug("Remove: Added action to removedmap", "path", event.Path)
+
+			logDebug("Remove: Done", "path", event.Path)
 
 		case Rename:
-			// A rename event always carries a path that should no longer exist
-			// It is emitted in one of the following cases:
-			// 1. When a file/directory is renamed or moved within watched areas:
-			//    - macOS emits: CREATE (new path, same ID) + RENAME (old path, same ID)
-			// 2. When a file/directory is moved outside watched areas (or to Trash):
-			//    - macOS emits: RENAME (old path only)
+			//-----------------------------------------------------------------------------------
+			//	- this is either rename/move or soft delete
+			//	- Check our watchmap to see if we know about the file
+			// 		- Found: We know about this file, it is now renamed, but we don't know to what -> add rename
+			//		- Not found: We know nothing about this file, irrelevant -> add noop
+			//-----------------------------------------------------------------------------------
 
-			// So, we need to check if there's a corresponding Create event for the same file identifier
-			// If there is one, we ignore the Create event and only raise the Rename event
-			// Otherwise, we ignore the Rename event and raise a Remove event
-
-			// Get the file info from the watchmap
-			renamedFileInfo := b.watchmap.Get(action.Path)
-			logDebug("Rename: Processing. Dumping watchmap BEFORE Get:")
-			b.PrintMap()
-			if renamedFileInfo == nil {
-				logDebug("Rename: Cannot find info for", "path", action.Path)
-				// If the file is not in the watchmap, it means it's not being watched, so we raise the rename event
-				// This shouldn't happen if our watchmap is up to date.
-				// But if it does, we'll raise the rename event because we have nothing to compare to
-				b.emitEvent(action)
-				processedPaths[action.Signature()] = true
+			watchmapInfo := b.watchmap.GetByPath(event.Path)
+			if watchmapInfo == nil { // Not found
+				logDebug("Rename: No watchmap entry found, file must have been created then renamed quickly", "path", event.Path)
+				action := FromFSEvent(event)
+				action.Type = NoOp
+				noop = append(noop, action)
+				logDebug("Rename: Added action to noop", "path", event.Path)
 				continue
 			}
+			
+			// Found: we add it renamed map to coalese it later
+			logDebug("Rename: Found watchmap entry", "path", event.Path)
+			action := AppendEvent(actions, event, watchmapInfo.Id)
+			action.Type = Remove
+			action.Subject = watchmapInfo
+			logDebug("Rename: Added Remove action to actionsmap", "path", event.Path)	
 
-			isRenameOrMove := false
-			// Check if there's a corresponding Create event for the same file identifier
-			// Unfortunately this is a little expensive, because the create event could be before or after the rename event
-			// So we'll have to stat all paths in Create events in the eventList
-			for _, relatedCreate := range eventList {
-				if relatedCreate.Type == Create {
-					createdStat, err := os.Stat(relatedCreate.Path)
-					if err != nil {
-						continue
-					}
-					createdFileInfo := FromOSInfo(relatedCreate.Path, createdStat)
-					if createdFileInfo != nil && createdFileInfo.Id == renamedFileInfo.Id {
-						// We found the create event, ignore it and only raise the enriched Rename event
-						logDebug("Rename: Found CREATE partner", "createSig", relatedCreate.Signature(), "renameSig", action.Signature())
-						result := NewFSEvent(Rename, action.Path, action.Timestamp)
-						result.Properties["OldPath"] = renamedFileInfo.Path
-						result.EnrichFromInfo(createdFileInfo)
-						logDebug("Rename: Emitting synthesized RENAME", "event", result)
-						b.emitEvent(result)
-						b.watchmap.Delete(renamedFileInfo.Path)
-						b.watchmap.Set(createdFileInfo.Path, createdFileInfo)
-						logDebug("Rename: Updated watchmap: Deleted", "path", renamedFileInfo.Path, "Set", createdFileInfo.Path)
-						processedPaths[action.Signature()] = true
-						processedPaths[relatedCreate.Signature()] = true
-						isRenameOrMove = true
-						break
-					}
-				}
-			}
-			if !isRenameOrMove {
-				// No corresponding create event found, raise a Remove event
-				logDebug("Rename: No CREATE partner found for RENAME", "path", action.Path)
-				// --- Log watchmap state before potential delete ---
-				logDebug("Rename: Watchmap state before potential delete of", "path", renamedFileInfo.Path)
-				b.PrintMap()
-				result := NewFSEvent(Remove, action.Path, action.Timestamp)
-				result.Properties["Type"] = "Soft"
-				result.EnrichFromInfo(renamedFileInfo)
-				logDebug("Rename: Emitting synthesized REMOVE", "event", result)
-				b.emitEvent(result)
-				processedPaths[action.Signature()] = true
-			}
-
-		case Write:
-			// First, dedup modify events
-			// Check if there are multiple save events for the same path within the queue, treat them as a single Modify event
-			latestModify := action
-			for _, relatedModify := range eventList {
-				if relatedModify.Path == action.Path && relatedModify.Type == Write && relatedModify.Timestamp.After(latestModify.Timestamp) {
-					processedPaths[latestModify.Signature()] = true
-					logDebug("Write: Found later Write, marking earlier processed", "earlierSig", latestModify.Signature(), "laterSig", relatedModify.Signature())
-					latestModify = relatedModify
-				}
-			}
-
-			// Check if the file exists on disk
-			stat, err := os.Stat(latestModify.Path)
-			if err != nil {
-				// If the file doesn't exist on disk, remove it from the watchmap and ignore the event
-				// as there must be a corresponding Remove/Rename event.
-				if os.IsNotExist(err) {
-					b.watchmap.Delete(latestModify.Path)
-				}
-				processedPaths[latestModify.Signature()] = true
-				continue
-			}
-
-			// Then check if there is a Create event for the same path, ignore the Write event and raise the Create event instead
-			// This handles the case where macOS emits a Create event followed by a Write event for a new non-empty file
-			// or a copy/move from an unwatched directory into a watched one.
-			foundCreated := false
-			logDebug("Write: Entering Create partner check", "signature", latestModify.Signature())
-			for _, relatedCreate := range eventList {
-				if relatedCreate.Path == latestModify.Path && relatedCreate.Type == Create && relatedCreate.Timestamp.Before(latestModify.Timestamp) {
-					// We found the Create event, ignore the Write event and raise the Create event instead
-					// But first we need to check if this specific create event was already processed
-					if !processedPaths[relatedCreate.Signature()] {
-						logDebug("Write: Found preceding CREATE partner", "createSig", relatedCreate.Signature(), "writeSig", latestModify.Signature())
-						// But first we need to check if this specific create event was already processed
-						if processedPaths[relatedCreate.Signature()] {
-							logDebug("Write: Preceding CREATE partner was already processed. Skipping Create emit.", "createSig", relatedCreate.Signature())
-						} else {
-							logDebug("Write: Emitting preceding CREATE event instead of Write", "createSig", relatedCreate.Signature(), "writeSig", latestModify.Signature())
-							relatedCreate.EnrichFromInfo(FromOSInfo(latestModify.Path, stat))
-							b.emitEvent(relatedCreate)
-							processedPaths[relatedCreate.Signature()] = true
-						}
-						processedPaths[latestModify.Signature()] = true
-						foundCreated = true
-						break
-					}
-				}
-			}
-			logDebug("Write: Exited Create partner check", "signature", latestModify.Signature(), "foundCreated", foundCreated)
-
-			// Otherwise, Process the latest Write event
-			if !foundCreated {
-				logDebug("Write: Processing as standalone Write", "signature", latestModify.Signature())
-				logDebug("Write: Watchmap state before Set/Enrich/Emit:", "signature", latestModify.Signature())
-				b.PrintMap()
-				info := FromOSInfo(latestModify.Path, stat)
-				if info != nil {
-					logDebug("Write: Updating watchmap with info", "signature", latestModify.Signature(), "info", info)
-					b.watchmap.Set(latestModify.Path, info)
-					latestModify.EnrichFromInfo(info)
-				}
-				logDebug("Write: Emitting WRITE event", "signature", latestModify.Signature(), "event", latestModify)
-				b.emitEvent(latestModify)
-				processedPaths[latestModify.Signature()] = true
-			}
+			logDebug("Rename: Done", "path", event.Path)
 
 		case Chmod:
-			logDebug("Chmod: Entering handler", "signature", action.Signature())
-			// Emit the chmod event if configured
-			if b.config.EmitChmod {
-				logDebug("Chmod: EmitChmod enabled, emitting CHMOD event", "signature", action.Signature(), "event", action)
-				b.emitEvent(action)
-			}
+			//-----------------------------------------------------------------------------------
+			// MacOS special case: clearing file to zero bytes emits no write events
+			// We use chmod event instead, and check the file to make sure it is a write
+			//	- stat/getId:
+			//		- File exists on disk && is zero bytes && wasn't zero bytes (from map by Id) -> add write
+			//			- add chmod
+			//	- Either way, still emit the chmod event if configured to do so
+			//-----------------------------------------------------------------------------------
 
-			// Mark the action as processed anyway, because it's a chmod event
-			processedPaths[action.Signature()] = true
-			logDebug("Chmod: Marked self as processed", "signature", action.Signature())
-
-			// Handle case where writing empty file in macOS results in no modify event, but only in chmod event
-			stat, err := os.Stat(action.Path)
-			if err != nil {
-				slog.Warn("Chmod: os.Stat failed during empty file check", "signature", action.Signature(), "path", action.Path, "error", err)
+			// Get stats from statmap
+			info, found := statmap[event.Path]
+			if !found { // Event irrelevant, file no longer exists
+				logDebug("Chmod: Event irrelevant. File no longer exists", "path", event.Path)
+				action := FromFSEvent(event)
+				action.Type = NoOp
+				noop = append(noop, action)
+				logDebug("Chmod: Added action to noop", "path", event.Path)
 				continue
 			}
-			potentialModify := b.watchmap.Get(action.Path)
-			if potentialModify != nil {
-				if stat.Size() == 0 && potentialModify.Size != 0 {
-					// Raise a write event
-					logDebug("Chmod: Detected file cleared via chmod, synthesizing Write", "signature", action.Signature())
-					modified := NewFSEvent(Write, action.Path, action.Timestamp)
-					modified.EnrichFromInfo(FromOSInfo(action.Path, stat))
-					b.emitEvent(modified)
-				}
 
-				// Update the watchmap with the new file information (i.e. after the chmod)
-				logDebug("Chmod: Updating watchmap with post-chmod info", "signature", action.Signature())
-				b.watchmap.Set(action.Path, FromOSInfo(action.Path, stat))
+			// Found statmap entry, check size
+			logDebug("Chmod: File found on disk, check it in watchmap", "path", event.Path)
+			watchmapInfo := b.watchmap.GetById(info.Id)
+			if watchmapInfo != nil { // Found watchmap entry. Compare sizes
+				if info.Size == 0 && watchmapInfo.Size > 0 {
+					logDebug("Chmod: File is zero size. It wasn't before.", "path", event.Path)
+					action := AppendEvent(actions, event, info.Id)
+					action.Type = Write
+					action.Subject = info
+					b.watchmap.Set(info)
+					logDebug("Chmod: Added action to writtenmap", "path", event.Path)
+				}
 			}
 
-		default:
-			slog.Warn("Unknown action type in resolveAndHandle", "typeValue", action.Type, "signature", action.Signature())
-			// Unreachable
+			// Add event to chmod normally
+			if b.config.EmitChmod {
+				logDebug("Chmod: Emitting Chmod is enabled. Adding action", "path", event.Path)
+				action := AppendEvent(actions, event, info.Id)
+				action.Subject = info
+				logDebug("Chmod: Added action to moddedmap", "path", event.Path)
+			}
+
+			logDebug("Chmod: Done", "path", event.Path)
 		}
 	}
 
-	// Remove items from watchmap
-	logDebug("Applying deferred watchmap removals", "count", len(watchmapItemsToRemove))
-	for path := range watchmapItemsToRemove {
-		logDebug("Removing item from watchmap", "path", path)
-		b.watchmap.Delete(path)
-	}
+	// Pass 2: Coalesing events, mapping pairs and deduplication
 
-	logDebug("Loop End", "processedCount", len(processedPaths))
+	// Write actions should now be in writtenmap.
+	// We need to deduplicate them, or find associated create actions (if any)
+
+	logDebug("Pass 2: Coalesing events, mapping pairs, and deduplication")
+	for key, value := range actions {
+		logDebug("Action: ", "id", key, "action", value)
+		b.emitAction(value)
+	}
+	for _, value := range noop {
+		logDebug("NoOp: ", "action", value)
+	}
 }
 
 // isSystemFile checks if the file is a common macOS system or metadata file.
@@ -445,14 +340,14 @@ func isHiddenFile(path string) (bool, error) {
 	return false, nil
 }
 
-func FromOSInfo(path string, fileinfo os.FileInfo) *Info {
+func FromOSInfo(path string, fileinfo os.FileInfo) *FSInfo {
 	sys := fileinfo.Sys()
 	sysstat, ok := sys.(*syscall.Stat_t)
 	if !ok {
 		return nil
 	}
 
-	return &Info{
+	return &FSInfo{
 		Id:      sysstat.Ino,
 		Path:    path,
 		Size:    uint64(fileinfo.Size()),
