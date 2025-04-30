@@ -1,0 +1,108 @@
+name: release
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'release-major'
+      - 'release-minor'
+      - 'release-patch'
+
+jobs:
+  test:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    
+    runs-on: ${{ matrix.os }}
+    steps:
+    - name: checkout code
+      uses: actions/checkout@v4
+      with:
+          fetch-depth: 1
+    
+    - name: set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.24.2'
+    
+    - name: install dependencies
+      run: go mod tidy
+
+    - name: run tests
+      run: go test -v ./...
+  
+  release:
+    needs: test
+    runs-on: ubuntu-latest
+    # Only run this job when pushing release tags
+    if: startsWith(github.ref, 'refs/tags/release-')
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Need full history to get all tags
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Setup Git user
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+      
+      - name: Get latest version and create new tag
+        id: version
+        run: |
+          # Determine which version part to increment based on tag
+          if [[ "${{ github.ref }}" == "refs/tags/release-major" ]]; then
+            INCREMENT_TYPE="major"
+          elif [[ "${{ github.ref }}" == "refs/tags/release-minor" ]]; then
+            INCREMENT_TYPE="minor"
+          elif [[ "${{ github.ref }}" == "refs/tags/release-patch" ]]; then
+            INCREMENT_TYPE="patch"
+          else
+            echo "Unknown tag format, exiting"
+            exit 1
+          fi
+          
+          echo "Incrementing $INCREMENT_TYPE version"
+          
+          # Get the latest semantic version tag
+          LATEST_TAG=$(git tag -l 'v[0-9]*.[0-9]*.[0-9]*' | sort -V | tail -n 1 || echo "v0.0.0")
+          echo "Current latest tag: $LATEST_TAG"
+          
+          # Extract version components
+          VERSION=${LATEST_TAG#v}
+          IFS='.' read -ra VERSION_PARTS <<< "$VERSION"
+          
+          MAJOR=${VERSION_PARTS[0]:-0}
+          MINOR=${VERSION_PARTS[1]:-0}
+          PATCH=${VERSION_PARTS[2]:-0}
+          
+          # Increment appropriate part based on tag
+          if [[ "$INCREMENT_TYPE" == "major" ]]; then
+            MAJOR=$((MAJOR + 1))
+            MINOR=0
+            PATCH=0
+          elif [[ "$INCREMENT_TYPE" == "minor" ]]; then
+            MINOR=$((MINOR + 1))
+            PATCH=0
+          else  # patch
+            PATCH=$((PATCH + 1))
+          fi
+          
+          # Create new version string
+          NEW_VERSION="v$MAJOR.$MINOR.$PATCH"
+          echo "New version will be: $NEW_VERSION"
+          echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+      
+      - name: Create and push new tag
+        run: |
+          NEW_TAG=${{ steps.version.outputs.new_version }}
+          echo "Creating new tag: $NEW_TAG"
+          git tag $NEW_TAG
+          git push origin $NEW_TAG
+          
+          # Delete the trigger tag after successful release
+          git push origin --delete ${{ github.ref_name }}
+    
