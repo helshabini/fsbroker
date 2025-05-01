@@ -534,11 +534,8 @@ func TestFSBrokerIntegration(t *testing.T) {
 		// Cleanup external file if test fails before move
 		defer os.Remove(externalPath)
 
-		// 2. On Windows, explicitly set the hidden attribute on the external file
-		if runtime.GOOS == "windows" {
-			// Call the OS-specific function (defined in fsbroker_test_windows.go)
-			fsbroker.SetHiddenAttribute(t, externalPath)
-		}
+		// Call the OS-specific function (defined in fsbroker_test_windows.go)
+		fsbroker.SetHiddenAttribute(t, externalPath)
 
 		// 3. Move the file into the watched directory
 		err = os.Rename(externalPath, finalPath)

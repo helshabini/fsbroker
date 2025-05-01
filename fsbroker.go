@@ -1,9 +1,7 @@
 package fsbroker
 
 import (
-	"errors"
 	"fmt"
-	"log/slog"
 	"os"
 	"path/filepath"
 	"strings"
@@ -60,10 +58,10 @@ func (b *FSBroker) Start() {
 					logDebug("Received fsnotify event", "op", event.Op.String(), "name", event.Name)
 					b.handleEvent(event)
 				default:
-					b.errors <- errors.New("unknown fsnotify event")
+					b.emitError(fmt.Errorf("unknown fsnotify event: %s", event.Op.String()))
 				}
 			case err := <-b.watcher.Errors:
-				b.errors <- err
+				b.emitError(err)
 			}
 		}
 	}()
@@ -201,38 +199,22 @@ func (b *FSBroker) Stop() {
 func (b *FSBroker) handleEvent(event fsnotify.Event) {
 	fsevent := NewFSEvent(&event)
 
-	// --- System File Check ---
-	if b.config.IgnoreSysFiles {
-		if isSystemFile(event.Name) {
-			logDebug("Ignoring event: System file", "name", event.Name)
-			return
-		}
-	}
-
-	// --- Hidden File Check ---
 	if b.config.IgnoreHiddenFiles {
 		hidden, err := isHiddenFile(event.Name) // Use name, not path
 		if err != nil {
-			// If file doesn't exist when we check hidden status, it's likely due to
-			// a rapid Rename/Remove. Log locally but don't treat as error or hidden.
-			if os.IsNotExist(err) {
-				logDebug("Cannot check hidden status (likely gone), assuming not hidden", "name", event.Name, "error", err)
-				// Don't send error to main channel, don't mark as hidden
-				hidden = false // Proceed as if not hidden
-				err = nil      // Clear error so we don't trigger general error handling
-			} else {
-				// For other errors, or errors, log to main channel
-				b.errors <- fmt.Errorf("error checking if file %s is hidden: %w", event.Name, err)
-				slog.Warn("Error checking hidden status, allowing event", "name", event.Name, "error", err)
-				// Allow event despite error, but report it
-				hidden = false
-				err = nil // Clear error as it's been reported
-			}
-		}
-		if hidden {
+			b.emitError(fmt.Errorf("error checking if file %s is hidden: %w", event.Name, err))
+			// Couldn't know whether the file/dir is hidden
+			// Maybe because the file doesn't exist for we have no permission to do so
+			// here we allow the event and report the error
+		} else if hidden {
 			logDebug("Ignoring event: Hidden file", "name", event.Name)
-			return
+			return // Skip this event
 		}
+	}
+
+	if b.config.IgnoreSysFiles && isSystemFile(event.Name) {
+		logDebug("Ignoring event: System file", "name", event.Name)
+		return // Skip this event
 	}
 
 	logDebug("Queuing action", "type", fsevent.Event.Op)
@@ -242,4 +224,9 @@ func (b *FSBroker) handleEvent(event fsnotify.Event) {
 // emitAction sends the event to the user after deduplication, grouping, and processing.
 func (b *FSBroker) emitAction(action *FSAction) {
 	b.emit <- action
+}
+
+func (b *FSBroker) emitError(err error) {
+	logDebug("Emitting error", "error", err)
+	b.errors <- err
 }
