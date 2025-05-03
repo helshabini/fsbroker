@@ -57,8 +57,6 @@ func (b *FSBroker) Start() {
 				case fsnotify.Create, fsnotify.Write, fsnotify.Remove, fsnotify.Rename, fsnotify.Chmod:
 					logDebug("Received fsnotify event", "op", event.Op.String(), "name", event.Name)
 					b.handleEvent(event)
-				default:
-					b.emitError(fmt.Errorf("unknown fsnotify event: %s", event.Op.String()))
 				}
 			case err := <-b.watcher.Errors:
 				b.emitError(err)
@@ -200,12 +198,10 @@ func (b *FSBroker) handleEvent(event fsnotify.Event) {
 	fsevent := NewFSEvent(&event)
 
 	if b.config.IgnoreHiddenFiles {
-		hidden, err := isHiddenFile(event.Name) // Use name, not path
+		hidden, err := isHiddenFile(event.Name)
 		if err != nil {
 			b.emitError(fmt.Errorf("error checking if file %s is hidden: %w", event.Name, err))
-			// Couldn't know whether the file/dir is hidden
-			// Maybe because the file doesn't exist for we have no permission to do so
-			// here we allow the event and report the error
+			// Allow the event to proceed despite the error, as per original logic.
 		} else if hidden {
 			logDebug("Ignoring event: Hidden file", "name", event.Name)
 			return // Skip this event
@@ -217,7 +213,7 @@ func (b *FSBroker) handleEvent(event fsnotify.Event) {
 		return // Skip this event
 	}
 
-	logDebug("Queuing action", "type", fsevent.Event.Op)
+	logDebug("Queuing event", "type", fsevent.Event.Op)
 	b.events <- fsevent
 }
 
@@ -227,6 +223,9 @@ func (b *FSBroker) emitAction(action *FSAction) {
 }
 
 func (b *FSBroker) emitError(err error) {
+	if err == nil {
+		return
+	}
 	logDebug("Emitting error", "error", err)
 	b.errors <- err
 }

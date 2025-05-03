@@ -4,6 +4,7 @@
 package fsbroker
 
 import (
+	"errors"
 	"os"
 	"path/filepath"
 	"strings"
@@ -54,11 +55,6 @@ func (b *FSBroker) resolveAndHandle(stack *EventStack, tickerLock *sync.Mutex) {
 
 	// Pass 1: transform events into grouped action
 	actions := make(map[uint64]*FSAction)
-	//created := make(map[uint64]*FSAction)
-	//written := make(map[uint64]*FSAction)
-	//removed := make(map[uint64]*FSAction)
-	//renamed := make(map[uint64]*FSAction)
-	//modded := make(map[uint64]*FSAction)
 	noop := make([]*FSAction, 0)
 
 	for event := stack.Pop(); event != nil; event = stack.Pop() {
@@ -142,7 +138,7 @@ func (b *FSBroker) resolveAndHandle(stack *EventStack, tickerLock *sync.Mutex) {
 				logDebug("Write: Added action to noop", "path", event.Path)
 				continue
 			}
-			
+
 			// If the write event is for a directory, ignore the event (add to noop)
 			if info.IsDir() {
 				logDebug("Write: event is on a directory. NoOp.", "path", event.Path)
@@ -151,7 +147,7 @@ func (b *FSBroker) resolveAndHandle(stack *EventStack, tickerLock *sync.Mutex) {
 				action.Properties["Message"] = "Event irrelevant. Event is on a directory"
 				noop = append(noop, action)
 				logDebug("Write: Added action to noop", "path", event.Path)
-				continue			
+				continue
 			}
 
 			watchmapInfo := b.watchmap.GetById(info.Id)
@@ -205,7 +201,7 @@ func (b *FSBroker) resolveAndHandle(stack *EventStack, tickerLock *sync.Mutex) {
 			action := AppendEvent(actions, event, watchmapInfo.Id)
 			action.Subject = watchmapInfo // Last known info about the deleted file
 			logDebug("Remove: Added action to removedmap", "path", event.Path)
-
+			b.watchmap.DeleteByPath(event.Path)
 			logDebug("Remove: Done", "path", event.Path)
 
 		case Rename:
@@ -225,13 +221,13 @@ func (b *FSBroker) resolveAndHandle(stack *EventStack, tickerLock *sync.Mutex) {
 				logDebug("Rename: Added action to noop", "path", event.Path)
 				continue
 			}
-			
+
 			// Found: we add it renamed map to coalese it later
 			logDebug("Rename: Found watchmap entry", "path", event.Path)
 			action := AppendEvent(actions, event, watchmapInfo.Id)
 			action.Type = Remove
 			action.Subject = watchmapInfo
-			logDebug("Rename: Added Remove action to actionsmap", "path", event.Path)	
+			logDebug("Rename: Added Remove action to actionsmap", "path", event.Path)
 
 			logDebug("Rename: Done", "path", event.Path)
 
@@ -268,18 +264,16 @@ func (b *FSBroker) resolveAndHandle(stack *EventStack, tickerLock *sync.Mutex) {
 		}
 	}
 
-	// Pass 2: Coalesing events, mapping pairs and deduplication
+	// Pass 2: Emitting actions
 
-	// Write actions should now be in writtenmap.
-	// We need to deduplicate them, or find associated create actions (if any)
-
-	logDebug("Pass 2: Coalesing events, mapping pairs, and deduplication")
+	logDebug("Pass 2: Emitting actions")
 	for key, value := range actions {
 		logDebug("Action: ", "id", key, "action", value)
 		b.emitAction(value)
 	}
 	for _, value := range noop {
 		logDebug("NoOp: ", "action", value)
+		b.emitAction(value)
 	}
 }
 
@@ -312,6 +306,16 @@ func isHiddenFile(path string) (bool, error) {
 	// Get file attributes
 	attributes, err := syscall.GetFileAttributes(pointer)
 	if err != nil {
+		// It is acceptable for these syscalls to fail
+		// This is because the file may not exist yet, and we want to ignore that
+		var sysErr syscall.Errno
+		if errors.As(err, &sysErr) &&
+			(sysErr == syscall.Errno(2) || sysErr == syscall.Errno(3)) /*ERROR_FILE_NOT_FOUND or ERROR_PATH_NOT_FOUND*/ {
+			logDebug("Ignoring benign 'file/path not found' error during hidden check", "name", path, "errno", int(sysErr))
+			return false, nil
+		}
+
+		// Any other error (permissions, etc.) OR "file not found" for non-RENAME ops.
 		return false, err
 	}
 

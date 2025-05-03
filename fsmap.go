@@ -25,17 +25,6 @@ func (m *FSMap) Set(value *FSInfo) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
-	/* // Removed UUID generation logic
-	if len(value.UId) == 0 {
-		uid, err := uuid.NewV6()
-		if err != nil {
-			return err
-		}
-		value.UId = uid.String()
-	}
-	*/
-
-	// m.uuids[value.UId] = value // Removed
 	oldEntry, found := m.ids[value.Id]
 	if found {
 		delete(m.paths, oldEntry.Path)
@@ -69,7 +58,6 @@ func (m *FSMap) DeleteById(id uint64) error {
 
 	delete(m.ids, id)
 	delete(m.paths, value.Path)
-	// delete(m.uuids, value.UId) // Removed
 
 	return nil
 }
@@ -85,7 +73,6 @@ func (m *FSMap) DeleteByPath(path string) error {
 
 	delete(m.ids, value.Id)
 	delete(m.paths, path)
-	// delete(m.uuids, value.UId) // Removed
 
 	return nil
 }
@@ -109,6 +96,5 @@ func (m *FSMap) IteratePaths(callback func(key string, value *FSInfo)) {
 func (m *FSMap) Size() int {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
-	// Use length of ids or paths map instead
 	return len(m.ids)
 }

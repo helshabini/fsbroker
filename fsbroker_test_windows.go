@@ -35,3 +35,17 @@ func SetHiddenAttribute(t *testing.T, filePath string) {
 	// Short delay to allow attribute change to potentially register fully?
 	time.Sleep(50 * time.Millisecond)
 }
+
+// testIsHiddenFile checks if a file is hidden on Windows.
+func TestIsHiddenFile(path string) (bool, error) {
+	return isHiddenFile(path)
+}
+
+// testIsSystemFile checks for common and Windows specific system file names.
+func TestIsSystemFile(name string) bool {
+	return isSystemFile(name)
+}
+
+func (b *FSBroker) TestIteratePaths(callback func(key string, value *FSInfo)) {
+	b.watchmap.IteratePaths(callback)
+}

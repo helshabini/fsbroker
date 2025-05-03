@@ -1,0 +1,735 @@
+[FSBroker] Debug logging ENABLED (compiled with 'fsbroker_debug' tag)
+=== RUN   TestNewEventStack
+--- PASS: TestNewEventStack (0.00s)
+=== RUN   TestEventStack_PushAndLen
+--- PASS: TestEventStack_PushAndLen (0.00s)
+=== RUN   TestEventStack_Pop
+--- PASS: TestEventStack_Pop (0.00s)
+=== RUN   TestEventStack_List
+--- PASS: TestEventStack_List (0.00s)
+=== RUN   TestEventStack_Delete
+--- PASS: TestEventStack_Delete (0.00s)
+=== RUN   TestEventStack_Clear
+--- PASS: TestEventStack_Clear (0.00s)
+=== RUN   TestEventStack_Concurrency
+    eventstack_test.go:265: Stack length after concurrent pops/deletes: 2781 (popped: 1300, potentially deleted: 919)
+--- PASS: TestEventStack_Concurrency (0.02s)
+=== RUN   TestNewFSAction
+--- PASS: TestNewFSAction (0.00s)
+=== RUN   TestFromFSEvent
+--- PASS: TestFromFSEvent (0.00s)
+=== RUN   TestMapOpToOpType
+=== RUN   TestMapOpToOpType/Create
+=== RUN   TestMapOpToOpType/Write
+=== RUN   TestMapOpToOpType/Remove
+=== RUN   TestMapOpToOpType/Rename
+=== RUN   TestMapOpToOpType/Chmod
+=== RUN   TestMapOpToOpType/Write+Chmod
+=== RUN   TestMapOpToOpType/Create+Write
+=== RUN   TestMapOpToOpType/Remove+Rename
+=== RUN   TestMapOpToOpType/Unknown_(0)
+=== RUN   TestMapOpToOpType/Unknown_high_bit
+--- PASS: TestMapOpToOpType (0.00s)
+    --- PASS: TestMapOpToOpType/Create (0.00s)
+    --- PASS: TestMapOpToOpType/Write (0.00s)
+    --- PASS: TestMapOpToOpType/Remove (0.00s)
+    --- PASS: TestMapOpToOpType/Rename (0.00s)
+    --- PASS: TestMapOpToOpType/Chmod (0.00s)
+    --- PASS: TestMapOpToOpType/Write+Chmod (0.00s)
+    --- PASS: TestMapOpToOpType/Create+Write (0.00s)
+    --- PASS: TestMapOpToOpType/Remove+Rename (0.00s)
+    --- PASS: TestMapOpToOpType/Unknown_(0) (0.00s)
+    --- PASS: TestMapOpToOpType/Unknown_high_bit (0.00s)
+=== RUN   TestDefaultFSConfig
+--- PASS: TestDefaultFSConfig (0.00s)
+=== RUN   TestNewFSEvent
+=== RUN   TestNewFSEvent/Create_Event
+=== RUN   TestNewFSEvent/Write_Event
+=== RUN   TestNewFSEvent/Remove_Event
+=== RUN   TestNewFSEvent/Rename_Event
+=== RUN   TestNewFSEvent/Chmod_Event
+=== RUN   TestNewFSEvent/Combined_Write+Chmod
+--- PASS: TestNewFSEvent (0.00s)
+    --- PASS: TestNewFSEvent/Create_Event (0.00s)
+    --- PASS: TestNewFSEvent/Write_Event (0.00s)
+    --- PASS: TestNewFSEvent/Remove_Event (0.00s)
+    --- PASS: TestNewFSEvent/Rename_Event (0.00s)
+    --- PASS: TestNewFSEvent/Chmod_Event (0.00s)
+    --- PASS: TestNewFSEvent/Combined_Write+Chmod (0.00s)
+=== RUN   TestFSInfo_IsDir
+=== RUN   TestFSInfo_IsDir/Directory_Mode
+=== RUN   TestFSInfo_IsDir/Regular_File_Mode
+=== RUN   TestFSInfo_IsDir/Symlink_Mode_(not_dir)
+--- PASS: TestFSInfo_IsDir (0.00s)
+    --- PASS: TestFSInfo_IsDir/Directory_Mode (0.00s)
+    --- PASS: TestFSInfo_IsDir/Regular_File_Mode (0.00s)
+    --- PASS: TestFSInfo_IsDir/Symlink_Mode_(not_dir) (0.00s)
+=== RUN   TestFSInfo_String
+--- PASS: TestFSInfo_String (0.00s)
+=== RUN   TestNewFSMap
+--- PASS: TestNewFSMap (0.00s)
+=== RUN   TestFSMap_SetAndGet
+--- PASS: TestFSMap_SetAndGet (0.00s)
+=== RUN   TestFSMap_Delete
+--- PASS: TestFSMap_Delete (0.00s)
+=== RUN   TestFSMap_Iterate
+--- PASS: TestFSMap_Iterate (0.00s)
+=== RUN   TestFSMap_Concurrency
+    fsmap_test.go:366: Delete attempts: 625, Successes: 625, Failures (e.g. not found): 0
+    fsmap_test.go:379: Final size after concurrent ops: 4375
+--- PASS: TestFSMap_Concurrency (0.05s)
+=== RUN   TestFSBrokerIntegration
+=== RUN   TestFSBrokerIntegration/CreateEmptyFile
+time=2025-05-03T20:52:48.330+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=0
+time=2025-05-03T20:52:48.431+03:00 level=DEBUG msg="Received fsnotify event" op=CREATE name=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1658719026/watch/empty_file.txt
+time=2025-05-03T20:52:48.431+03:00 level=DEBUG msg="Queuing event" type=CREATE
+time=2025-05-03T20:52:48.432+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=1
+time=2025-05-03T20:52:48.731+03:00 level=DEBUG msg="Stating event file" operation=Create path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1658719026/watch/empty_file.txt
+time=2025-05-03T20:52:48.731+03:00 level=DEBUG msg="Popped event" operation=Create path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1658719026/watch/empty_file.txt
+time=2025-05-03T20:52:48.731+03:00 level=DEBUG msg="Create: No entry found in watchmap. This is a new path" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1658719026/watch/empty_file.txt
+time=2025-05-03T20:52:48.731+03:00 level=DEBUG msg="Create: Adding watch if recursive watch is enabled"
+time=2025-05-03T20:52:48.731+03:00 level=DEBUG msg="Create: Added action to createdmap" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1658719026/watch/empty_file.txt
+time=2025-05-03T20:52:48.731+03:00 level=DEBUG msg="Pass 2: Emitting actions"
+time=2025-05-03T20:52:48.731+03:00 level=DEBUG msg="Action: " id=63792016 action="&{Type:Create Timestamp:2025-05-03 20:52:48.431969 +0300 EEST m=+0.166998418 Subject:Id: 63792016, Path: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1658719026/watch/empty_file.txt, Mode: 644 Events:[0x1400019e000] Properties:map[]}"
+time=2025-05-03T20:52:48.731+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=0
+    fsbroker_test.go:324: Received expected action: Type=Create, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1658719026/watch/empty_file.txt, Props=map[]
+    fsbroker_test.go:327: [VerifyMap] ✓ Map state matches expected filesystem state (1 entries).
+=== RUN   TestFSBrokerIntegration/CreateNonEmptyFile
+time=2025-05-03T20:52:48.934+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=0
+time=2025-05-03T20:52:49.036+03:00 level=DEBUG msg="Received fsnotify event" op=CREATE name=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_79834937/watch/non_empty_file.txt
+time=2025-05-03T20:52:49.036+03:00 level=DEBUG msg="Queuing event" type=CREATE
+time=2025-05-03T20:52:49.036+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=1
+time=2025-05-03T20:52:49.335+03:00 level=DEBUG msg="Stating event file" operation=Create path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_79834937/watch/non_empty_file.txt
+time=2025-05-03T20:52:49.335+03:00 level=DEBUG msg="Popped event" operation=Create path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_79834937/watch/non_empty_file.txt
+time=2025-05-03T20:52:49.335+03:00 level=DEBUG msg="Create: No entry found in watchmap. This is a new path" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_79834937/watch/non_empty_file.txt
+time=2025-05-03T20:52:49.335+03:00 level=DEBUG msg="Create: Adding watch if recursive watch is enabled"
+time=2025-05-03T20:52:49.335+03:00 level=DEBUG msg="Create: Added action to createdmap" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_79834937/watch/non_empty_file.txt
+time=2025-05-03T20:52:49.335+03:00 level=DEBUG msg="Pass 2: Emitting actions"
+time=2025-05-03T20:52:49.335+03:00 level=DEBUG msg="Action: " id=63792019 action="&{Type:Create Timestamp:2025-05-03 20:52:49.036046 +0300 EEST m=+0.771076001 Subject:Id: 63792019, Path: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_79834937/watch/non_empty_file.txt, Mode: 644 Events:[0x1400029f3c0] Properties:map[]}"
+time=2025-05-03T20:52:49.335+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=0
+    fsbroker_test.go:341: Received expected action: Type=Create, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_79834937/watch/non_empty_file.txt, Props=map[]
+    fsbroker_test.go:345: Correctly received no non-NoOp action or error within 200ms
+    fsbroker_test.go:348: [VerifyMap] ✓ Map state matches expected filesystem state (1 entries).
+=== RUN   TestFSBrokerIntegration/ModifyFile
+time=2025-05-03T20:52:49.738+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=0
+time=2025-05-03T20:52:49.839+03:00 level=DEBUG msg="Received fsnotify event" op=CREATE name=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3075064981/watch/modify_file.txt
+time=2025-05-03T20:52:49.839+03:00 level=DEBUG msg="Queuing event" type=CREATE
+time=2025-05-03T20:52:49.839+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=1
+time=2025-05-03T20:52:50.139+03:00 level=DEBUG msg="Stating event file" operation=Create path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3075064981/watch/modify_file.txt
+time=2025-05-03T20:52:50.139+03:00 level=DEBUG msg="Popped event" operation=Create path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3075064981/watch/modify_file.txt
+time=2025-05-03T20:52:50.139+03:00 level=DEBUG msg="Create: No entry found in watchmap. This is a new path" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3075064981/watch/modify_file.txt
+time=2025-05-03T20:52:50.139+03:00 level=DEBUG msg="Create: Adding watch if recursive watch is enabled"
+time=2025-05-03T20:52:50.139+03:00 level=DEBUG msg="Create: Added action to createdmap" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3075064981/watch/modify_file.txt
+time=2025-05-03T20:52:50.139+03:00 level=DEBUG msg="Pass 2: Emitting actions"
+time=2025-05-03T20:52:50.139+03:00 level=DEBUG msg="Action: " id=63792023 action="&{Type:Create Timestamp:2025-05-03 20:52:49.839735 +0300 EEST m=+1.574766501 Subject:Id: 63792023, Path: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3075064981/watch/modify_file.txt, Mode: 644 Events:[0x1400029f4c0] Properties:map[]}"
+time=2025-05-03T20:52:50.139+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=0
+    fsbroker_test.go:360: Received expected action: Type=Create, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3075064981/watch/modify_file.txt, Props=map[]
+time=2025-05-03T20:52:50.139+03:00 level=DEBUG msg="Received fsnotify event" op=WRITE name=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3075064981/watch/modify_file.txt
+time=2025-05-03T20:52:50.139+03:00 level=DEBUG msg="Queuing event" type=WRITE
+time=2025-05-03T20:52:50.139+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=1
+time=2025-05-03T20:52:50.539+03:00 level=DEBUG msg="Stating event file" operation=Write path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3075064981/watch/modify_file.txt
+time=2025-05-03T20:52:50.539+03:00 level=DEBUG msg="Popped event" operation=Write path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3075064981/watch/modify_file.txt
+time=2025-05-03T20:52:50.539+03:00 level=DEBUG msg="Write: Found watchmap entry. This is a normal write" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3075064981/watch/modify_file.txt
+time=2025-05-03T20:52:50.539+03:00 level=DEBUG msg="Write: Added action to writtenmap" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3075064981/watch/modify_file.txt
+time=2025-05-03T20:52:50.539+03:00 level=DEBUG msg="Write: Done" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3075064981/watch/modify_file.txt
+time=2025-05-03T20:52:50.539+03:00 level=DEBUG msg="Pass 2: Emitting actions"
+time=2025-05-03T20:52:50.539+03:00 level=DEBUG msg="Action: " id=63792023 action="&{Type:Write Timestamp:2025-05-03 20:52:50.139713 +0300 EEST m=+1.874745043 Subject:Id: 63792023, Path: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3075064981/watch/modify_file.txt, Mode: 644 Events:[0x1400019e140] Properties:map[]}"
+time=2025-05-03T20:52:50.539+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=0
+    fsbroker_test.go:374: Received expected action: Type=Write, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3075064981/watch/modify_file.txt, Props=map[]
+    fsbroker_test.go:377: [VerifyMap] ✓ Map state matches expected filesystem state (1 entries).
+=== RUN   TestFSBrokerIntegration/ClearFile
+time=2025-05-03T20:52:50.742+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=0
+time=2025-05-03T20:52:50.843+03:00 level=DEBUG msg="Received fsnotify event" op=CREATE name=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3414965773/watch/clear_file.txt
+time=2025-05-03T20:52:50.843+03:00 level=DEBUG msg="Queuing event" type=CREATE
+time=2025-05-03T20:52:50.843+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=1
+time=2025-05-03T20:52:51.143+03:00 level=DEBUG msg="Stating event file" operation=Create path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3414965773/watch/clear_file.txt
+time=2025-05-03T20:52:51.143+03:00 level=DEBUG msg="Popped event" operation=Create path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3414965773/watch/clear_file.txt
+time=2025-05-03T20:52:51.143+03:00 level=DEBUG msg="Create: No entry found in watchmap. This is a new path" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3414965773/watch/clear_file.txt
+time=2025-05-03T20:52:51.143+03:00 level=DEBUG msg="Create: Adding watch if recursive watch is enabled"
+time=2025-05-03T20:52:51.143+03:00 level=DEBUG msg="Create: Added action to createdmap" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3414965773/watch/clear_file.txt
+time=2025-05-03T20:52:51.143+03:00 level=DEBUG msg="Pass 2: Emitting actions"
+time=2025-05-03T20:52:51.143+03:00 level=DEBUG msg="Action: " id=63792026 action="&{Type:Create Timestamp:2025-05-03 20:52:50.843581 +0300 EEST m=+2.578613918 Subject:Id: 63792026, Path: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3414965773/watch/clear_file.txt, Mode: 644 Events:[0x140004160c0] Properties:map[]}"
+time=2025-05-03T20:52:51.143+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=0
+    fsbroker_test.go:390: Received expected action: Type=Create, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3414965773/watch/clear_file.txt, Props=map[]
+time=2025-05-03T20:52:51.143+03:00 level=DEBUG msg="Received fsnotify event" op=CHMOD name=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3414965773/watch/clear_file.txt
+time=2025-05-03T20:52:51.143+03:00 level=DEBUG msg="Queuing event" type=CHMOD
+time=2025-05-03T20:52:51.143+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=1
+time=2025-05-03T20:52:51.543+03:00 level=DEBUG msg="Stating event file" operation=Chmod path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3414965773/watch/clear_file.txt
+time=2025-05-03T20:52:51.543+03:00 level=DEBUG msg="Popped event" operation=Chmod path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3414965773/watch/clear_file.txt
+time=2025-05-03T20:52:51.543+03:00 level=DEBUG msg="Chmod: File found on disk, check it in watchmap" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3414965773/watch/clear_file.txt
+time=2025-05-03T20:52:51.543+03:00 level=DEBUG msg="Chmod: File is zero size. It wasn't before." path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3414965773/watch/clear_file.txt
+time=2025-05-03T20:52:51.543+03:00 level=DEBUG msg="Chmod: Added action to writtenmap" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3414965773/watch/clear_file.txt
+time=2025-05-03T20:52:51.543+03:00 level=DEBUG msg="Chmod: Done" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3414965773/watch/clear_file.txt
+time=2025-05-03T20:52:51.543+03:00 level=DEBUG msg="Pass 2: Emitting actions"
+time=2025-05-03T20:52:51.543+03:00 level=DEBUG msg="Action: " id=63792026 action="&{Type:Write Timestamp:2025-05-03 20:52:51.143569 +0300 EEST m=+2.878601834 Subject:Id: 63792026, Path: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3414965773/watch/clear_file.txt, Mode: 644 Events:[0x140005929c0] Properties:map[]}"
+time=2025-05-03T20:52:51.543+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=0
+    fsbroker_test.go:397: Received expected action: Type=Write, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3414965773/watch/clear_file.txt, Props=map[]
+    fsbroker_test.go:400: [VerifyMap] ✓ Map state matches expected filesystem state (1 entries).
+=== RUN   TestFSBrokerIntegration/RenameFileInplace
+time=2025-05-03T20:52:51.746+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=0
+time=2025-05-03T20:52:51.847+03:00 level=DEBUG msg="Received fsnotify event" op=CREATE name=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3950730413/watch/old_name.txt
+time=2025-05-03T20:52:51.847+03:00 level=DEBUG msg="Queuing event" type=CREATE
+time=2025-05-03T20:52:51.847+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=1
+time=2025-05-03T20:52:52.147+03:00 level=DEBUG msg="Stating event file" operation=Create path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3950730413/watch/old_name.txt
+time=2025-05-03T20:52:52.147+03:00 level=DEBUG msg="Popped event" operation=Create path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3950730413/watch/old_name.txt
+time=2025-05-03T20:52:52.147+03:00 level=DEBUG msg="Create: No entry found in watchmap. This is a new path" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3950730413/watch/old_name.txt
+time=2025-05-03T20:52:52.147+03:00 level=DEBUG msg="Create: Adding watch if recursive watch is enabled"
+time=2025-05-03T20:52:52.147+03:00 level=DEBUG msg="Create: Added action to createdmap" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3950730413/watch/old_name.txt
+time=2025-05-03T20:52:52.147+03:00 level=DEBUG msg="Pass 2: Emitting actions"
+time=2025-05-03T20:52:52.147+03:00 level=DEBUG msg="Action: " id=63792029 action="&{Type:Create Timestamp:2025-05-03 20:52:51.84736 +0300 EEST m=+3.582394459 Subject:Id: 63792029, Path: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3950730413/watch/old_name.txt, Mode: 644 Events:[0x14000213e80] Properties:map[]}"
+time=2025-05-03T20:52:52.147+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=0
+    fsbroker_test.go:414: Received expected action: Type=Create, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3950730413/watch/old_name.txt, Props=map[]
+time=2025-05-03T20:52:52.147+03:00 level=DEBUG msg="Received fsnotify event" op=CREATE name=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3950730413/watch/new_name.txt
+time=2025-05-03T20:52:52.147+03:00 level=DEBUG msg="Queuing event" type=CREATE
+time=2025-05-03T20:52:52.147+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=1
+time=2025-05-03T20:52:52.147+03:00 level=DEBUG msg="Received fsnotify event" op=RENAME name=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3950730413/watch/old_name.txt
+time=2025-05-03T20:52:52.147+03:00 level=DEBUG msg="Queuing event" type=RENAME
+time=2025-05-03T20:52:52.147+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=2
+time=2025-05-03T20:52:52.547+03:00 level=DEBUG msg="Stating event file" operation=Create path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3950730413/watch/new_name.txt
+time=2025-05-03T20:52:52.547+03:00 level=DEBUG msg="Stating event file" operation=Rename path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3950730413/watch/old_name.txt
+time=2025-05-03T20:52:52.547+03:00 level=DEBUG msg="File not found" operation=Rename path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3950730413/watch/old_name.txt
+time=2025-05-03T20:52:52.547+03:00 level=DEBUG msg="Popped event" operation=Rename path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3950730413/watch/old_name.txt
+time=2025-05-03T20:52:52.547+03:00 level=DEBUG msg="Rename: Found watchmap entry" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3950730413/watch/old_name.txt
+time=2025-05-03T20:52:52.547+03:00 level=DEBUG msg="Rename: Added Remove action to actionsmap" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3950730413/watch/old_name.txt
+time=2025-05-03T20:52:52.547+03:00 level=DEBUG msg="Rename: Done" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3950730413/watch/old_name.txt
+time=2025-05-03T20:52:52.547+03:00 level=DEBUG msg="Popped event" operation=Create path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3950730413/watch/new_name.txt
+time=2025-05-03T20:52:52.547+03:00 level=DEBUG msg="Create: No entry found in watchmap. This is a new path" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3950730413/watch/new_name.txt
+time=2025-05-03T20:52:52.547+03:00 level=DEBUG msg="Create: Adding watch if recursive watch is enabled"
+time=2025-05-03T20:52:52.547+03:00 level=DEBUG msg="Create: Added action to createdmap" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3950730413/watch/new_name.txt
+time=2025-05-03T20:52:52.547+03:00 level=DEBUG msg="Pass 2: Emitting actions"
+time=2025-05-03T20:52:52.547+03:00 level=DEBUG msg="Action: " id=63792029 action="&{Type:Remove Timestamp:2025-05-03 20:52:52.147435 +0300 EEST m=+3.882469334 Subject:Id: 63792029, Path: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3950730413/watch/new_name.txt, Mode: 644 Events:[0x14000213ec0 0x1400029f580] Properties:map[]}"
+time=2025-05-03T20:52:52.547+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=0
+    fsbroker_test.go:421: Expected action type Rename, but got Remove for path /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3950730413/watch/new_name.txt
+=== RUN   TestFSBrokerIntegration/MoveFileWatchedToWatched
+time=2025-05-03T20:52:52.648+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=0
+time=2025-05-03T20:52:52.750+03:00 level=DEBUG msg="Received fsnotify event" op=CREATE name=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3379815581/watch/subdir
+time=2025-05-03T20:52:52.750+03:00 level=DEBUG msg="Queuing event" type=CREATE
+time=2025-05-03T20:52:52.750+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=1
+time=2025-05-03T20:52:53.049+03:00 level=DEBUG msg="Stating event file" operation=Create path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3379815581/watch/subdir
+time=2025-05-03T20:52:53.049+03:00 level=DEBUG msg="Popped event" operation=Create path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3379815581/watch/subdir
+time=2025-05-03T20:52:53.049+03:00 level=DEBUG msg="Create: No entry found in watchmap. This is a new path" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3379815581/watch/subdir
+time=2025-05-03T20:52:53.049+03:00 level=DEBUG msg="Create: Adding watch if recursive watch is enabled"
+time=2025-05-03T20:52:53.049+03:00 level=DEBUG msg="Create: Added recursive watch for directory" signature=Create-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3379815581/watch/subdir path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3379815581/watch/subdir
+time=2025-05-03T20:52:53.049+03:00 level=DEBUG msg="Create: Added action to createdmap" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3379815581/watch/subdir
+time=2025-05-03T20:52:53.049+03:00 level=DEBUG msg="Pass 2: Emitting actions"
+time=2025-05-03T20:52:53.049+03:00 level=DEBUG msg="Action: " id=63792035 action="&{Type:Create Timestamp:2025-05-03 20:52:52.750119 +0300 EEST m=+4.485154501 Subject:Id: 63792035, Path: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3379815581/watch/subdir, Mode: 20000000755 Events:[0x140003012c0] Properties:map[]}"
+time=2025-05-03T20:52:53.049+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=0
+    fsbroker_test.go:440: Received expected action: Type=Create, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3379815581/watch/subdir, Props=map[]
+time=2025-05-03T20:52:53.250+03:00 level=DEBUG msg="Received fsnotify event" op=CREATE name=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3379815581/watch/move_me.txt
+time=2025-05-03T20:52:53.250+03:00 level=DEBUG msg="Queuing event" type=CREATE
+time=2025-05-03T20:52:53.250+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=1
+time=2025-05-03T20:52:53.449+03:00 level=DEBUG msg="Stating event file" operation=Create path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3379815581/watch/move_me.txt
+time=2025-05-03T20:52:53.449+03:00 level=DEBUG msg="Popped event" operation=Create path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3379815581/watch/move_me.txt
+time=2025-05-03T20:52:53.449+03:00 level=DEBUG msg="Create: No entry found in watchmap. This is a new path" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3379815581/watch/move_me.txt
+time=2025-05-03T20:52:53.449+03:00 level=DEBUG msg="Create: Adding watch if recursive watch is enabled"
+time=2025-05-03T20:52:53.449+03:00 level=DEBUG msg="Create: Added action to createdmap" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3379815581/watch/move_me.txt
+time=2025-05-03T20:52:53.449+03:00 level=DEBUG msg="Pass 2: Emitting actions"
+time=2025-05-03T20:52:53.449+03:00 level=DEBUG msg="Action: " id=63792036 action="&{Type:Create Timestamp:2025-05-03 20:52:53.250111 +0300 EEST m=+4.985147501 Subject:Id: 63792036, Path: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3379815581/watch/move_me.txt, Mode: 644 Events:[0x1400053b280] Properties:map[]}"
+time=2025-05-03T20:52:53.449+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=0
+    fsbroker_test.go:451: Received expected action: Type=Create, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3379815581/watch/move_me.txt, Props=map[]
+time=2025-05-03T20:52:53.450+03:00 level=DEBUG msg="Received fsnotify event" op=CREATE name=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3379815581/watch/subdir/move_me.txt
+time=2025-05-03T20:52:53.450+03:00 level=DEBUG msg="Queuing event" type=CREATE
+time=2025-05-03T20:52:53.450+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=1
+time=2025-05-03T20:52:53.450+03:00 level=DEBUG msg="Received fsnotify event" op=RENAME name=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3379815581/watch/move_me.txt
+time=2025-05-03T20:52:53.450+03:00 level=DEBUG msg="Queuing event" type=RENAME
+time=2025-05-03T20:52:53.450+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=2
+time=2025-05-03T20:52:53.849+03:00 level=DEBUG msg="Stating event file" operation=Create path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3379815581/watch/subdir/move_me.txt
+time=2025-05-03T20:52:53.849+03:00 level=DEBUG msg="Stating event file" operation=Rename path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3379815581/watch/move_me.txt
+time=2025-05-03T20:52:53.849+03:00 level=DEBUG msg="File not found" operation=Rename path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3379815581/watch/move_me.txt
+time=2025-05-03T20:52:53.849+03:00 level=DEBUG msg="Popped event" operation=Rename path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3379815581/watch/move_me.txt
+time=2025-05-03T20:52:53.849+03:00 level=DEBUG msg="Rename: Found watchmap entry" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3379815581/watch/move_me.txt
+time=2025-05-03T20:52:53.849+03:00 level=DEBUG msg="Rename: Added Remove action to actionsmap" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3379815581/watch/move_me.txt
+time=2025-05-03T20:52:53.849+03:00 level=DEBUG msg="Rename: Done" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3379815581/watch/move_me.txt
+time=2025-05-03T20:52:53.849+03:00 level=DEBUG msg="Popped event" operation=Create path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3379815581/watch/subdir/move_me.txt
+time=2025-05-03T20:52:53.849+03:00 level=DEBUG msg="Create: No entry found in watchmap. This is a new path" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3379815581/watch/subdir/move_me.txt
+time=2025-05-03T20:52:53.849+03:00 level=DEBUG msg="Create: Adding watch if recursive watch is enabled"
+time=2025-05-03T20:52:53.849+03:00 level=DEBUG msg="Create: Added action to createdmap" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3379815581/watch/subdir/move_me.txt
+time=2025-05-03T20:52:53.849+03:00 level=DEBUG msg="Pass 2: Emitting actions"
+time=2025-05-03T20:52:53.849+03:00 level=DEBUG msg="Action: " id=63792036 action="&{Type:Remove Timestamp:2025-05-03 20:52:53.450384 +0300 EEST m=+5.185420709 Subject:Id: 63792036, Path: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3379815581/watch/subdir/move_me.txt, Mode: 644 Events:[0x14000301340 0x14000301300] Properties:map[]}"
+time=2025-05-03T20:52:53.849+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=0
+    fsbroker_test.go:458: Expected action type Rename, but got Remove for path /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3379815581/watch/subdir/move_me.txt
+=== RUN   TestFSBrokerIntegration/MoveFileUnwatchedToWatched
+time=2025-05-03T20:52:53.952+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=0
+time=2025-05-03T20:52:54.053+03:00 level=DEBUG msg="Received fsnotify event" op=CREATE name=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2329792723/watch/external.txt
+time=2025-05-03T20:52:54.053+03:00 level=DEBUG msg="Queuing event" type=CREATE
+time=2025-05-03T20:52:54.053+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=1
+time=2025-05-03T20:52:54.357+03:00 level=DEBUG msg="Stating event file" operation=Create path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2329792723/watch/external.txt
+time=2025-05-03T20:52:54.357+03:00 level=DEBUG msg="Popped event" operation=Create path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2329792723/watch/external.txt
+time=2025-05-03T20:52:54.357+03:00 level=DEBUG msg="Create: No entry found in watchmap. This is a new path" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2329792723/watch/external.txt
+time=2025-05-03T20:52:54.357+03:00 level=DEBUG msg="Create: Adding watch if recursive watch is enabled"
+time=2025-05-03T20:52:54.357+03:00 level=DEBUG msg="Create: Added action to createdmap" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2329792723/watch/external.txt
+time=2025-05-03T20:52:54.357+03:00 level=DEBUG msg="Pass 2: Emitting actions"
+time=2025-05-03T20:52:54.357+03:00 level=DEBUG msg="Action: " id=63792039 action="&{Type:Create Timestamp:2025-05-03 20:52:54.053939 +0300 EEST m=+5.788976543 Subject:Id: 63792039, Path: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2329792723/watch/external.txt, Mode: 644 Events:[0x14000416380] Properties:map[]}"
+time=2025-05-03T20:52:54.358+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=0
+    fsbroker_test.go:486: Received expected action: Type=Create, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2329792723/watch/external.txt, Props=map[]
+    fsbroker_test.go:489: [VerifyMap] ✓ Map state matches expected filesystem state (1 entries).
+=== RUN   TestFSBrokerIntegration/MoveFileWatchedToUnwatched
+time=2025-05-03T20:52:54.560+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=0
+time=2025-05-03T20:52:54.662+03:00 level=DEBUG msg="Received fsnotify event" op=CREATE name=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_556150383/watch/internal.txt
+time=2025-05-03T20:52:54.662+03:00 level=DEBUG msg="Queuing event" type=CREATE
+time=2025-05-03T20:52:54.662+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=1
+time=2025-05-03T20:52:54.962+03:00 level=DEBUG msg="Stating event file" operation=Create path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_556150383/watch/internal.txt
+time=2025-05-03T20:52:54.962+03:00 level=DEBUG msg="Popped event" operation=Create path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_556150383/watch/internal.txt
+time=2025-05-03T20:52:54.962+03:00 level=DEBUG msg="Create: No entry found in watchmap. This is a new path" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_556150383/watch/internal.txt
+time=2025-05-03T20:52:54.962+03:00 level=DEBUG msg="Create: Adding watch if recursive watch is enabled"
+time=2025-05-03T20:52:54.962+03:00 level=DEBUG msg="Create: Added action to createdmap" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_556150383/watch/internal.txt
+time=2025-05-03T20:52:54.962+03:00 level=DEBUG msg="Pass 2: Emitting actions"
+time=2025-05-03T20:52:54.962+03:00 level=DEBUG msg="Action: " id=63792042 action="&{Type:Create Timestamp:2025-05-03 20:52:54.66267 +0300 EEST m=+6.397708293 Subject:Id: 63792042, Path: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_556150383/watch/internal.txt, Mode: 644 Events:[0x14000453a80] Properties:map[]}"
+time=2025-05-03T20:52:54.962+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=0
+    fsbroker_test.go:504: Received expected action: Type=Create, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_556150383/watch/internal.txt, Props=map[]
+time=2025-05-03T20:52:55.163+03:00 level=DEBUG msg="Received fsnotify event" op=RENAME name=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_556150383/watch/internal.txt
+time=2025-05-03T20:52:55.163+03:00 level=DEBUG msg="Queuing event" type=RENAME
+time=2025-05-03T20:52:55.163+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=1
+time=2025-05-03T20:52:55.361+03:00 level=DEBUG msg="Stating event file" operation=Rename path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_556150383/watch/internal.txt
+time=2025-05-03T20:52:55.361+03:00 level=DEBUG msg="File not found" operation=Rename path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_556150383/watch/internal.txt
+time=2025-05-03T20:52:55.361+03:00 level=DEBUG msg="Popped event" operation=Rename path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_556150383/watch/internal.txt
+time=2025-05-03T20:52:55.361+03:00 level=DEBUG msg="Rename: Found watchmap entry" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_556150383/watch/internal.txt
+time=2025-05-03T20:52:55.361+03:00 level=DEBUG msg="Rename: Added Remove action to actionsmap" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_556150383/watch/internal.txt
+time=2025-05-03T20:52:55.361+03:00 level=DEBUG msg="Rename: Done" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_556150383/watch/internal.txt
+time=2025-05-03T20:52:55.361+03:00 level=DEBUG msg="Pass 2: Emitting actions"
+time=2025-05-03T20:52:55.361+03:00 level=DEBUG msg="Action: " id=63792042 action="&{Type:Remove Timestamp:2025-05-03 20:52:55.163641 +0300 EEST m=+6.898679751 Subject:Id: 63792042, Path: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_556150383/watch/internal.txt, Mode: 644 Events:[0x1400073a000] Properties:map[]}"
+time=2025-05-03T20:52:55.361+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=0
+    fsbroker_test.go:513: Received expected action: Type=Remove, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_556150383/watch/internal.txt, Props=map[]
+    fsbroker_test.go:516: [VerifyMap] ✓ Map state matches expected filesystem state (0 entries).
+=== RUN   TestFSBrokerIntegration/HardDeleteFile
+time=2025-05-03T20:52:55.564+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=0
+time=2025-05-03T20:52:55.666+03:00 level=DEBUG msg="Received fsnotify event" op=CREATE name=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2602927505/watch/delete_me.txt
+time=2025-05-03T20:52:55.666+03:00 level=DEBUG msg="Queuing event" type=CREATE
+time=2025-05-03T20:52:55.666+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=1
+time=2025-05-03T20:52:55.965+03:00 level=DEBUG msg="Stating event file" operation=Create path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2602927505/watch/delete_me.txt
+time=2025-05-03T20:52:55.965+03:00 level=DEBUG msg="Popped event" operation=Create path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2602927505/watch/delete_me.txt
+time=2025-05-03T20:52:55.965+03:00 level=DEBUG msg="Create: No entry found in watchmap. This is a new path" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2602927505/watch/delete_me.txt
+time=2025-05-03T20:52:55.965+03:00 level=DEBUG msg="Create: Adding watch if recursive watch is enabled"
+time=2025-05-03T20:52:55.965+03:00 level=DEBUG msg="Create: Added action to createdmap" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2602927505/watch/delete_me.txt
+time=2025-05-03T20:52:55.965+03:00 level=DEBUG msg="Pass 2: Emitting actions"
+time=2025-05-03T20:52:55.965+03:00 level=DEBUG msg="Action: " id=63792045 action="&{Type:Create Timestamp:2025-05-03 20:52:55.666482 +0300 EEST m=+7.401521793 Subject:Id: 63792045, Path: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2602927505/watch/delete_me.txt, Mode: 644 Events:[0x14000592000] Properties:map[]}"
+time=2025-05-03T20:52:55.967+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=0
+    fsbroker_test.go:528: Received expected action: Type=Create, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2602927505/watch/delete_me.txt, Props=map[]
+time=2025-05-03T20:52:55.967+03:00 level=DEBUG msg="Received fsnotify event" op=REMOVE name=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2602927505/watch/delete_me.txt
+time=2025-05-03T20:52:55.967+03:00 level=DEBUG msg="Queuing event" type=REMOVE
+time=2025-05-03T20:52:55.967+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=1
+time=2025-05-03T20:52:56.365+03:00 level=DEBUG msg="Stating event file" operation=Remove path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2602927505/watch/delete_me.txt
+time=2025-05-03T20:52:56.365+03:00 level=DEBUG msg="File not found" operation=Remove path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2602927505/watch/delete_me.txt
+time=2025-05-03T20:52:56.365+03:00 level=DEBUG msg="Popped event" operation=Remove path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2602927505/watch/delete_me.txt
+time=2025-05-03T20:52:56.365+03:00 level=DEBUG msg="Remove: Found watchmap entry." path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2602927505/watch/delete_me.txt
+time=2025-05-03T20:52:56.365+03:00 level=DEBUG msg="Remove: Added action to removedmap" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2602927505/watch/delete_me.txt
+time=2025-05-03T20:52:56.365+03:00 level=DEBUG msg="Remove: Done" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2602927505/watch/delete_me.txt
+time=2025-05-03T20:52:56.365+03:00 level=DEBUG msg="Pass 2: Emitting actions"
+time=2025-05-03T20:52:56.365+03:00 level=DEBUG msg="Action: " id=63792045 action="&{Type:Remove Timestamp:2025-05-03 20:52:55.967349 +0300 EEST m=+7.702389001 Subject:Id: 63792045, Path: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2602927505/watch/delete_me.txt, Mode: 644 Events:[0x14000300040] Properties:map[]}"
+time=2025-05-03T20:52:56.365+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=0
+    fsbroker_test.go:535: Received expected action: Type=Remove, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2602927505/watch/delete_me.txt, Props=map[]
+    fsbroker_test.go:538: [VerifyMap] ✓ Map state matches expected filesystem state (0 entries).
+=== RUN   TestFSBrokerIntegration/CreateDirectory
+time=2025-05-03T20:52:56.569+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=0
+time=2025-05-03T20:52:56.669+03:00 level=DEBUG msg="Received fsnotify event" op=CREATE name=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_84360899/watch/new_dir
+time=2025-05-03T20:52:56.669+03:00 level=DEBUG msg="Queuing event" type=CREATE
+time=2025-05-03T20:52:56.669+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=1
+time=2025-05-03T20:52:56.969+03:00 level=DEBUG msg="Stating event file" operation=Create path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_84360899/watch/new_dir
+time=2025-05-03T20:52:56.969+03:00 level=DEBUG msg="Popped event" operation=Create path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_84360899/watch/new_dir
+time=2025-05-03T20:52:56.969+03:00 level=DEBUG msg="Create: No entry found in watchmap. This is a new path" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_84360899/watch/new_dir
+time=2025-05-03T20:52:56.969+03:00 level=DEBUG msg="Create: Adding watch if recursive watch is enabled"
+time=2025-05-03T20:52:56.970+03:00 level=DEBUG msg="Create: Added recursive watch for directory" signature=Create-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_84360899/watch/new_dir path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_84360899/watch/new_dir
+time=2025-05-03T20:52:56.970+03:00 level=DEBUG msg="Create: Added action to createdmap" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_84360899/watch/new_dir
+time=2025-05-03T20:52:56.970+03:00 level=DEBUG msg="Pass 2: Emitting actions"
+time=2025-05-03T20:52:56.970+03:00 level=DEBUG msg="Action: " id=63792051 action="&{Type:Create Timestamp:2025-05-03 20:52:56.669449 +0300 EEST m=+8.404490168 Subject:Id: 63792051, Path: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_84360899/watch/new_dir, Mode: 20000000755 Events:[0x1400053a000] Properties:map[]}"
+time=2025-05-03T20:52:56.970+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=0
+    fsbroker_test.go:553: Received expected action: Type=Create, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_84360899/watch/new_dir, Props=map[]
+    fsbroker_test.go:556: [VerifyMap] ✓ Map state matches expected filesystem state (1 entries).
+=== RUN   TestFSBrokerIntegration/RenameDirectoryInplace
+time=2025-05-03T20:52:57.172+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=0
+time=2025-05-03T20:52:57.274+03:00 level=DEBUG msg="Received fsnotify event" op=CREATE name=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_710560417/watch/old_dir
+time=2025-05-03T20:52:57.274+03:00 level=DEBUG msg="Queuing event" type=CREATE
+time=2025-05-03T20:52:57.274+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=1
+time=2025-05-03T20:52:57.573+03:00 level=DEBUG msg="Stating event file" operation=Create path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_710560417/watch/old_dir
+time=2025-05-03T20:52:57.573+03:00 level=DEBUG msg="Popped event" operation=Create path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_710560417/watch/old_dir
+time=2025-05-03T20:52:57.573+03:00 level=DEBUG msg="Create: No entry found in watchmap. This is a new path" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_710560417/watch/old_dir
+time=2025-05-03T20:52:57.573+03:00 level=DEBUG msg="Create: Adding watch if recursive watch is enabled"
+time=2025-05-03T20:52:57.573+03:00 level=DEBUG msg="Create: Added recursive watch for directory" signature=Create-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_710560417/watch/old_dir path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_710560417/watch/old_dir
+time=2025-05-03T20:52:57.573+03:00 level=DEBUG msg="Create: Added action to createdmap" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_710560417/watch/old_dir
+time=2025-05-03T20:52:57.573+03:00 level=DEBUG msg="Pass 2: Emitting actions"
+time=2025-05-03T20:52:57.573+03:00 level=DEBUG msg="Action: " id=63792054 action="&{Type:Create Timestamp:2025-05-03 20:52:57.274378 +0300 EEST m=+9.009419876 Subject:Id: 63792054, Path: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_710560417/watch/old_dir, Mode: 20000000755 Events:[0x1400019c000] Properties:map[]}"
+time=2025-05-03T20:52:57.574+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=0
+    fsbroker_test.go:570: Received expected action: Type=Create, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_710560417/watch/old_dir, Props=map[]
+time=2025-05-03T20:52:57.574+03:00 level=DEBUG msg="Received fsnotify event" op=CREATE name=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_710560417/watch/new_dir
+time=2025-05-03T20:52:57.574+03:00 level=DEBUG msg="Queuing event" type=CREATE
+time=2025-05-03T20:52:57.574+03:00 level=DEBUG msg="Received fsnotify event" op=RENAME name=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_710560417/watch/old_dir
+time=2025-05-03T20:52:57.574+03:00 level=DEBUG msg="Queuing event" type=RENAME
+time=2025-05-03T20:52:57.574+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=1
+time=2025-05-03T20:52:57.574+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=2
+time=2025-05-03T20:52:57.973+03:00 level=DEBUG msg="Stating event file" operation=Create path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_710560417/watch/new_dir
+time=2025-05-03T20:52:57.973+03:00 level=DEBUG msg="Stating event file" operation=Rename path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_710560417/watch/old_dir
+time=2025-05-03T20:52:57.974+03:00 level=DEBUG msg="File not found" operation=Rename path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_710560417/watch/old_dir
+time=2025-05-03T20:52:57.974+03:00 level=DEBUG msg="Popped event" operation=Rename path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_710560417/watch/old_dir
+time=2025-05-03T20:52:57.974+03:00 level=DEBUG msg="Rename: Found watchmap entry" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_710560417/watch/old_dir
+time=2025-05-03T20:52:57.974+03:00 level=DEBUG msg="Rename: Added Remove action to actionsmap" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_710560417/watch/old_dir
+time=2025-05-03T20:52:57.974+03:00 level=DEBUG msg="Rename: Done" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_710560417/watch/old_dir
+time=2025-05-03T20:52:57.974+03:00 level=DEBUG msg="Popped event" operation=Create path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_710560417/watch/new_dir
+time=2025-05-03T20:52:57.974+03:00 level=DEBUG msg="Create: No entry found in watchmap. This is a new path" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_710560417/watch/new_dir
+time=2025-05-03T20:52:57.974+03:00 level=DEBUG msg="Create: Adding watch if recursive watch is enabled"
+time=2025-05-03T20:52:57.974+03:00 level=DEBUG msg="Create: Added recursive watch for directory" signature=Remove-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_710560417/watch/new_dir path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_710560417/watch/new_dir
+time=2025-05-03T20:52:57.974+03:00 level=DEBUG msg="Create: Added action to createdmap" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_710560417/watch/new_dir
+time=2025-05-03T20:52:57.974+03:00 level=DEBUG msg="Pass 2: Emitting actions"
+time=2025-05-03T20:52:57.974+03:00 level=DEBUG msg="Action: " id=63792054 action="&{Type:Remove Timestamp:2025-05-03 20:52:57.574374 +0300 EEST m=+9.309417001 Subject:Id: 63792054, Path: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_710560417/watch/new_dir, Mode: 20000000755 Events:[0x1400029e200 0x1400029e1c0] Properties:map[]}"
+time=2025-05-03T20:52:57.974+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=0
+    fsbroker_test.go:577: Expected action type Rename, but got Remove for path /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_710560417/watch/new_dir
+=== RUN   TestFSBrokerIntegration/MoveDirectoryWatchedToWatched
+time=2025-05-03T20:52:58.097+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=0
+time=2025-05-03T20:52:58.178+03:00 level=DEBUG msg="Received fsnotify event" op=CREATE name=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_324852324/watch/parent_dir
+time=2025-05-03T20:52:58.178+03:00 level=DEBUG msg="Queuing event" type=CREATE
+time=2025-05-03T20:52:58.178+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=1
+time=2025-05-03T20:52:58.501+03:00 level=DEBUG msg="Stating event file" operation=Create path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_324852324/watch/parent_dir
+time=2025-05-03T20:52:58.501+03:00 level=DEBUG msg="Popped event" operation=Create path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_324852324/watch/parent_dir
+time=2025-05-03T20:52:58.501+03:00 level=DEBUG msg="Create: No entry found in watchmap. This is a new path" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_324852324/watch/parent_dir
+time=2025-05-03T20:52:58.501+03:00 level=DEBUG msg="Create: Adding watch if recursive watch is enabled"
+time=2025-05-03T20:52:58.501+03:00 level=DEBUG msg="Create: Added recursive watch for directory" signature=Create-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_324852324/watch/parent_dir path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_324852324/watch/parent_dir
+time=2025-05-03T20:52:58.501+03:00 level=DEBUG msg="Create: Added action to createdmap" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_324852324/watch/parent_dir
+time=2025-05-03T20:52:58.501+03:00 level=DEBUG msg="Pass 2: Emitting actions"
+time=2025-05-03T20:52:58.501+03:00 level=DEBUG msg="Action: " id=63792057 action="&{Type:Create Timestamp:2025-05-03 20:52:58.178109 +0300 EEST m=+9.913152251 Subject:Id: 63792057, Path: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_324852324/watch/parent_dir, Mode: 20000000755 Events:[0x14000300200] Properties:map[]}"
+time=2025-05-03T20:52:58.501+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=0
+    fsbroker_test.go:596: Received expected action: Type=Create, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_324852324/watch/parent_dir, Props=map[]
+time=2025-05-03T20:52:58.503+03:00 level=DEBUG msg="Received fsnotify event" op=CREATE name=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_324852324/watch/move_this_dir
+time=2025-05-03T20:52:58.503+03:00 level=DEBUG msg="Queuing event" type=CREATE
+time=2025-05-03T20:52:58.503+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=1
+time=2025-05-03T20:52:58.897+03:00 level=DEBUG msg="Stating event file" operation=Create path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_324852324/watch/move_this_dir
+time=2025-05-03T20:52:58.898+03:00 level=DEBUG msg="Popped event" operation=Create path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_324852324/watch/move_this_dir
+time=2025-05-03T20:52:58.898+03:00 level=DEBUG msg="Create: No entry found in watchmap. This is a new path" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_324852324/watch/move_this_dir
+time=2025-05-03T20:52:58.898+03:00 level=DEBUG msg="Create: Adding watch if recursive watch is enabled"
+time=2025-05-03T20:52:58.898+03:00 level=DEBUG msg="Create: Added recursive watch for directory" signature=Create-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_324852324/watch/move_this_dir path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_324852324/watch/move_this_dir
+time=2025-05-03T20:52:58.898+03:00 level=DEBUG msg="Create: Added action to createdmap" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_324852324/watch/move_this_dir
+time=2025-05-03T20:52:58.898+03:00 level=DEBUG msg="Pass 2: Emitting actions"
+time=2025-05-03T20:52:58.898+03:00 level=DEBUG msg="Action: " id=63792058 action="&{Type:Create Timestamp:2025-05-03 20:52:58.503152 +0300 EEST m=+10.238196043 Subject:Id: 63792058, Path: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_324852324/watch/move_this_dir, Mode: 20000000755 Events:[0x14000300300] Properties:map[]}"
+time=2025-05-03T20:52:58.898+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=0
+    fsbroker_test.go:605: Received expected action: Type=Create, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_324852324/watch/move_this_dir, Props=map[]
+time=2025-05-03T20:52:58.898+03:00 level=DEBUG msg="Received fsnotify event" op=CREATE name=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_324852324/watch/parent_dir/move_this_dir
+time=2025-05-03T20:52:58.898+03:00 level=DEBUG msg="Queuing event" type=CREATE
+time=2025-05-03T20:52:58.898+03:00 level=DEBUG msg="Received fsnotify event" op=RENAME name=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_324852324/watch/move_this_dir
+time=2025-05-03T20:52:58.898+03:00 level=DEBUG msg="Queuing event" type=RENAME
+time=2025-05-03T20:52:58.922+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=1
+time=2025-05-03T20:52:58.922+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=2
+time=2025-05-03T20:52:59.302+03:00 level=DEBUG msg="Stating event file" operation=Create path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_324852324/watch/parent_dir/move_this_dir
+time=2025-05-03T20:52:59.302+03:00 level=DEBUG msg="Stating event file" operation=Rename path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_324852324/watch/move_this_dir
+time=2025-05-03T20:52:59.302+03:00 level=DEBUG msg="File not found" operation=Rename path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_324852324/watch/move_this_dir
+time=2025-05-03T20:52:59.302+03:00 level=DEBUG msg="Popped event" operation=Rename path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_324852324/watch/move_this_dir
+time=2025-05-03T20:52:59.302+03:00 level=DEBUG msg="Rename: Found watchmap entry" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_324852324/watch/move_this_dir
+time=2025-05-03T20:52:59.302+03:00 level=DEBUG msg="Rename: Added Remove action to actionsmap" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_324852324/watch/move_this_dir
+time=2025-05-03T20:52:59.302+03:00 level=DEBUG msg="Rename: Done" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_324852324/watch/move_this_dir
+time=2025-05-03T20:52:59.302+03:00 level=DEBUG msg="Popped event" operation=Create path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_324852324/watch/parent_dir/move_this_dir
+time=2025-05-03T20:52:59.302+03:00 level=DEBUG msg="Create: No entry found in watchmap. This is a new path" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_324852324/watch/parent_dir/move_this_dir
+time=2025-05-03T20:52:59.302+03:00 level=DEBUG msg="Create: Adding watch if recursive watch is enabled"
+time=2025-05-03T20:52:59.302+03:00 level=DEBUG msg="Create: Added recursive watch for directory" signature=Remove-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_324852324/watch/parent_dir/move_this_dir path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_324852324/watch/parent_dir/move_this_dir
+time=2025-05-03T20:52:59.302+03:00 level=DEBUG msg="Create: Added action to createdmap" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_324852324/watch/parent_dir/move_this_dir
+time=2025-05-03T20:52:59.302+03:00 level=DEBUG msg="Pass 2: Emitting actions"
+time=2025-05-03T20:52:59.302+03:00 level=DEBUG msg="Action: " id=63792058 action="&{Type:Remove Timestamp:2025-05-03 20:52:58.898754 +0300 EEST m=+10.633798459 Subject:Id: 63792058, Path: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_324852324/watch/parent_dir/move_this_dir, Mode: 20000000755 Events:[0x14000300440 0x14000300400] Properties:map[]}"
+time=2025-05-03T20:52:59.302+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=0
+    fsbroker_test.go:612: Expected action type Rename, but got Remove for path /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_324852324/watch/parent_dir/move_this_dir
+=== RUN   TestFSBrokerIntegration/MoveDirectoryUnwatchedToWatched
+time=2025-05-03T20:52:59.467+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=0
+time=2025-05-03T20:52:59.581+03:00 level=DEBUG msg="Received fsnotify event" op=CREATE name=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3495190165/watch/external_dir
+time=2025-05-03T20:52:59.581+03:00 level=DEBUG msg="Queuing event" type=CREATE
+time=2025-05-03T20:52:59.581+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=1
+time=2025-05-03T20:52:59.890+03:00 level=DEBUG msg="Stating event file" operation=Create path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3495190165/watch/external_dir
+time=2025-05-03T20:52:59.890+03:00 level=DEBUG msg="Popped event" operation=Create path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3495190165/watch/external_dir
+time=2025-05-03T20:52:59.890+03:00 level=DEBUG msg="Create: No entry found in watchmap. This is a new path" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3495190165/watch/external_dir
+time=2025-05-03T20:52:59.890+03:00 level=DEBUG msg="Create: Adding watch if recursive watch is enabled"
+time=2025-05-03T20:52:59.890+03:00 level=DEBUG msg="Create: Added recursive watch for directory" signature=Create-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3495190165/watch/external_dir path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3495190165/watch/external_dir
+time=2025-05-03T20:52:59.890+03:00 level=DEBUG msg="Create: Added action to createdmap" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3495190165/watch/external_dir
+time=2025-05-03T20:52:59.890+03:00 level=DEBUG msg="Pass 2: Emitting actions"
+time=2025-05-03T20:52:59.890+03:00 level=DEBUG msg="Action: " id=63792061 action="&{Type:Create Timestamp:2025-05-03 20:52:59.581416 +0300 EEST m=+11.316461168 Subject:Id: 63792061, Path: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3495190165/watch/external_dir, Mode: 20000000755 Events:[0x140003004c0] Properties:map[]}"
+time=2025-05-03T20:52:59.890+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=0
+    fsbroker_test.go:638: Received expected action: Type=Create, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_3495190165/watch/external_dir, Props=map[]
+    fsbroker_test.go:641: [VerifyMap] ✓ Map state matches expected filesystem state (1 entries).
+=== RUN   TestFSBrokerIntegration/MoveDirectoryWatchedToUnwatched
+time=2025-05-03T20:53:00.154+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=0
+time=2025-05-03T20:53:00.295+03:00 level=DEBUG msg="Received fsnotify event" op=CREATE name=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2798586427/watch/internal_dir
+time=2025-05-03T20:53:00.295+03:00 level=DEBUG msg="Queuing event" type=CREATE
+time=2025-05-03T20:53:00.295+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=1
+time=2025-05-03T20:53:00.558+03:00 level=DEBUG msg="Stating event file" operation=Create path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2798586427/watch/internal_dir
+time=2025-05-03T20:53:00.558+03:00 level=DEBUG msg="Popped event" operation=Create path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2798586427/watch/internal_dir
+time=2025-05-03T20:53:00.558+03:00 level=DEBUG msg="Create: No entry found in watchmap. This is a new path" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2798586427/watch/internal_dir
+time=2025-05-03T20:53:00.558+03:00 level=DEBUG msg="Create: Adding watch if recursive watch is enabled"
+time=2025-05-03T20:53:00.558+03:00 level=DEBUG msg="Create: Added recursive watch for directory" signature=Create-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2798586427/watch/internal_dir path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2798586427/watch/internal_dir
+time=2025-05-03T20:53:00.558+03:00 level=DEBUG msg="Create: Added action to createdmap" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2798586427/watch/internal_dir
+time=2025-05-03T20:53:00.558+03:00 level=DEBUG msg="Pass 2: Emitting actions"
+time=2025-05-03T20:53:00.558+03:00 level=DEBUG msg="Action: " id=63792066 action="&{Type:Create Timestamp:2025-05-03 20:53:00.295509 +0300 EEST m=+12.030555793 Subject:Id: 63792066, Path: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2798586427/watch/internal_dir, Mode: 20000000755 Events:[0x14000300540] Properties:map[]}"
+time=2025-05-03T20:53:00.558+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=0
+    fsbroker_test.go:655: Received expected action: Type=Create, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2798586427/watch/internal_dir, Props=map[]
+time=2025-05-03T20:53:00.604+03:00 level=DEBUG msg="Received fsnotify event" op=RENAME name=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2798586427/watch/internal_dir
+time=2025-05-03T20:53:00.604+03:00 level=DEBUG msg="Queuing event" type=RENAME
+time=2025-05-03T20:53:00.604+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=1
+time=2025-05-03T20:53:00.968+03:00 level=DEBUG msg="Stating event file" operation=Rename path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2798586427/watch/internal_dir
+time=2025-05-03T20:53:00.968+03:00 level=DEBUG msg="File not found" operation=Rename path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2798586427/watch/internal_dir
+time=2025-05-03T20:53:00.968+03:00 level=DEBUG msg="Popped event" operation=Rename path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2798586427/watch/internal_dir
+time=2025-05-03T20:53:00.968+03:00 level=DEBUG msg="Rename: Found watchmap entry" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2798586427/watch/internal_dir
+time=2025-05-03T20:53:00.968+03:00 level=DEBUG msg="Rename: Added Remove action to actionsmap" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2798586427/watch/internal_dir
+time=2025-05-03T20:53:00.968+03:00 level=DEBUG msg="Rename: Done" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2798586427/watch/internal_dir
+time=2025-05-03T20:53:00.968+03:00 level=DEBUG msg="Pass 2: Emitting actions"
+time=2025-05-03T20:53:00.968+03:00 level=DEBUG msg="Action: " id=63792066 action="&{Type:Remove Timestamp:2025-05-03 20:53:00.604732 +0300 EEST m=+12.339779043 Subject:Id: 63792066, Path: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2798586427/watch/internal_dir, Mode: 20000000755 Events:[0x14000106040] Properties:map[]}"
+time=2025-05-03T20:53:00.969+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=0
+    fsbroker_test.go:662: Received expected action: Type=Remove, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2798586427/watch/internal_dir, Props=map[]
+    fsbroker_test.go:665: [VerifyMap] ✓ Map state matches expected filesystem state (0 entries).
+=== RUN   TestFSBrokerIntegration/HardDeleteDirectory
+time=2025-05-03T20:53:01.218+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=0
+time=2025-05-03T20:53:01.353+03:00 level=DEBUG msg="Received fsnotify event" op=CREATE name=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2341034755/watch/delete_this_dir
+time=2025-05-03T20:53:01.353+03:00 level=DEBUG msg="Queuing event" type=CREATE
+time=2025-05-03T20:53:01.353+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=1
+time=2025-05-03T20:53:01.628+03:00 level=DEBUG msg="Stating event file" operation=Create path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2341034755/watch/delete_this_dir
+time=2025-05-03T20:53:01.628+03:00 level=DEBUG msg="Popped event" operation=Create path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2341034755/watch/delete_this_dir
+time=2025-05-03T20:53:01.628+03:00 level=DEBUG msg="Create: No entry found in watchmap. This is a new path" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2341034755/watch/delete_this_dir
+time=2025-05-03T20:53:01.628+03:00 level=DEBUG msg="Create: Adding watch if recursive watch is enabled"
+time=2025-05-03T20:53:01.629+03:00 level=DEBUG msg="Create: Added recursive watch for directory" signature=Create-/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2341034755/watch/delete_this_dir path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2341034755/watch/delete_this_dir
+time=2025-05-03T20:53:01.629+03:00 level=DEBUG msg="Create: Added action to createdmap" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2341034755/watch/delete_this_dir
+time=2025-05-03T20:53:01.629+03:00 level=DEBUG msg="Pass 2: Emitting actions"
+time=2025-05-03T20:53:01.629+03:00 level=DEBUG msg="Action: " id=63792071 action="&{Type:Create Timestamp:2025-05-03 20:53:01.353772 +0300 EEST m=+13.088820543 Subject:Id: 63792071, Path: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2341034755/watch/delete_this_dir, Mode: 20000000755 Events:[0x1400019c080] Properties:map[]}"
+time=2025-05-03T20:53:01.629+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=0
+    fsbroker_test.go:684: Received expected action: Type=Create, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2341034755/watch/delete_this_dir, Props=map[]
+    fsbroker_test.go:694: Waiting for first Remove action.after RemoveAll(/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2341034755/watch/delete_this_dir)
+time=2025-05-03T20:53:01.869+03:00 level=DEBUG msg="Received fsnotify event" op=REMOVE name=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2341034755/watch/delete_this_dir/inner_file.txt
+time=2025-05-03T20:53:01.869+03:00 level=DEBUG msg="Queuing event" type=REMOVE
+time=2025-05-03T20:53:01.869+03:00 level=DEBUG msg="Received fsnotify event" op=REMOVE name=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2341034755/watch/delete_this_dir
+time=2025-05-03T20:53:01.869+03:00 level=DEBUG msg="Queuing event" type=REMOVE
+time=2025-05-03T20:53:01.899+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=1
+time=2025-05-03T20:53:01.899+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=2
+time=2025-05-03T20:53:02.037+03:00 level=DEBUG msg="Stating event file" operation=Remove path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2341034755/watch/delete_this_dir/inner_file.txt
+time=2025-05-03T20:53:02.037+03:00 level=DEBUG msg="File not found" operation=Remove path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2341034755/watch/delete_this_dir/inner_file.txt
+time=2025-05-03T20:53:02.037+03:00 level=DEBUG msg="Stating event file" operation=Remove path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2341034755/watch/delete_this_dir
+time=2025-05-03T20:53:02.037+03:00 level=DEBUG msg="File not found" operation=Remove path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2341034755/watch/delete_this_dir
+time=2025-05-03T20:53:02.037+03:00 level=DEBUG msg="Popped event" operation=Remove path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2341034755/watch/delete_this_dir
+time=2025-05-03T20:53:02.037+03:00 level=DEBUG msg="Remove: Found watchmap entry." path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2341034755/watch/delete_this_dir
+time=2025-05-03T20:53:02.037+03:00 level=DEBUG msg="Remove: Added action to removedmap" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2341034755/watch/delete_this_dir
+time=2025-05-03T20:53:02.037+03:00 level=DEBUG msg="Remove: Done" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2341034755/watch/delete_this_dir
+time=2025-05-03T20:53:02.037+03:00 level=DEBUG msg="Popped event" operation=Remove path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2341034755/watch/delete_this_dir/inner_file.txt
+time=2025-05-03T20:53:02.037+03:00 level=DEBUG msg="Remove: No watchmap entry found, file must have been created then removed quickly" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2341034755/watch/delete_this_dir/inner_file.txt
+time=2025-05-03T20:53:02.037+03:00 level=DEBUG msg="Remove: Added action to noop" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2341034755/watch/delete_this_dir/inner_file.txt
+time=2025-05-03T20:53:02.037+03:00 level=DEBUG msg="Pass 2: Emitting actions"
+time=2025-05-03T20:53:02.037+03:00 level=DEBUG msg="Action: " id=63792071 action="&{Type:Remove Timestamp:2025-05-03 20:53:01.86947 +0300 EEST m=+13.604519293 Subject:Id: 63792071, Path: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2341034755/watch/delete_this_dir, Mode: 20000000755 Events:[0x1400053a0c0] Properties:map[]}"
+time=2025-05-03T20:53:02.037+03:00 level=DEBUG msg="NoOp: " action="&{Type:NoOp Timestamp:2025-05-03 20:53:01.869457 +0300 EEST m=+13.604505959 Subject:<nil> Events:[0x1400053a080] Properties:map[]}"
+    fsbroker_test.go:722: Received first remove action. Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2341034755/watch/delete_this_dir
+    fsbroker_test.go:739: Received Remove action.path 'delete_this_dir' matches expected paths ('delete_this_dir' or 'delete_this_dir/inner_file.txt')
+    fsbroker_test.go:744: Draining potential subsequent Remove action...
+time=2025-05-03T20:53:02.037+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=0
+time=2025-05-03T20:53:02.444+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=0
+    fsbroker_test.go:749: Checking for further unexpected action....
+time=2025-05-03T20:53:02.823+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=0
+    fsbroker_test.go:750: Correctly received no non-NoOp action or error within 200ms
+    fsbroker_test.go:753: [VerifyMap] ✓ Map state matches expected filesystem state (0 entries).
+=== RUN   TestFSBrokerIntegration/IgnoreHiddenFile
+time=2025-05-03T20:53:03.089+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=0
+    fsbroker_test_posix.go:14: Skipping setHiddenAttribute on non-Windows platform for /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2483844645/.hidden_external
+time=2025-05-03T20:53:03.223+03:00 level=DEBUG msg="Received fsnotify event" op=CREATE name=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2483844645/watch/.hidden_external
+time=2025-05-03T20:53:03.223+03:00 level=DEBUG msg="Ignoring event: Hidden file" name=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2483844645/watch/.hidden_external
+time=2025-05-03T20:53:03.502+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=0
+    fsbroker_test.go:786: Correctly received no non-NoOp action or error within 600ms
+    fsbroker_test.go:193: [VerifyMap] Ignoring hidden file on disk: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2483844645/watch/.hidden_external
+    fsbroker_test.go:789: [VerifyMap] ✓ Map state matches expected filesystem state (0 entries).
+=== RUN   TestFSBrokerIntegration/IgnoreSystemFile
+time=2025-05-03T20:53:04.015+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=0
+time=2025-05-03T20:53:04.113+03:00 level=DEBUG msg="Received fsnotify event" op=CREATE name=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1411186932/watch/.DS_Store
+time=2025-05-03T20:53:04.129+03:00 level=DEBUG msg="Ignoring event: Hidden file" name=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1411186932/watch/.DS_Store
+time=2025-05-03T20:53:04.423+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=0
+    fsbroker_test.go:818: Correctly received no non-NoOp action or error within 600ms
+time=2025-05-03T20:53:04.842+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=0
+    fsbroker_test.go:193: [VerifyMap] Ignoring hidden file on disk: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_1411186932/watch/.DS_Store
+    fsbroker_test.go:821: [VerifyMap] ✓ Map state matches expected filesystem state (0 entries).
+=== RUN   TestFSBrokerIntegration/WriteDeduplication
+time=2025-05-03T20:53:05.023+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=0
+time=2025-05-03T20:53:05.154+03:00 level=DEBUG msg="Received fsnotify event" op=CREATE name=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4071341800/watch/dedup_write.txt
+time=2025-05-03T20:53:05.154+03:00 level=DEBUG msg="Queuing event" type=CREATE
+time=2025-05-03T20:53:05.154+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=1
+time=2025-05-03T20:53:05.440+03:00 level=DEBUG msg="Stating event file" operation=Create path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4071341800/watch/dedup_write.txt
+time=2025-05-03T20:53:05.440+03:00 level=DEBUG msg="Popped event" operation=Create path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4071341800/watch/dedup_write.txt
+time=2025-05-03T20:53:05.441+03:00 level=DEBUG msg="Create: No entry found in watchmap. This is a new path" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4071341800/watch/dedup_write.txt
+time=2025-05-03T20:53:05.441+03:00 level=DEBUG msg="Create: Adding watch if recursive watch is enabled"
+time=2025-05-03T20:53:05.441+03:00 level=DEBUG msg="Create: Added action to createdmap" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4071341800/watch/dedup_write.txt
+time=2025-05-03T20:53:05.441+03:00 level=DEBUG msg="Pass 2: Emitting actions"
+time=2025-05-03T20:53:05.441+03:00 level=DEBUG msg="Action: " id=63792087 action="&{Type:Create Timestamp:2025-05-03 20:53:05.154462 +0300 EEST m=+16.889515876 Subject:Id: 63792087, Path: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4071341800/watch/dedup_write.txt, Mode: 644 Events:[0x1400019c140] Properties:map[]}"
+time=2025-05-03T20:53:05.441+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=0
+    fsbroker_test.go:839: Received expected action: Type=Create, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4071341800/watch/dedup_write.txt, Props=map[]
+    fsbroker_test.go:842: Performing rapid writes...
+time=2025-05-03T20:53:05.489+03:00 level=DEBUG msg="Received fsnotify event" op=WRITE name=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4071341800/watch/dedup_write.txt
+time=2025-05-03T20:53:05.489+03:00 level=DEBUG msg="Queuing event" type=WRITE
+time=2025-05-03T20:53:05.489+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=1
+time=2025-05-03T20:53:05.567+03:00 level=DEBUG msg="Received fsnotify event" op=WRITE name=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4071341800/watch/dedup_write.txt
+time=2025-05-03T20:53:05.567+03:00 level=DEBUG msg="Queuing event" type=WRITE
+time=2025-05-03T20:53:05.567+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=2
+time=2025-05-03T20:53:05.618+03:00 level=DEBUG msg="Received fsnotify event" op=WRITE name=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4071341800/watch/dedup_write.txt
+time=2025-05-03T20:53:05.618+03:00 level=DEBUG msg="Queuing event" type=WRITE
+time=2025-05-03T20:53:05.618+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=3
+time=2025-05-03T20:53:05.706+03:00 level=DEBUG msg="Received fsnotify event" op=WRITE name=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4071341800/watch/dedup_write.txt
+time=2025-05-03T20:53:05.706+03:00 level=DEBUG msg="Queuing event" type=WRITE
+time=2025-05-03T20:53:05.706+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=4
+time=2025-05-03T20:53:05.770+03:00 level=DEBUG msg="Received fsnotify event" op=WRITE name=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4071341800/watch/dedup_write.txt
+time=2025-05-03T20:53:05.770+03:00 level=DEBUG msg="Queuing event" type=WRITE
+time=2025-05-03T20:53:05.770+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=5
+    fsbroker_test.go:856: Finished rapid writes.
+time=2025-05-03T20:53:05.835+03:00 level=DEBUG msg="Stating event file" operation=Write path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4071341800/watch/dedup_write.txt
+time=2025-05-03T20:53:05.835+03:00 level=DEBUG msg="Stating event file" operation=Write path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4071341800/watch/dedup_write.txt
+time=2025-05-03T20:53:05.835+03:00 level=DEBUG msg="Stating event file" operation=Write path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4071341800/watch/dedup_write.txt
+time=2025-05-03T20:53:05.835+03:00 level=DEBUG msg="Stating event file" operation=Write path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4071341800/watch/dedup_write.txt
+time=2025-05-03T20:53:05.835+03:00 level=DEBUG msg="Stating event file" operation=Write path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4071341800/watch/dedup_write.txt
+time=2025-05-03T20:53:05.835+03:00 level=DEBUG msg="Popped event" operation=Write path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4071341800/watch/dedup_write.txt
+time=2025-05-03T20:53:05.835+03:00 level=DEBUG msg="Write: Found watchmap entry. This is a normal write" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4071341800/watch/dedup_write.txt
+time=2025-05-03T20:53:05.835+03:00 level=DEBUG msg="Write: Added action to writtenmap" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4071341800/watch/dedup_write.txt
+time=2025-05-03T20:53:05.835+03:00 level=DEBUG msg="Write: Done" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4071341800/watch/dedup_write.txt
+time=2025-05-03T20:53:05.835+03:00 level=DEBUG msg="Popped event" operation=Write path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4071341800/watch/dedup_write.txt
+time=2025-05-03T20:53:05.835+03:00 level=DEBUG msg="Write: Found watchmap entry. This is a normal write" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4071341800/watch/dedup_write.txt
+time=2025-05-03T20:53:05.835+03:00 level=DEBUG msg="Write: Added action to writtenmap" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4071341800/watch/dedup_write.txt
+time=2025-05-03T20:53:05.835+03:00 level=DEBUG msg="Write: Done" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4071341800/watch/dedup_write.txt
+time=2025-05-03T20:53:05.835+03:00 level=DEBUG msg="Popped event" operation=Write path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4071341800/watch/dedup_write.txt
+time=2025-05-03T20:53:05.835+03:00 level=DEBUG msg="Write: Found watchmap entry. This is a normal write" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4071341800/watch/dedup_write.txt
+time=2025-05-03T20:53:05.835+03:00 level=DEBUG msg="Write: Added action to writtenmap" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4071341800/watch/dedup_write.txt
+time=2025-05-03T20:53:05.835+03:00 level=DEBUG msg="Write: Done" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4071341800/watch/dedup_write.txt
+time=2025-05-03T20:53:05.835+03:00 level=DEBUG msg="Popped event" operation=Write path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4071341800/watch/dedup_write.txt
+time=2025-05-03T20:53:05.835+03:00 level=DEBUG msg="Write: Found watchmap entry. This is a normal write" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4071341800/watch/dedup_write.txt
+time=2025-05-03T20:53:05.835+03:00 level=DEBUG msg="Write: Added action to writtenmap" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4071341800/watch/dedup_write.txt
+time=2025-05-03T20:53:05.835+03:00 level=DEBUG msg="Write: Done" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4071341800/watch/dedup_write.txt
+time=2025-05-03T20:53:05.835+03:00 level=DEBUG msg="Popped event" operation=Write path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4071341800/watch/dedup_write.txt
+time=2025-05-03T20:53:05.835+03:00 level=DEBUG msg="Write: Found watchmap entry. This is a normal write" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4071341800/watch/dedup_write.txt
+time=2025-05-03T20:53:05.835+03:00 level=DEBUG msg="Write: Added action to writtenmap" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4071341800/watch/dedup_write.txt
+time=2025-05-03T20:53:05.835+03:00 level=DEBUG msg="Write: Done" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4071341800/watch/dedup_write.txt
+time=2025-05-03T20:53:05.835+03:00 level=DEBUG msg="Pass 2: Emitting actions"
+time=2025-05-03T20:53:05.835+03:00 level=DEBUG msg="Action: " id=63792087 action="&{Type:Write Timestamp:2025-05-03 20:53:05.770725 +0300 EEST m=+17.505779209 Subject:Id: 63792087, Path: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4071341800/watch/dedup_write.txt, Mode: 644 Events:[0x14000592080 0x14000592040 0x1400019c180 0x14000300580 0x1400017e000] Properties:map[]}"
+time=2025-05-03T20:53:05.835+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=0
+    fsbroker_test.go:859: Received expected action: Type=Write, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_4071341800/watch/dedup_write.txt, Props=map[]
+time=2025-05-03T20:53:06.239+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=0
+    fsbroker_test.go:862: Correctly received no non-NoOp action or error within 666.666666ms
+time=2025-05-03T20:53:06.635+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=0
+    fsbroker_test.go:865: [VerifyMap] ✓ Map state matches expected filesystem state (1 entries).
+=== RUN   TestFSBrokerIntegration/DeleteDeduplication
+time=2025-05-03T20:53:06.781+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=0
+time=2025-05-03T20:53:06.942+03:00 level=DEBUG msg="Received fsnotify event" op=CREATE name=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2623151968/watch/dedup_delete.txt
+time=2025-05-03T20:53:06.942+03:00 level=DEBUG msg="Queuing event" type=CREATE
+time=2025-05-03T20:53:06.942+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=1
+time=2025-05-03T20:53:07.205+03:00 level=DEBUG msg="Stating event file" operation=Create path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2623151968/watch/dedup_delete.txt
+time=2025-05-03T20:53:07.205+03:00 level=DEBUG msg="Popped event" operation=Create path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2623151968/watch/dedup_delete.txt
+time=2025-05-03T20:53:07.205+03:00 level=DEBUG msg="Create: No entry found in watchmap. This is a new path" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2623151968/watch/dedup_delete.txt
+time=2025-05-03T20:53:07.205+03:00 level=DEBUG msg="Create: Adding watch if recursive watch is enabled"
+time=2025-05-03T20:53:07.205+03:00 level=DEBUG msg="Create: Added action to createdmap" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2623151968/watch/dedup_delete.txt
+time=2025-05-03T20:53:07.205+03:00 level=DEBUG msg="Pass 2: Emitting actions"
+time=2025-05-03T20:53:07.205+03:00 level=DEBUG msg="Action: " id=63792093 action="&{Type:Create Timestamp:2025-05-03 20:53:06.942337 +0300 EEST m=+18.677393376 Subject:Id: 63792093, Path: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2623151968/watch/dedup_delete.txt, Mode: 644 Events:[0x14000452500] Properties:map[]}"
+time=2025-05-03T20:53:07.205+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=0
+    fsbroker_test.go:883: Received expected action: Type=Create, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2623151968/watch/dedup_delete.txt, Props=map[]
+    fsbroker_test.go:886: Performing rapid write then delete...
+    fsbroker_test.go:902: Finished rapid write then delete.
+time=2025-05-03T20:53:07.263+03:00 level=DEBUG msg="Received fsnotify event" op=REMOVE name=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2623151968/watch/dedup_delete.txt
+time=2025-05-03T20:53:07.263+03:00 level=DEBUG msg="Queuing event" type=REMOVE
+time=2025-05-03T20:53:07.263+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=1
+time=2025-05-03T20:53:07.618+03:00 level=DEBUG msg="Stating event file" operation=Remove path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2623151968/watch/dedup_delete.txt
+time=2025-05-03T20:53:07.618+03:00 level=DEBUG msg="File not found" operation=Remove path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2623151968/watch/dedup_delete.txt
+time=2025-05-03T20:53:07.618+03:00 level=DEBUG msg="Popped event" operation=Remove path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2623151968/watch/dedup_delete.txt
+time=2025-05-03T20:53:07.618+03:00 level=DEBUG msg="Remove: Found watchmap entry." path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2623151968/watch/dedup_delete.txt
+time=2025-05-03T20:53:07.618+03:00 level=DEBUG msg="Remove: Added action to removedmap" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2623151968/watch/dedup_delete.txt
+time=2025-05-03T20:53:07.618+03:00 level=DEBUG msg="Remove: Done" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2623151968/watch/dedup_delete.txt
+time=2025-05-03T20:53:07.618+03:00 level=DEBUG msg="Pass 2: Emitting actions"
+time=2025-05-03T20:53:07.618+03:00 level=DEBUG msg="Action: " id=63792093 action="&{Type:Remove Timestamp:2025-05-03 20:53:07.263073 +0300 EEST m=+18.998130043 Subject:Id: 63792093, Path: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2623151968/watch/dedup_delete.txt, Mode: 644 Events:[0x1400029e240] Properties:map[]}"
+time=2025-05-03T20:53:07.618+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=0
+    fsbroker_test.go:905: Received expected action: Type=Remove, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2623151968/watch/dedup_delete.txt, Props=map[]
+time=2025-05-03T20:53:07.995+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=0
+    fsbroker_test.go:908: Correctly received no non-NoOp action or error within 666.666666ms
+time=2025-05-03T20:53:08.390+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=0
+    fsbroker_test.go:911: [VerifyMap] ✓ Map state matches expected filesystem state (0 entries).
+=== RUN   TestFSBrokerIntegration/MixedRapidActions
+time=2025-05-03T20:53:08.621+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=0
+    fsbroker_test.go:929: Performing mixed rapid actions...
+time=2025-05-03T20:53:08.753+03:00 level=DEBUG msg="Received fsnotify event" op=CREATE name=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2845643131/watch/file_a.txt
+time=2025-05-03T20:53:08.753+03:00 level=DEBUG msg="Queuing event" type=CREATE
+time=2025-05-03T20:53:08.753+03:00 level=DEBUG msg="Received fsnotify event" op=CREATE name=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2845643131/watch/file_b.txt
+time=2025-05-03T20:53:08.753+03:00 level=DEBUG msg="Queuing event" type=CREATE
+time=2025-05-03T20:53:08.777+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=1
+time=2025-05-03T20:53:08.777+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=2
+time=2025-05-03T20:53:08.816+03:00 level=DEBUG msg="Received fsnotify event" op=CREATE name=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2845643131/watch/file_c.txt
+time=2025-05-03T20:53:08.816+03:00 level=DEBUG msg="Queuing event" type=CREATE
+time=2025-05-03T20:53:08.829+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=3
+time=2025-05-03T20:53:08.853+03:00 level=DEBUG msg="Received fsnotify event" op=CREATE name=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2845643131/watch/file_a_renamed.txt
+time=2025-05-03T20:53:08.853+03:00 level=DEBUG msg="Queuing event" type=CREATE
+time=2025-05-03T20:53:08.853+03:00 level=DEBUG msg="Received fsnotify event" op=RENAME name=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2845643131/watch/file_a.txt
+time=2025-05-03T20:53:08.853+03:00 level=DEBUG msg="Queuing event" type=RENAME
+time=2025-05-03T20:53:08.853+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=4
+time=2025-05-03T20:53:08.853+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=5
+time=2025-05-03T20:53:08.853+03:00 level=DEBUG msg="Received fsnotify event" op=WRITE name=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2845643131/watch/file_b.txt
+time=2025-05-03T20:53:08.853+03:00 level=DEBUG msg="Queuing event" type=WRITE
+time=2025-05-03T20:53:08.853+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=6
+    fsbroker_test.go:940: Finished mixed rapid actions.
+    fsbroker_test.go:943: Collecting action....
+time=2025-05-03T20:53:08.916+03:00 level=DEBUG msg="Received fsnotify event" op=REMOVE name=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2845643131/watch/file_c.txt
+time=2025-05-03T20:53:08.916+03:00 level=DEBUG msg="Queuing event" type=REMOVE
+time=2025-05-03T20:53:08.916+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=7
+time=2025-05-03T20:53:09.029+03:00 level=DEBUG msg="Stating event file" operation=Create path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2845643131/watch/file_a.txt
+time=2025-05-03T20:53:09.029+03:00 level=DEBUG msg="File not found" operation=Create path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2845643131/watch/file_a.txt
+time=2025-05-03T20:53:09.029+03:00 level=DEBUG msg="Stating event file" operation=Create path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2845643131/watch/file_b.txt
+time=2025-05-03T20:53:09.029+03:00 level=DEBUG msg="Stating event file" operation=Create path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2845643131/watch/file_c.txt
+time=2025-05-03T20:53:09.029+03:00 level=DEBUG msg="File not found" operation=Create path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2845643131/watch/file_c.txt
+time=2025-05-03T20:53:09.029+03:00 level=DEBUG msg="Stating event file" operation=Create path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2845643131/watch/file_a_renamed.txt
+time=2025-05-03T20:53:09.029+03:00 level=DEBUG msg="Stating event file" operation=Rename path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2845643131/watch/file_a.txt
+time=2025-05-03T20:53:09.029+03:00 level=DEBUG msg="File not found" operation=Rename path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2845643131/watch/file_a.txt
+time=2025-05-03T20:53:09.029+03:00 level=DEBUG msg="Stating event file" operation=Write path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2845643131/watch/file_b.txt
+time=2025-05-03T20:53:09.029+03:00 level=DEBUG msg="Stating event file" operation=Remove path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2845643131/watch/file_c.txt
+time=2025-05-03T20:53:09.029+03:00 level=DEBUG msg="File not found" operation=Remove path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2845643131/watch/file_c.txt
+time=2025-05-03T20:53:09.029+03:00 level=DEBUG msg="Popped event" operation=Remove path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2845643131/watch/file_c.txt
+time=2025-05-03T20:53:09.029+03:00 level=DEBUG msg="Remove: No watchmap entry found, file must have been created then removed quickly" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2845643131/watch/file_c.txt
+time=2025-05-03T20:53:09.029+03:00 level=DEBUG msg="Remove: Added action to noop" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2845643131/watch/file_c.txt
+time=2025-05-03T20:53:09.029+03:00 level=DEBUG msg="Popped event" operation=Write path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2845643131/watch/file_b.txt
+time=2025-05-03T20:53:09.029+03:00 level=DEBUG msg="Write: No entry found in watchmap. This is a non-empty file creation" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2845643131/watch/file_b.txt
+time=2025-05-03T20:53:09.029+03:00 level=DEBUG msg="Create: Adding watch if recursive watch is enabled"
+time=2025-05-03T20:53:09.029+03:00 level=DEBUG msg="Write: Added action to createdmap" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2845643131/watch/file_b.txt
+time=2025-05-03T20:53:09.029+03:00 level=DEBUG msg="Popped event" operation=Rename path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2845643131/watch/file_a.txt
+time=2025-05-03T20:53:09.029+03:00 level=DEBUG msg="Rename: No watchmap entry found, file must have been created then renamed quickly" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2845643131/watch/file_a.txt
+time=2025-05-03T20:53:09.029+03:00 level=DEBUG msg="Rename: Added action to noop" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2845643131/watch/file_a.txt
+time=2025-05-03T20:53:09.029+03:00 level=DEBUG msg="Popped event" operation=Create path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2845643131/watch/file_a_renamed.txt
+time=2025-05-03T20:53:09.029+03:00 level=DEBUG msg="Create: No entry found in watchmap. This is a new path" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2845643131/watch/file_a_renamed.txt
+time=2025-05-03T20:53:09.029+03:00 level=DEBUG msg="Create: Adding watch if recursive watch is enabled"
+time=2025-05-03T20:53:09.029+03:00 level=DEBUG msg="Create: Added action to createdmap" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2845643131/watch/file_a_renamed.txt
+time=2025-05-03T20:53:09.029+03:00 level=DEBUG msg="Popped event" operation=Create path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2845643131/watch/file_c.txt
+time=2025-05-03T20:53:09.029+03:00 level=DEBUG msg="Create: Since file no longer exists on disk, this event is irrelevant" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2845643131/watch/file_c.txt
+time=2025-05-03T20:53:09.029+03:00 level=DEBUG msg="Create: Added action to noop" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2845643131/watch/file_c.txt
+time=2025-05-03T20:53:09.029+03:00 level=DEBUG msg="Popped event" operation=Create path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2845643131/watch/file_b.txt
+time=2025-05-03T20:53:09.029+03:00 level=DEBUG msg="Create: Entry found in watchmap. This is a rename/move" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2845643131/watch/file_b.txt
+time=2025-05-03T20:53:09.029+03:00 level=DEBUG msg="Create: Done" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2845643131/watch/file_b.txt
+time=2025-05-03T20:53:09.029+03:00 level=DEBUG msg="Popped event" operation=Create path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2845643131/watch/file_a.txt
+time=2025-05-03T20:53:09.029+03:00 level=DEBUG msg="Create: Since file no longer exists on disk, this event is irrelevant" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2845643131/watch/file_a.txt
+time=2025-05-03T20:53:09.029+03:00 level=DEBUG msg="Create: Added action to noop" path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2845643131/watch/file_a.txt
+time=2025-05-03T20:53:09.029+03:00 level=DEBUG msg="Pass 2: Emitting actions"
+time=2025-05-03T20:53:09.029+03:00 level=DEBUG msg="Action: " id=63792102 action="&{Type:Create Timestamp:2025-05-03 20:53:08.853946 +0300 EEST m=+20.589004918 Subject:Id: 63792102, Path: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2845643131/watch/file_a_renamed.txt, Mode: 644 Events:[0x1400017e140] Properties:map[]}"
+time=2025-05-03T20:53:09.029+03:00 level=DEBUG msg="Action: " id=63792103 action="&{Type:Create Timestamp:2025-05-03 20:53:08.85399 +0300 EEST m=+20.589048918 Subject:Id: 63792103, Path: /var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2845643131/watch/file_b.txt, Mode: 644 Events:[0x1400017e200 0x1400019e780] Properties:map[]}"
+    fsbroker_test.go:960: Collected Event: Type=Create, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2845643131/watch/file_a_renamed.txt, OldPath=<nil>
+    fsbroker_test.go:960: Collected Event: Type=Create, Path=/var/folders/5z/yys8by895g3gnzwdv4p3syt40000gn/T/fsbroker_test_2845643131/watch/file_b.txt, OldPath=<nil>
+time=2025-05-03T20:53:09.029+03:00 level=DEBUG msg="NoOp: " action="&{Type:NoOp Timestamp:2025-05-03 20:53:08.916389 +0300 EEST m=+20.651448209 Subject:<nil> Events:[0x1400029e300] Properties:map[]}"
+time=2025-05-03T20:53:09.029+03:00 level=DEBUG msg="NoOp: " action="&{Type:NoOp Timestamp:2025-05-03 20:53:08.853962 +0300 EEST m=+20.589021334 Subject:<nil> Events:[0x1400017e180] Properties:map[]}"
+    fsbroker_test.go:955: Ignoring NoOp action during collection (subject is nil)
+    fsbroker_test.go:955: Ignoring NoOp action during collection (subject is nil)
+time=2025-05-03T20:53:09.029+03:00 level=DEBUG msg="NoOp: " action="&{Type:NoOp Timestamp:2025-05-03 20:53:08.816874 +0300 EEST m=+20.551933126 Subject:<nil> Events:[0x14000416200] Properties:map[Message:Event irrelevant. File no longer exists]}"
+time=2025-05-03T20:53:09.029+03:00 level=DEBUG msg="NoOp: " action="&{Type:NoOp Timestamp:2025-05-03 20:53:08.753858 +0300 EEST m=+20.488916626 Subject:<nil> Events:[0x1400019e740] Properties:map[Message:Event irrelevant. File no longer exists]}"
+    fsbroker_test.go:955: Ignoring NoOp action during collection (subject is nil)
+    fsbroker_test.go:955: Ignoring NoOp action during collection (subject is nil)
+time=2025-05-03T20:53:09.029+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=0
+time=2025-05-03T20:53:09.460+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=0
+time=2025-05-03T20:53:09.823+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=0
+time=2025-05-03T20:53:10.230+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=0
+time=2025-05-03T20:53:10.630+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=0
+time=2025-05-03T20:53:11.052+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=0
+time=2025-05-03T20:53:11.428+03:00 level=DEBUG msg="Event loop tick" "Stack Size"=0
+    fsbroker_test.go:970: Finished collecting action after 2.5s. Got 2 action(s).
+    fsbroker_test.go:1002: [VerifyMap] ✓ Map state matches expected filesystem state (2 entries).
+--- FAIL: TestFSBrokerIntegration (23.34s)
+    --- PASS: TestFSBrokerIntegration/CreateEmptyFile (0.60s)
+    --- PASS: TestFSBrokerIntegration/CreateNonEmptyFile (0.80s)
+    --- PASS: TestFSBrokerIntegration/ModifyFile (1.00s)
+    --- PASS: TestFSBrokerIntegration/ClearFile (1.00s)
+    --- FAIL: TestFSBrokerIntegration/RenameFileInplace (0.90s)
+    --- FAIL: TestFSBrokerIntegration/MoveFileWatchedToWatched (1.30s)
+    --- PASS: TestFSBrokerIntegration/MoveFileUnwatchedToWatched (0.61s)
+    --- PASS: TestFSBrokerIntegration/MoveFileWatchedToUnwatched (1.00s)
+    --- PASS: TestFSBrokerIntegration/HardDeleteFile (1.00s)
+    --- PASS: TestFSBrokerIntegration/CreateDirectory (0.60s)
+    --- FAIL: TestFSBrokerIntegration/RenameDirectoryInplace (0.90s)
+    --- FAIL: TestFSBrokerIntegration/MoveDirectoryWatchedToWatched (1.36s)
+    --- PASS: TestFSBrokerIntegration/MoveDirectoryUnwatchedToWatched (0.70s)
+    --- PASS: TestFSBrokerIntegration/MoveDirectoryWatchedToUnwatched (1.06s)
+    --- PASS: TestFSBrokerIntegration/HardDeleteDirectory (1.87s)
+    --- PASS: TestFSBrokerIntegration/IgnoreHiddenFile (0.93s)
+    --- PASS: TestFSBrokerIntegration/IgnoreSystemFile (0.99s)
+    --- PASS: TestFSBrokerIntegration/WriteDeduplication (1.78s)
+    --- PASS: TestFSBrokerIntegration/DeleteDeduplication (1.84s)
+    --- PASS: TestFSBrokerIntegration/MixedRapidActions (3.08s)
+FAIL
+FAIL	github.com/helshabini/fsbroker	23.798s
+FAIL

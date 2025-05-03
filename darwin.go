@@ -51,11 +51,6 @@ func (b *FSBroker) resolveAndHandle(stack *EventStack, tickerLock *sync.Mutex) {
 
 	// Pass 1: transform events into grouped action
 	actions := make(map[uint64]*FSAction)
-	//created := make(map[uint64]*FSAction)
-	//written := make(map[uint64]*FSAction)
-	//removed := make(map[uint64]*FSAction)
-	//renamed := make(map[uint64]*FSAction)
-	//modded := make(map[uint64]*FSAction)
 	noop := make([]*FSAction, 0)
 
 	for event := stack.Pop(); event != nil; event = stack.Pop() {
@@ -162,9 +157,8 @@ func (b *FSBroker) resolveAndHandle(stack *EventStack, tickerLock *sync.Mutex) {
 			logDebug("Write: Found watchmap entry. This is a normal write", "path", event.Path)
 			action := AppendEvent(actions, event, info.Id)
 			action.Subject = info
-			b.watchmap.Set(info)
 			logDebug("Write: Added action to writtenmap", "path", event.Path)
-
+			b.watchmap.Set(info)
 			logDebug("Write: Done", "path", event.Path)
 
 		case Remove:
@@ -191,7 +185,7 @@ func (b *FSBroker) resolveAndHandle(stack *EventStack, tickerLock *sync.Mutex) {
 			action := AppendEvent(actions, event, watchmapInfo.Id)
 			action.Subject = watchmapInfo // Last known info about the deleted file
 			logDebug("Remove: Added action to removedmap", "path", event.Path)
-
+			b.watchmap.DeleteByPath(event.Path)
 			logDebug("Remove: Done", "path", event.Path)
 
 		case Rename:
@@ -211,14 +205,14 @@ func (b *FSBroker) resolveAndHandle(stack *EventStack, tickerLock *sync.Mutex) {
 				logDebug("Rename: Added action to noop", "path", event.Path)
 				continue
 			}
-			
+
 			// Found: we add it renamed map to coalese it later
 			logDebug("Rename: Found watchmap entry", "path", event.Path)
 			action := AppendEvent(actions, event, watchmapInfo.Id)
 			action.Type = Remove
 			action.Subject = watchmapInfo
-			logDebug("Rename: Added Remove action to actionsmap", "path", event.Path)	
-
+			logDebug("Rename: Added Remove action to actionsmap", "path", event.Path)
+			b.watchmap.DeleteByPath(event.Path)
 			logDebug("Rename: Done", "path", event.Path)
 
 		case Chmod:
@@ -268,18 +262,16 @@ func (b *FSBroker) resolveAndHandle(stack *EventStack, tickerLock *sync.Mutex) {
 		}
 	}
 
-	// Pass 2: Coalesing events, mapping pairs and deduplication
+	// Pass 2: Emitting actions
 
-	// Write actions should now be in writtenmap.
-	// We need to deduplicate them, or find associated create actions (if any)
-
-	logDebug("Pass 2: Coalesing events, mapping pairs, and deduplication")
+	logDebug("Pass 2: Emitting actions")
 	for key, value := range actions {
 		logDebug("Action: ", "id", key, "action", value)
 		b.emitAction(value)
 	}
 	for _, value := range noop {
 		logDebug("NoOp: ", "action", value)
+		b.emitAction(value)
 	}
 }
 
