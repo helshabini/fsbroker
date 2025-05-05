@@ -206,10 +206,10 @@ func TestEventStack_Concurrency(t *testing.T) {
 
 	// Concurrent Pushes
 	wg.Add(numGoroutines)
-	for i := 0; i < numGoroutines; i++ {
+	for i := range numGoroutines {
 		go func(gIndex int) {
 			defer wg.Done()
-			for j := 0; j < numOpsPerGoroutine; j++ {
+			for j := range numOpsPerGoroutine {
 				event := newTestEvent("file_" + string(rune(gIndex)) + "_" + string(rune(j)))
 				es.Push(event)
 			}
@@ -228,10 +228,10 @@ func TestEventStack_Concurrency(t *testing.T) {
 	var popLock sync.Mutex // To safely count pops
 
 	wg.Add(numGoroutines)
-	for i := 0; i < numGoroutines; i++ {
+	for range numGoroutines {
 		go func() {
 			defer wg.Done()
-			for j := 0; j < numOpsPerGoroutine/2; j++ { // Mix of Pops and Deletes
+			for j := range numOpsPerGoroutine { // Mix of Pops and Deletes
 				if j%2 == 0 {
 					// Pop
 					if popped := es.Pop(); popped != nil {

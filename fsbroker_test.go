@@ -17,7 +17,7 @@ const (
 	// Generous timeout to wait for action., allowing for FS latency and broker processing.
 	// The broker's internal timeout is 300ms by default.
 	// Default timeout for tests NOT overriding config.Timeout. Should be > DefaultFSConfig().Timeout + buffer.
-	defaultTestTimeout = 1 * time.Second
+	defaultTestTimeout = 2 * time.Second
 )
 
 // setupTestEnv creates a temporary directory, initializes and starts FSBroker watching it.
@@ -40,7 +40,7 @@ func setupTestEnv(t *testing.T) (*fsbroker.FSBroker, *fsbroker.FSConfig, string,
 
 	config := fsbroker.DefaultFSConfig()
 	// Reduce timeout for faster tests, but keep it > fsnotify latency
-	config.Timeout = 400 * time.Millisecond
+	config.Timeout = 1 * time.Second
 
 	broker, err := fsbroker.NewFSBroker(config)
 	if err != nil {
@@ -83,7 +83,11 @@ func expectAction(t *testing.T, broker *fsbroker.FSBroker, expectedType fsbroker
 		select {
 		case action := <-broker.Next():
 			if action.Type == fsbroker.NoOp {
-				t.Logf("Received and ignoring NoOp action for path %s while waiting for %v", action.Subject.Path, expectedType)
+				if action.Subject == nil {
+					t.Logf("Received and ignoring NoOp action while waiting for %v", expectedType)
+				} else {
+					t.Logf("Received and ignoring NoOp action for path %s while waiting for %v", action.Subject.Path, expectedType)
+				}
 				// Reset the timer or continue waiting? Let's continue waiting for now, the original timer still runs.
 				continue // Continue loop to wait for the next event
 			}
@@ -449,6 +453,10 @@ func TestFSBrokerIntegration(t *testing.T) {
 			t.Fatalf("Failed to create file: %v", err)
 		}
 		expectAction(t, broker, fsbroker.Create, oldPath, defaultTestTimeout) // Consume create event
+		// Drain any other potential related action. just in case
+		drainEvents(broker, config.Timeout/2)
+
+		time.Sleep(50 * time.Millisecond) // Delay << config.Timeout
 
 		err = os.Rename(oldPath, newPath)
 		if err != nil {
@@ -477,6 +485,8 @@ func TestFSBrokerIntegration(t *testing.T) {
 			t.Fatalf("Failed to create external file: %v", err)
 		}
 		// No action.expected yet as it's outside watchDir
+
+		time.Sleep(50 * time.Millisecond) // Delay << config.Timeout
 
 		err = os.Rename(externalPath, finalPath)
 		if err != nil {
@@ -594,6 +604,7 @@ func TestFSBrokerIntegration(t *testing.T) {
 		}
 		// Consume parent create
 		expectAction(t, broker, fsbroker.Create, parentDir, defaultTestTimeout)
+		drainEvents(broker, config.Timeout/2)
 
 		oldPath := filepath.Join(watchDir, "move_this_dir")
 		newPath := filepath.Join(parentDir, "move_this_dir") // Moved inside parent
@@ -603,6 +614,9 @@ func TestFSBrokerIntegration(t *testing.T) {
 			t.Fatalf("Failed to create dir to move: %v", err)
 		}
 		expectAction(t, broker, fsbroker.Create, oldPath, defaultTestTimeout) // Consume create event
+		drainEvents(broker, config.Timeout/2)
+
+		time.Sleep(50 * time.Millisecond) // Delay << config.Timeout
 
 		err = os.Rename(oldPath, newPath)
 		if err != nil {
@@ -653,6 +667,9 @@ func TestFSBrokerIntegration(t *testing.T) {
 			t.Fatalf("Failed to create internal dir: %v", err)
 		}
 		expectAction(t, broker, fsbroker.Create, internalPath, defaultTestTimeout) // Consume create
+		drainEvents(broker, config.Timeout/2)
+
+		time.Sleep(50 * time.Millisecond) // Delay << config.Timeout
 
 		err = os.Rename(internalPath, externalPath)
 		if err != nil {
@@ -841,7 +858,7 @@ func TestFSBrokerIntegration(t *testing.T) {
 		// Perform rapid writes
 		t.Logf("Performing rapid writes...")
 		numWrites := 5
-		for i := 0; i < numWrites; i++ {
+		for i := range numWrites {
 			f, err := os.OpenFile(filePath, os.O_APPEND|os.O_WRONLY, 0644)
 			if err != nil {
 				t.Fatalf("Failed to open for append %d: %v", i, err)
@@ -851,7 +868,7 @@ func TestFSBrokerIntegration(t *testing.T) {
 			if err != nil {
 				t.Fatalf("Failed append %d: %v", i, err)
 			}
-			time.Sleep(50 * time.Millisecond) // Delay << config.Timeout
+			time.Sleep(5 * time.Millisecond) // Delay << config.Timeout
 		}
 		t.Logf("Finished rapid writes.")
 

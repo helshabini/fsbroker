@@ -179,6 +179,16 @@ func (b *FSBroker) eventloop() {
 			eventStack.Push(event)
 
 		case <-ticker.C:
+			// Drain any pending events before handling (reduces the chance of splitting event sequences between ticks)
+			drainEvents := true
+			for drainEvents {
+				select {
+				case event := <-b.events:
+					eventStack.Push(event)
+				default:
+					drainEvents = false
+				}
+			}
 			b.resolveAndHandle(eventStack, &tickerLock)
 
 		case <-b.quit:

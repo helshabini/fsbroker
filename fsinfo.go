@@ -3,6 +3,7 @@ package fsbroker
 import (
 	"fmt"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -21,4 +22,14 @@ func (info *FSInfo) IsDir() bool {
 func (info *FSInfo) String() string {
 	return fmt.Sprintf("Id: %d, Path: %s, Mode: %o",
 		info.Id, info.Path, info.Mode)
+}
+
+func (info *FSInfo) Clone() *FSInfo {
+	return &FSInfo{
+		Id: info.Id,
+		Path: strings.Clone(info.Path),
+		Size: info.Size,
+		ModTime: info.ModTime,
+		Mode: info.Mode,
+	}
 }

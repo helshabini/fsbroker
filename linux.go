@@ -27,7 +27,21 @@ func (b *FSBroker) resolveAndHandle(stack *EventStack, tickerLock *sync.Mutex) {
 	statmap := make(map[string]*FSInfo)
 	events := stack.List()
 
+	noop := make([]*FSAction, 0)
+	renameDedupMap := make(map[string]*FSEvent, 0)
 	for _, event := range events {
+		if event.Type == Rename {
+			_, found := renameDedupMap[event.Path]
+			if !found {
+				renameDedupMap[event.Path] = event
+				continue
+			}
+			logDebug("Deduping rename event", "operation", event.Type, "path", event.Path)
+			action := FromFSEvent(event)
+			action.Properties["Message"] = "Duplicate rename event"
+			noop = append(noop, action)
+			stack.Delete(event)
+		}
 		logDebug("Stating event file", "operation", event.Type, "path", event.Path)
 		_, found := statmap[event.Path]
 		if !found {
@@ -51,7 +65,7 @@ func (b *FSBroker) resolveAndHandle(stack *EventStack, tickerLock *sync.Mutex) {
 
 	// Pass 1: transform events into grouped action
 	actions := make(map[uint64]*FSAction)
-	noop := make([]*FSAction, 0)
+	toRename := make([]*FSInfo, 0)
 
 	for event := stack.Pop(); event != nil; event = stack.Pop() {
 		logDebug("Popped event", "operation", event.Type, "path", event.Path)
@@ -84,14 +98,14 @@ func (b *FSBroker) resolveAndHandle(stack *EventStack, tickerLock *sync.Mutex) {
 			// Found file on disk, now we query the watchmap by file Id to check whether we already know about that file or not
 			watchmapInfo := b.watchmap.GetById(info.Id)
 
-			if watchmapInfo == nil { // Not found: new file
+			if watchmapInfo == nil { // Not found: new file // or rename yet to be processed in the same tick
 				logDebug("Create: No entry found in watchmap. This is a new path", "path", event.Path)
 				action := AppendEvent(actions, event, info.Id)
 				action.Subject = info
 				logDebug("Create: Adding watch if recursive watch is enabled")
 				if b.watchrecursive && info.IsDir() {
 					// Make sure AddWatch doesn't error due to existing map entry if called twice
-					_ = b.AddWatch(info.Path) // Add watch if not already present
+					_ = b.AddWatch(info.Path) // Add watch if not already present, this already adds recursively into watchmap
 					logDebug("Create: Added recursive watch for directory", "signature", action.Signature(), "path", info.Path)
 				}
 				b.watchmap.Set(info)
@@ -100,21 +114,26 @@ func (b *FSBroker) resolveAndHandle(stack *EventStack, tickerLock *sync.Mutex) {
 			}
 
 			// Found: rename/move
-			logDebug("Create: Entry found in watchmap. This is a rename/move", "path", event.Path)
-			oldpath := watchmapInfo.Path
-			if oldpath == info.Path {
+			logDebug("Create: Entry found in watchmap. This could still be a Create or Rename/Move", "path", event.Path)
+			// We check the existing actions map, if it has an existing Create action left by a write event, we're just a create
+			createAction, found := actions[info.Id]
+			if found && createAction.Type == Create {
+				logDebug("Create: Found already created action. Appending this event to it.", "path", event.Path)
 				_ = AppendEvent(actions, event, info.Id)
-			} else {
-				action := AppendEvent(actions, event, info.Id)
-				action.Subject = info
-				action.Type = Rename
-				if action.Properties == nil {
-					action.Properties = make(map[string]any)
-				}
-				action.Properties["OldPath"] = oldpath
 				b.watchmap.Set(info)
-				logDebug("Create: Added action to renamedmap", "path", event.Path)
+				logDebug("Create: Added action to actionsmap", "path", event.Path)
+				continue
 			}
+
+			logDebug("Create: Entry found in watchmap. This could still be a Create or Rename/Move", "path", event.Path)
+			// Otherwise, we're a rename/move
+			renameInfo := watchmapInfo.Clone()
+			toRename = append(toRename, renameInfo)
+			action := AppendEvent(actions, event, info.Id)
+			action.Subject = info
+			action.Type = Rename
+			b.watchmap.Set(info)
+			logDebug("Create: Added action to renamedmap", "path", event.Path)
 
 			logDebug("Create: Done", "path", event.Path)
 		case Write:
@@ -200,6 +219,29 @@ func (b *FSBroker) resolveAndHandle(stack *EventStack, tickerLock *sync.Mutex) {
 			//		- Not found: We know nothing about this file, irrelevant -> add noop
 			//-----------------------------------------------------------------------------------
 
+			// All we have in a rename event is an oldPath.
+			// On Linux, the event is process after the CREATE event has already been processed and the watchmap entry is added
+			// Although it was added by the new name, we need a way to attach this event to the CREATE action)
+
+			// We see if the already processed create event has left is something to look for:
+			var renameInfo *FSInfo = nil
+			for _, rename := range toRename {
+				if event.Path == rename.Path {
+					renameInfo = rename
+				}
+			}
+
+			if renameInfo != nil { // Not found
+				logDebug("Rename: Found matching CREATE event. This is a rename/move", "path", event.Path)
+				action := AppendEvent(actions, event, renameInfo.Id)
+				action.Type = Rename
+				action.Properties["OldPath"] = event.Path
+				logDebug("Rename: Added action to actionsmap", "path", event.Path)
+				continue
+			}
+
+			// Otherwise, this must be a normal rename. Handle it as usual
+
 			watchmapInfo := b.watchmap.GetByPath(event.Path)
 			if watchmapInfo == nil { // Not found
 				logDebug("Rename: No watchmap entry found, file must have been created then renamed quickly", "path", event.Path)
@@ -210,13 +252,12 @@ func (b *FSBroker) resolveAndHandle(stack *EventStack, tickerLock *sync.Mutex) {
 				continue
 			}
 
-			// Found: we add it renamed map to coalese it later
 			logDebug("Rename: Found watchmap entry", "path", event.Path)
 			action := AppendEvent(actions, event, watchmapInfo.Id)
 			action.Type = Remove
 			action.Subject = watchmapInfo
 			logDebug("Rename: Added Remove action to actionsmap", "path", event.Path)
-
+			b.watchmap.DeleteByPath(event.Path)
 			logDebug("Rename: Done", "path", event.Path)
 
 		case Chmod:

@@ -28,9 +28,9 @@ func (b *FSBroker) resolveAndHandle(stack *EventStack, tickerLock *sync.Mutex) {
 	events := stack.List()
 
 	for _, event := range events {
-		logDebug("Stating event file", "operation", event.Type, "path", event.Path)
 		_, found := statmap[event.Path]
 		if !found {
+			logDebug("Stating event file", "operation", event.Type, "path", event.Path)
 			stat, err := os.Stat(event.Path)
 			if err != nil {
 				if os.IsNotExist(err) {
@@ -52,6 +52,7 @@ func (b *FSBroker) resolveAndHandle(stack *EventStack, tickerLock *sync.Mutex) {
 	// Pass 1: transform events into grouped action
 	actions := make(map[uint64]*FSAction)
 	noop := make([]*FSAction, 0)
+	toRename := make([]*FSInfo, 0)
 
 	for event := stack.Pop(); event != nil; event = stack.Pop() {
 		logDebug("Popped event", "operation", event.Type, "path", event.Path)
@@ -81,10 +82,15 @@ func (b *FSBroker) resolveAndHandle(stack *EventStack, tickerLock *sync.Mutex) {
 				logDebug("Create: Added action to noop", "path", event.Path)
 				continue
 			}
-			// Found file on disk, now we query the watchmap by file Id to check whether we already know about that file or not
-			watchmapInfo := b.watchmap.GetById(info.Id)
 
-			if watchmapInfo == nil { // Not found: new file
+			var renameInfo *FSInfo = nil
+			for _, rename := range toRename {
+				if info.Id == rename.Id {
+					renameInfo = rename
+				}
+			}
+
+			if renameInfo == nil { // Not found, nor rename: new file
 				logDebug("Create: No entry found in watchmap. This is a new path", "path", event.Path)
 				action := AppendEvent(actions, event, info.Id)
 				action.Subject = info
@@ -101,7 +107,7 @@ func (b *FSBroker) resolveAndHandle(stack *EventStack, tickerLock *sync.Mutex) {
 
 			// Found: rename/move
 			logDebug("Create: Entry found in watchmap. This is a rename/move", "path", event.Path)
-			oldpath := watchmapInfo.Path
+			oldpath := renameInfo.Path
 			if oldpath == info.Path {
 				_ = AppendEvent(actions, event, info.Id)
 			} else {
@@ -212,6 +218,8 @@ func (b *FSBroker) resolveAndHandle(stack *EventStack, tickerLock *sync.Mutex) {
 			action.Type = Remove
 			action.Subject = watchmapInfo
 			logDebug("Rename: Added Remove action to actionsmap", "path", event.Path)
+			renameInfo := watchmapInfo.Clone()
+			toRename = append(toRename, renameInfo)
 			b.watchmap.DeleteByPath(event.Path)
 			logDebug("Rename: Done", "path", event.Path)
 
