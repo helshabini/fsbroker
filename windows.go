@@ -56,6 +56,7 @@ func (b *FSBroker) resolveAndHandle(stack *EventStack, tickerLock *sync.Mutex) {
 	// Pass 1: transform events into grouped action
 	actions := make(map[uint64]*FSAction)
 	noop := make([]*FSAction, 0)
+	toRename := make(map[string]*FSInfo, 0)
 
 	for event := stack.Pop(); event != nil; event = stack.Pop() {
 		logDebug("Popped event", "operation", event.Type, "path", event.Path)
@@ -109,6 +110,7 @@ func (b *FSBroker) resolveAndHandle(stack *EventStack, tickerLock *sync.Mutex) {
 			if oldpath == info.Path {
 				_ = AppendEvent(actions, event, info.Id)
 			} else {
+				toRename[oldpath] = watchmapInfo.Clone()
 				action := AppendEvent(actions, event, info.Id)
 				action.Subject = info
 				action.Type = Rename
@@ -189,6 +191,15 @@ func (b *FSBroker) resolveAndHandle(stack *EventStack, tickerLock *sync.Mutex) {
 			// Seek file info from our watchmap
 			watchmapInfo := b.watchmap.GetByPath(event.Path)
 			if watchmapInfo == nil {
+				// First check if we're part of a rename
+				renameInfo, found := toRename[event.Path]
+				if found {
+			  	logDebug("Remove: Found rename entry in toRename map", "path", event.Path)
+					_ = AppendEvent(actions, event, renameInfo.Id)
+					logDebug("Remove: Appended event to existing Rename action", "path", event.Path)
+					continue
+				}
+
 				logDebug("Remove: No watchmap entry found, file must have been created then removed quickly", "path", event.Path)
 				action := FromFSEvent(event)
 				action.Type = NoOp
@@ -214,6 +225,15 @@ func (b *FSBroker) resolveAndHandle(stack *EventStack, tickerLock *sync.Mutex) {
 
 			watchmapInfo := b.watchmap.GetByPath(event.Path)
 			if watchmapInfo == nil { // Not found
+				// First check if we're part of a rename
+				renameInfo, found := toRename[event.Path]
+				if found {
+			  	logDebug("Rename: Found rename entry in toRename map", "path", event.Path)
+					_ = AppendEvent(actions, event, renameInfo.Id)
+					logDebug("Rename: Appended event to existing Rename action", "path", event.Path)
+					continue
+				}
+
 				logDebug("Rename: No watchmap entry found, file must have been created then renamed quickly", "path", event.Path)
 				action := FromFSEvent(event)
 				action.Type = NoOp
