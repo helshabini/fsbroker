@@ -229,6 +229,9 @@ func (b *FSBroker) handleEvent(event fsnotify.Event) {
 
 // emitAction sends the event to the user after deduplication, grouping, and processing.
 func (b *FSBroker) emitAction(action *FSAction) {
+	if b.Filter != nil && !b.Filter(action) {
+		return
+	}
 	b.emit <- action
 }
 

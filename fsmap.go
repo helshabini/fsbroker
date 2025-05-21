@@ -3,21 +3,18 @@ package fsbroker
 import (
 	"errors"
 	"sync"
-	// "github.com/google/uuid" // No longer needed
 )
 
 type FSMap struct {
 	mu    sync.RWMutex
 	ids   map[uint64]*FSInfo
 	paths map[string]*FSInfo
-	// uuids map[string]*FSInfo // Removed redundant map
 }
 
 func NewFSMap() *FSMap {
 	return &FSMap{
 		ids:   make(map[uint64]*FSInfo),
 		paths: make(map[string]*FSInfo),
-		// uuids: make(map[string]*FSInfo), // Removed
 	}
 }
 

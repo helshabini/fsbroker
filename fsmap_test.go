@@ -17,7 +17,6 @@ func newTestInfo(id uint64, path string) *FSInfo {
 		Size:    100 + id, // Arbitrary size
 		ModTime: time.Now(),
 		Mode:    0644, // Arbitrary mode
-		// UId field removed
 	}
 }
 
@@ -41,12 +40,6 @@ func TestFSMap_SetAndGet(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Set failed for info1: %v", err)
 	}
-	/* // UId generation removed
-	if len(info1.UId) == 0 {
-		t.Error("Expected UId to be generated for info1")
-	}
-	uid1 := info1.UId // Store generated UID
-	*/
 
 	// Verify retrieval
 	retrievedById := m.GetById(1)
@@ -66,12 +59,6 @@ func TestFSMap_SetAndGet(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Set failed for info2: %v", err)
 	}
-	/* // UId generation removed
-	if len(info2.UId) == 0 {
-		t.Error("Expected UId to be generated for info2")
-	}
-	uid2 := info2.UId
-	*/
 
 	// Verify retrieval
 	retrievedById2 := m.GetById(2)
@@ -97,7 +84,6 @@ func TestFSMap_SetAndGet(t *testing.T) {
 	// Test updating an item (by setting again with same ID/Path but different data)
 	updatedInfo1 := newTestInfo(1, "/path/to/file1") // Same ID and Path
 	updatedInfo1.Size = 999
-	/* updatedInfo1.UId = uid1 // Removed */
 
 	err = m.Set(updatedInfo1) // Should overwrite
 	if err != nil {
@@ -126,16 +112,6 @@ func TestFSMap_SetAndGet(t *testing.T) {
 	if m.paths["/path/to/file1"] != updatedInfo1 {
 		t.Error("Internal paths map not updated correctly")
 	}
-	/* // uuids map removed
-	// Ensure the original UUID still points to the updated info
-	if m.uuids[uid1] != updatedInfo1 {
-		t.Error("Internal uuids map not updated correctly")
-	}
-	// Ensure the second item's UUID map entry is still correct
-	if m.uuids[uid2] != info2 {
-		t.Error("Internal uuids map for second item incorrect after updating first item")
-	}
-	*/
 }
 
 func TestFSMap_Delete(t *testing.T) {
@@ -147,11 +123,6 @@ func TestFSMap_Delete(t *testing.T) {
 	_ = m.Set(info1)
 	_ = m.Set(info2)
 	_ = m.Set(info3)
-	/* // UId removed
-	uid1 := info1.UId
-	uid2 := info2.UId
-	uid3 := info3.UId
-	*/
 
 	if m.Size() != 3 {
 		t.Fatalf("Expected initial size 3, got %d", m.Size())
@@ -171,11 +142,6 @@ func TestFSMap_Delete(t *testing.T) {
 	if m.GetByPath("/path/to/file2") != nil {
 		t.Error("GetByPath(\"/path/to/file2\"): should return nil after deletion")
 	}
-	/* // uuids map removed
-	if _, exists := m.uuids[uid2]; exists {
-		t.Error("UUID entry for info2 should be deleted")
-	}
-	*/
 
 	// Delete by Path (info1)
 	err = m.DeleteByPath("/path/to/file1")
@@ -191,11 +157,6 @@ func TestFSMap_Delete(t *testing.T) {
 	if m.GetByPath("/path/to/file1") != nil {
 		t.Error("GetByPath(\"/path/to/file1\"): should return nil after deletion")
 	}
-	/* // uuids map removed
-	if _, exists := m.uuids[uid1]; exists {
-		t.Error("UUID entry for info1 should be deleted")
-	}
-	*/
 
 	// Verify remaining item (info3)
 	if m.GetById(3) != info3 {
@@ -204,11 +165,6 @@ func TestFSMap_Delete(t *testing.T) {
 	if m.GetByPath("/path/to/file3") != info3 {
 		t.Error("GetByPath(\"/path/to/file3\"): did not return info3")
 	}
-	/* // uuids map removed
-	if m.uuids[uid3] != info3 {
-		t.Error("UUID entry for info3 incorrect")
-	}
-	*/
 
 	// Delete non-existent ID
 	err = m.DeleteById(99)
@@ -295,10 +251,10 @@ func TestFSMap_Concurrency(t *testing.T) {
 
 	// Concurrent Set
 	wg.Add(numGoroutines)
-	for i := 0; i < numGoroutines; i++ {
+	for i := range numGoroutines {
 		go func(gIndex int) {
 			defer wg.Done()
-			for j := 0; j < itemsPerGoroutine; j++ {
+			for j := range itemsPerGoroutine {
 				id := uint64(gIndex*itemsPerGoroutine + j)
 				path := fmt.Sprintf("/path/gr%d/file%d", gIndex, j)
 				info := newTestInfo(id, path)
@@ -321,10 +277,10 @@ func TestFSMap_Concurrency(t *testing.T) {
 	var deleteSuccesses int64
 	var deleteFailures int64
 	wg.Add(numGoroutines)
-	for i := 0; i < numGoroutines; i++ {
+	for i := range numGoroutines {
 		go func(gIndex int) {
 			defer wg.Done()
-			for j := 0; j < itemsPerGoroutine; j++ {
+			for j := range itemsPerGoroutine {
 				id := uint64(gIndex*itemsPerGoroutine + j)
 				path := fmt.Sprintf("/path/gr%d/file%d", gIndex, j)
 

@@ -63,19 +63,6 @@ func (b *FSBroker) resolveAndHandle(stack *EventStack, tickerLock *sync.Mutex) {
 
 		switch event.Type {
 		case Create:
-			//--------------------------------------------------------------
-			//  - this is either a new file or rename/move
-			//    - stat/getId:
-			//      - File doesn't exist on disk:
-			//        - Irrelevant event, file no longer exists -> add noop
-			//      - File exists on disk:
-			//        - query the map by Id
-			//          - Found: rename/move -> add rename (new & old path)
-			//          - Not Found: new file -> add create
-			//--------------------------------------------------------------
-
-			// We pre-stated all unique paths before entering Pass 1
-			// So now we seek the statmap for information about our file on disk
 			info, found := statmap[event.Path]
 			if !found {
 				logDebug("Create: Since file no longer exists on disk, this event is irrelevant", "path", event.Path)
@@ -100,7 +87,7 @@ func (b *FSBroker) resolveAndHandle(stack *EventStack, tickerLock *sync.Mutex) {
 					logDebug("Create: Added recursive watch for directory", "signature", action.Signature(), "path", info.Path)
 				}
 				b.watchmap.Set(info)
-				logDebug("Create: Added action to createdmap", "path", event.Path)
+				logDebug("Create: Added action to actionsmap", "path", event.Path)
 				continue
 			}
 
@@ -116,7 +103,7 @@ func (b *FSBroker) resolveAndHandle(stack *EventStack, tickerLock *sync.Mutex) {
 				action.Type = Rename
 				action.Properties["OldPath"] = oldpath
 				b.watchmap.Set(info)
-				logDebug("Create: Added action to renamedmap", "path", event.Path)
+				logDebug("Create: Added action to actionsmap", "path", event.Path)
 			}
 
 			logDebug("Create: Done", "path", event.Path)
@@ -166,7 +153,7 @@ func (b *FSBroker) resolveAndHandle(stack *EventStack, tickerLock *sync.Mutex) {
 					logDebug("Create: Added recursive watch for directory", "signature", action.Signature(), "path", info.Path)
 				}
 				b.watchmap.Set(info)
-				logDebug("Write: Added action to createdmap", "path", event.Path)
+				logDebug("Write: Added action to actionsmap", "path", event.Path)
 				continue
 			}
 
@@ -175,20 +162,11 @@ func (b *FSBroker) resolveAndHandle(stack *EventStack, tickerLock *sync.Mutex) {
 			action := AppendEvent(actions, event, info.Id)
 			action.Subject = info
 			b.watchmap.Set(info)
-			logDebug("Write: Added action to writtenmap", "path", event.Path)
+			logDebug("Write: Added action to actionsmap", "path", event.Path)
 
 			logDebug("Write: Done", "path", event.Path)
 
 		case Remove:
-			//-----------------------------------------------------------------------------------------
-			// - Check if we already have an entry about this file
-			// 	- Not found: irrelevant event, file never captured and now is gone -> add noop
-			//	- Found: Relevant, we know about the file -> ensure file is actually removed from disk
-			//		- Still Exists: irrelevant event, file still exists -> add noop
-			//		- Doesn't exist: file actually gone -> add remove
-			//-----------------------------------------------------------------------------------------
-
-			// Seek file info from our watchmap
 			watchmapInfo := b.watchmap.GetByPath(event.Path)
 			if watchmapInfo == nil {
 				// First check if we're part of a rename
@@ -211,18 +189,11 @@ func (b *FSBroker) resolveAndHandle(stack *EventStack, tickerLock *sync.Mutex) {
 			logDebug("Remove: Found watchmap entry.", "path", event.Path)
 			action := AppendEvent(actions, event, watchmapInfo.Id)
 			action.Subject = watchmapInfo // Last known info about the deleted file
-			logDebug("Remove: Added action to removedmap", "path", event.Path)
+			logDebug("Remove: Added action to actionsmap", "path", event.Path)
 			b.watchmap.DeleteByPath(event.Path)
 			logDebug("Remove: Done", "path", event.Path)
 
 		case Rename:
-			//-----------------------------------------------------------------------------------
-			//	- this is either rename/move or soft delete
-			//	- Check our watchmap to see if we know about the file
-			// 		- Found: We know about this file, it is now renamed, but we don't know to what -> add rename
-			//		- Not found: We know nothing about this file, irrelevant -> add noop
-			//-----------------------------------------------------------------------------------
-
 			watchmapInfo := b.watchmap.GetByPath(event.Path)
 			if watchmapInfo == nil { // Not found
 				// First check if we're part of a rename
@@ -252,16 +223,6 @@ func (b *FSBroker) resolveAndHandle(stack *EventStack, tickerLock *sync.Mutex) {
 			logDebug("Rename: Done", "path", event.Path)
 
 		case Chmod:
-			//-----------------------------------------------------------------------------------
-			// MacOS special case: clearing file to zero bytes emits no write events
-			// We use chmod event instead, and check the file to make sure it is a write
-			//	- stat/getId:
-			//		- File exists on disk && is zero bytes && wasn't zero bytes (from map by Id) -> add write
-			//			- add chmod
-			//	- Either way, still emit the chmod event if configured to do so
-			//-----------------------------------------------------------------------------------
-
-			// Get stats from statmap
 			info, found := statmap[event.Path]
 			if !found { // Event irrelevant, file no longer exists
 				logDebug("Chmod: Event irrelevant. File no longer exists", "path", event.Path)
@@ -277,7 +238,7 @@ func (b *FSBroker) resolveAndHandle(stack *EventStack, tickerLock *sync.Mutex) {
 				logDebug("Chmod: Emitting Chmod is enabled. Adding action", "path", event.Path)
 				action := AppendEvent(actions, event, info.Id)
 				action.Subject = info
-				logDebug("Chmod: Added action to moddedmap", "path", event.Path)
+				logDebug("Chmod: Added action to actionsmap", "path", event.Path)
 			}
 
 			logDebug("Chmod: Done", "path", event.Path)
@@ -285,7 +246,6 @@ func (b *FSBroker) resolveAndHandle(stack *EventStack, tickerLock *sync.Mutex) {
 	}
 
 	// Pass 2: Emitting actions
-
 	logDebug("Pass 2: Emitting actions")
 	for key, value := range actions {
 		logDebug("Action: ", "id", key, "action", value)

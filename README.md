@@ -36,11 +36,11 @@ FSBroker is designed and tested to work on the following operating systems:
 -   **macOS**
 -   **Linux**
 
-While manually tested across these platforms, contributions towards automated multi-platform testing are welcome (see Missing Features).
+While manually tested across these platforms, contributions towards better multi-platform testing are welcome (see Missing Features).
 
 ## Changelog
 
-- Coming soon... (New v1.0.0) First complete release.
+- (New v1.0.0) First complete release.
 - (New v0.1.8) Update fsnotify to v1.9.0
 - (New v0.1.7) Update fsnotify to v1.9.0
 - (New v0.1.6) Added the option to ignore hidden files.
@@ -88,9 +88,10 @@ func main() {
 	for {
 		select {
 		case event := <-broker.Next():
-			log.Printf("fs event has occurred: type=%s, path=%s, timestamp=%s, properties=%v", event.Type.String(), event.Path, event.Timestamp, event.Properties)
-		case error := <-broker.Error():
-			log.Printf("an error has occurred: %v", error)
+			log.Printf("fs event has occurred: type=%s, path=%s, timestamp=%s, properties=%v", 
+				event.Type.String(), event.Path, event.Timestamp.Format(time.RFC3339), event.Properties)
+		case err := <-broker.Error():
+			log.Printf("an error has occurred: %v", err)
 		}
 	}
 }
@@ -99,16 +100,16 @@ func main() {
 You can also apply your own filters to events:
 
 ```go
-broker.Filter = func(event *FSEvent) bool {
-    return event.Type != Remove // Filters out any event that is not Remove
+broker.Filter = func(action *FSAction) bool {
+    return action.Type != fsbroker.Remove // Filters out any event that is not Remove
 }
 ```
 
 or
 
 ```go
-broker.Filter = func(event *FSEvent) bool {
-    return event.Path == "/some/excluded/path" // Filters out any event which is related to this path
+broker.Filter = func(action *FSAction) bool {
+    return action.Path == "/some/excluded/path" // Filters out any event which is related to this path
 }
 ```
 
@@ -120,7 +121,7 @@ Creates a default FS Config instance with these default settings:
 
 - Timeout:             300 * time.Millisecond
 - IgnoreSysFiles:      true
-- DarwinChmodAsModify: true
+- IgnoreHiddenFiles:   true
 - EmitChmod:           false
 
 ### `NewFSBroker(config *FSConfig) (*FSBroker, error)`
@@ -131,59 +132,81 @@ Creates a new FS Broker instance.
 
 ### `(*FSBroker) AddRecursiveWatch(path string) error`
 
-Adds a recursive watch on the specified path.
+Adds a recursive watch on the specified path. This will:
+- Watch the specified directory and all its subdirectories
+- Automatically add watches for newly created subdirectories
+- Add all existing files and directories to the watch map
 
 - `path`: The directory path to watch.
 
+### `(*FSBroker) AddWatch(path string) error`
+
+Adds a watch on a specific file or directory. This will:
+- Watch the specified path
+- Add all existing files in the directory to the watch map (if path is a directory)
+- Not automatically watch new subdirectories (use AddRecursiveWatch for that)
+
+- `path`: The file or directory path to watch.
+
+### `(*FSBroker) RemoveWatch(path string)`
+
+Removes a watch on a file or directory. This will:
+- Remove the watch from fsnotify
+- Remove the path and all its subpaths from the watch map
+
+- `path`: The file or directory path to stop watching.
+
 ### `(*FSBroker) Start()`
 
-Starts the FS Broker to begin monitoring file system events.
+Starts the FS Broker to begin monitoring file system events. This will:
+- Start the event processing loop
+- Begin listening for fsnotify events
+- Process and emit events through the Next() channel
 
 ### `(*FSBroker) Stop()`
 
-Stops the FS Broker.
+Stops the FS Broker. This will:
+- Stop the event processing loop
+- Close the fsnotify watcher
+- Clean up all resources
 
-### `(*FSBroker) Next() <-chan *FSEvent`
+### `(*FSBroker) Next() <-chan *FSAction`
 
-Returns a channel that receives file system events.
+Returns a channel that receives processed file system events. Each event is an `FSAction` that represents a high-level file system operation (Create, Write, Rename, or Remove).
 
 ### `(*FSBroker) Error() <-chan error`
 
-Returns a channel that receives errors.
+Returns a channel that receives errors that occur during file system watching or event processing.
 
-+## Debugging
-+
-+FSBroker uses the standard `log/slog` package for logging. By default, only messages with `INFO` level or higher are shown.
-+
-+To enable detailed debug logging (using `slog.LevelDebug`), compile or test the package with the `fsbroker_debug` build tag. This enables verbose logging of internal event processing steps, which can be helpful for troubleshooting.
-+
-+**Examples:**
-+
-+```sh
-+# Run tests with debug logging enabled
-+go test -v -tags fsbroker_debug ./...
-+
-+# Build your application with debug logging enabled
-+go build -tags fsbroker_debug -o myapp main.go
-+```
-+
-+When the tag is *not* provided, the `slog` level defaults to `INFO`, and the `slog.Debug` calls in the code have minimal performance impact.
+### `(*FSBroker) Filter func(*FSAction) bool`
+
+A function that can be set to filter events before they are emitted through the Next() channel. Return `true` to allow the event to be emitted, `false` to filter it out.
+
+## Debugging
+
+FSBroker uses the standard `log/slog` package for logging. By default, only messages with `INFO` level or higher are shown.
+
+To enable detailed debug logging (using `slog.LevelDebug`), compile or test the package with the `fsbroker_debug` build tag. This enables verbose logging of internal event processing steps, which can be helpful for troubleshooting.
+
+**Examples:**
+
+```sh
+# Run tests with debug logging enabled
+go test -v -tags fsbroker_debug ./...
+
+# Build your application with debug logging enabled
+go build -tags fsbroker_debug -o myapp main.go
+```
+
+When the tag is *not* provided, the `slog` level defaults to `INFO`, and the `slog.Debug` calls in the code have minimal performance impact.
 
 ## Missing features:
 
 Here is a list of features I would like to add in the future, please feel free to submit pull requests:
 
-- Conditional recursion for directories
-
-Currently, once you use FSBroker.AddRecursiveWatch it will automatically adds newly created directories within any of the already watched directories to the watch list. Even if said watch directory was previously added using FSBroker.AddWatch. I would like to modify the watch map to allow for having the "recursivewatch" flag separately per watched directory, rather than globally on the entire broker.
-
-- Separate the "FSBroker.Filter" function into two separate pre-filter and post-filter
-
-Currently, FSBroker.Filter only runs while the event is being emitted out of FSNotify, before we apply any processing on it. I'd like to separate that into two different filter functions. One that runs as the event is added, and another as the event is being emitted to the user.
-
 - Testing on different operating systems
 
-I've ran manual tests on all platforms. Yet, your contibution to writing multi-platform tests is needed.
+Currently, existing automated tests may give a false negative due to concurrency issues with the way tests are performed. Any contribution to the testing methodology is welcomed.
 
 ## FAQ
 
@@ -244,19 +267,19 @@ I've ran manual tests on all platforms. Yet, your contibution to writing multi-p
 ```
 Event received from fsnotify
 │
-├── Is it a CREATE event?
-│   ├── Yes
-│   │   ├── Is there a RENAME event for a the same Id?
+├── Windows
+│   │
+│   ├── Is it a CREATE event?
+│   │   ├── Is there a RENAME event for the same Id?
 │   │   │   ├── Yes → RENAME event (internal rename/move)
 │   │   │   └── No → CREATE event
 │   │   │
 │   │   └── For a file: Is it followed by WRITE event(s)?
 │   │       └── Yes → Still CREATE event (non-empty file creation)
-│
-├── Is it a WRITE event?
-│   ├── Yes
-│   │   ├── Is it on Windows AND for a directory?
-│   │   │   └── Yes → Ignore event
+│   │
+│   ├── Is it a WRITE event?
+│   │   ├── Is it for a directory?
+│   │   │   └── Yes → Ignore event (Windows directory write noise)
 │   │   │
 │   │   ├── Was there a CREATE event for this path just before?
 │   │   │   └── Yes → Part of CREATE event (non-empty file)
@@ -264,28 +287,77 @@ Event received from fsnotify
 │   │   └── Is it the most recent WRITE for this path?
 │   │       ├── Yes → WRITE event
 │   │       └── No → Ignore (deduplicate)
-│
-├── Is it a RENAME event?
-│   ├── Yes
-│   │   ├── Is there a CREATE event with the same Id?
-│   │   │   └── Yes → RENAME event (internal rename/move)
-│   │   │
-│   │   └── No matching CREATE event
-│   │       └── On macOS/Linux → REMOVE event (soft delete/move)
-│
-├── Is it a REMOVE event?
-│   ├── Yes
-│   │   ├── Is there a CREATE event with the same Id? (Windows only)
-│   │   │   └── Yes → RENAME event (internal rename/move)
-│   │   │
-│   │   └── No matching CREATE → REMOVE event (hard delete)
+│   │   
+│   ├── Is it a REMOVE event?
+│   │   └── Is there a CREATE event with the same Id?
+│   │       ├── Yes → RENAME event (internal rename/move)
+|	|	 	└── No → REMOVE event (hard delete) / Invalidate all previous events for this path
 │   │
-│   └── Invalidate all previous events for this path
-│  
-└── Is it a CHMOD event?
-	└── Yes
-		└── On macOS, Is it a file that became zero bytes?
-			└── Yes → WRITE event
+│   ├── Is it a CHMOD event?
+│   │   └── Yes → Emit if EmitChmod is true
+│   │
+│   └── Is it a RENAME event?
+│       └── Yes → REMOVE event (Windows treats renames as removes)
+│    
+├── macOS
+│   ├── Is it a CREATE event?
+│   │   ├── Is there a RENAME event for the same Id?
+│   │   │   ├── Yes → RENAME event (internal rename/move)
+│   │   │   └── No → CREATE event
+│   │   │
+│   │   └── For a file: Is it followed by WRITE event(s)?
+│   │       └── Yes → Still CREATE event (non-empty file creation)
+│   │   
+│   ├── Is it a WRITE event?
+│   │   ├── Was there a CREATE event for this path just before?
+│   │   │   └── Yes → Part of CREATE event (non-empty file)
+│   │   │
+│   │   └── Is it the most recent WRITE for this path?
+│   │       ├── Yes → WRITE event
+│   │       └── No → Ignore (deduplicate)
+│   │
+│   ├── Is it a REMOVE event?
+│   │   ├── Yes → REMOVE event (hard delete)
+│   │   │
+│   │   └── Invalidate all previous events for this path
+│   │
+│   ├── Is it a RENAME event?
+│   │   └── Yes → REMOVE event (soft delete/move to trash)
+│   │
+│   └── Is it a CHMOD event?
+│       └── Yes
+│           ├── Is it a file that became zero bytes?
+│           │   └── Yes → WRITE event (macOS file clear)
+│           │
+│           └── No → Emit if EmitChmod is true
+│        
+└── Linux
+    ├── Is it a CREATE event?
+    │   ├── Is there a RENAME event for the same Id?
+    │   │   ├── Yes → RENAME event (internal rename/move)
+    │   │   └── No → CREATE event
+    │   │
+    │   └── For a file: Is it followed by WRITE event(s)?
+    │       └── Yes → Still CREATE event (non-empty file creation)
+    │    
+	├── Is it a WRITE event?
+	│	├── Was there a CREATE event for this path just before?
+	│	│   └── Yes → Part of CREATE event (non-empty file)
+	│	│
+	│	└── Is it the most recent WRITE for this path?
+	│	    ├── Yes → WRITE event
+	│	    └── No → Ignore (deduplicate)
+	|
+	├── Is it a REMOVE event?
+	│   ├── Yes → REMOVE event (hard delete)
+	│   │
+	│   └── Invalidate all previous events for this path
+	│
+	├── Is it a RENAME event?
+	│   └── Yes → REMOVE event (soft delete/move)
+	│
+	└── Is it a CHMOD event?
+		└── Yes → Emit if EmitChmod is true
 ```
 
 ## License
