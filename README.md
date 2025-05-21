@@ -39,7 +39,7 @@ FSBroker is designed and tested to work on the following operating systems:
 While manually tested across these platforms, contributions towards better multi-platform testing are welcome (see Missing Features).
 
 ## Changelog
-
+- (New v1.0.1) Formatting, remove README pdf for smaller download size.
 - (New v1.0.0) First complete release.
 - (New v0.1.8) Update fsnotify to v1.9.0
 - (New v0.1.7) Update fsnotify to v1.9.0
