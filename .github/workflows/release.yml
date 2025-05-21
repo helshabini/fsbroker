@@ -102,6 +102,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          # Configure git to use token
+          git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}
+          
           NEW_TAG=${{ steps.version.outputs.new_version }}
           echo "Creating new tag: $NEW_TAG"
           git tag $NEW_TAG
