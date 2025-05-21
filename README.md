@@ -293,11 +293,11 @@ Event received from fsnotify
 │   │       ├── Yes → RENAME event (internal rename/move)
 │   │	 	└── No → REMOVE event (hard delete) / Invalidate all previous events for this path
 │   │
-│   ├── Is it a CHMOD event?
-│   │   └── Yes → Emit if EmitChmod is true
+│   ├── Is it a RENAME event?
+│   │   └── Yes → REMOVE event (Windows treats renames as removes)
 │   │
-│   └── Is it a RENAME event?
-│       └── Yes → REMOVE event (Windows treats renames as removes)
+│   └── Is it a CHMOD event?
+│       └── Yes → Emit if EmitChmod is true
 │    
 ├── macOS
 │   ├── Is it a CREATE event?
