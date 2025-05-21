@@ -325,10 +325,8 @@ Event received from fsnotify
 │   │   └── Yes → REMOVE event (soft delete/move to trash)
 │   │
 │   └── Is it a CHMOD event?
-│       └── Yes
-│           ├── Is it a file that became zero bytes?
-│           │   └── Yes → WRITE event (macOS file clear)
-│           │
+│       └── Is it a file that became zero bytes?
+│           ├── Yes → WRITE event (macOS file clear)
 │           └── No → Emit if EmitChmod is true
 │        
 └── Linux
