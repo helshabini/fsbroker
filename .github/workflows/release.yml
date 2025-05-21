@@ -99,6 +99,8 @@ jobs:
           echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
       
       - name: Create and push new tag
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           NEW_TAG=${{ steps.version.outputs.new_version }}
           echo "Creating new tag: $NEW_TAG"
