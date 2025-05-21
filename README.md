@@ -291,7 +291,7 @@ Event received from fsnotify
 │   ├── Is it a REMOVE event?
 │   │   └── Is there a CREATE event with the same Id?
 │   │       ├── Yes → RENAME event (internal rename/move)
-|	|	 	└── No → REMOVE event (hard delete) / Invalidate all previous events for this path
+│   │	 	└── No → REMOVE event (hard delete) / Invalidate all previous events for this path
 │   │
 │   ├── Is it a CHMOD event?
 │   │   └── Yes → Emit if EmitChmod is true
@@ -340,24 +340,24 @@ Event received from fsnotify
     │   └── For a file: Is it followed by WRITE event(s)?
     │       └── Yes → Still CREATE event (non-empty file creation)
     │    
-	├── Is it a WRITE event?
-	│	├── Was there a CREATE event for this path just before?
-	│	│   └── Yes → Part of CREATE event (non-empty file)
-	│	│
-	│	└── Is it the most recent WRITE for this path?
-	│	    ├── Yes → WRITE event
-	│	    └── No → Ignore (deduplicate)
-	|
-	├── Is it a REMOVE event?
-	│   ├── Yes → REMOVE event (hard delete)
-	│   │
-	│   └── Invalidate all previous events for this path
-	│
-	├── Is it a RENAME event?
-	│   └── Yes → REMOVE event (soft delete/move)
-	│
-	└── Is it a CHMOD event?
-		└── Yes → Emit if EmitChmod is true
+    ├── Is it a WRITE event?
+    │	├── Was there a CREATE event for this path just before?
+    │	│   └── Yes → Part of CREATE event (non-empty file)
+    │	│
+    │	└── Is it the most recent WRITE for this path?
+    │	    ├── Yes → WRITE event
+    │	    └── No → Ignore (deduplicate)
+    |
+    ├── Is it a REMOVE event?
+    │   ├── Yes → REMOVE event (hard delete)
+    │   │
+    │   └── Invalidate all previous events for this path
+    │
+    ├── Is it a RENAME event?
+    │   └── Yes → REMOVE event (soft delete/move)
+    │
+    └── Is it a CHMOD event?
+    	└── Yes → Emit if EmitChmod is true
 ```
 
 ## License
