@@ -291,7 +291,7 @@ Event received from fsnotify
 │   ├── Is it a REMOVE event?
 │   │   └── Is there a CREATE event with the same Id?
 │   │       ├── Yes → RENAME event (internal rename/move)
-│   │	 	└── No → REMOVE event (hard delete) / Invalidate all previous events for this path
+│   │       └── No → REMOVE event (hard delete) / Invalidate all previous events for this path
 │   │
 │   ├── Is it a RENAME event?
 │   │   └── Yes → REMOVE event (Windows treats renames as removes)
