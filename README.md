@@ -87,9 +87,9 @@ func main() {
 
 	for {
 		select {
-		case event := <-broker.Next():
-			log.Printf("fs event has occurred: type=%s, path=%s, timestamp=%s, properties=%v", 
-				event.Type.String(), event.Path, event.Timestamp.Format(time.RFC3339), event.Properties)
+		case action := <-broker.Next():
+			log.Printf("fs action has occurred: type=%s, path=%s, timestamp=%s, properties=%v", 
+				action.Type.String(), action.Path, action.Timestamp.Format(time.RFC3339), action.Properties)
 		case err := <-broker.Error():
 			log.Printf("an error has occurred: %v", err)
 		}
@@ -97,7 +97,7 @@ func main() {
 }
 ```
 
-You can also apply your own filters to events:
+You can also apply your own filters to file system actions:
 
 ```go
 broker.Filter = func(action *FSAction) bool {
