@@ -86,7 +86,7 @@ func (b *FSBroker) AddRecursiveWatch(path string) error {
 		}
 
 		if stat.IsDir() {
-			if err := b.addWatchInternal(path, stat); err != nil {
+			if err := b.addWatchInternal(p, stat); err != nil {
 				return err
 			}
 		}
