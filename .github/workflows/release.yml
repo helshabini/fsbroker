@@ -98,18 +98,24 @@ jobs:
           echo "New version will be: $NEW_VERSION"
           echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
       
-      - name: Create and push new tag
+      - name: Create release and tag
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Configure git to use token
-          git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}
-          
           NEW_TAG=${{ steps.version.outputs.new_version }}
-          echo "Creating new tag: $NEW_TAG"
-          git tag $NEW_TAG
-          git push origin $NEW_TAG
+          echo "Creating release with tag: $NEW_TAG"
           
-          # Delete the trigger tag after successful release
-          git push origin --delete ${{ github.ref_name }}
+          # Create a GitHub release which automatically creates the tag
+          gh release create $NEW_TAG \
+            --title "Release $NEW_TAG" \
+            --notes "Automated release $NEW_TAG" \
+            --target ${{ github.sha }}
+      
+      - name: Delete trigger tag
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "Deleting trigger tag: ${{ github.ref_name }}"
+          gh api -X DELETE /repos/${{ github.repository }}/git/refs/tags/${{ github.ref_name }}
     
+
