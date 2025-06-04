@@ -89,7 +89,7 @@ func main() {
 		select {
 		case action := <-broker.Next():
 			log.Printf("fs action has occurred: type=%s, path=%s, timestamp=%s, properties=%v", 
-				action.Type.String(), action.Path, action.Timestamp.Format(time.RFC3339), action.Properties)
+				action.Type.String(), action.Subject.Path, action.Timestamp.Format(time.RFC3339), action.Properties)
 		case err := <-broker.Error():
 			log.Printf("an error has occurred: %v", err)
 		}
@@ -109,7 +109,7 @@ or
 
 ```go
 broker.Filter = func(action *FSAction) bool {
-    return action.Path == "/some/excluded/path" // Filters out any event which is related to this path
+    return action.Subject.Path == "/some/excluded/path" // Filters out any event which is related to this path
 }
 ```
 
