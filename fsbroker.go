@@ -60,6 +60,8 @@ func (b *FSBroker) Start() {
 				}
 			case err := <-b.watcher.Errors:
 				b.emitError(err)
+			case <-b.quit:
+				return
 			}
 		}
 	}()
