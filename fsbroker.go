@@ -92,7 +92,12 @@ func (b *FSBroker) AddRecursiveWatch(path string) error {
 				return err
 			}
 		}
-		b.watchmap.Set(FromOSInfo(p, stat))
+		info := FromOSInfo(p, stat)
+		if info == nil {
+			logDebug("Skipping path: no file info available", "path", p)
+			return nil
+		}
+		b.watchmap.Set(info)
 
 		return nil
 	})
@@ -121,7 +126,13 @@ func (b *FSBroker) AddWatch(path string) error {
 		if err != nil {
 			continue // Ignore error, file may not exist
 		}
-		b.watchmap.Set(FromOSInfo(filepath.Join(path, file.Name()), stat))
+		entryPath := filepath.Join(path, file.Name())
+		info := FromOSInfo(entryPath, stat)
+		if info == nil {
+			logDebug("Skipping entry: no file info available", "path", entryPath)
+			continue
+		}
+		b.watchmap.Set(info)
 	}
 
 	return nil
