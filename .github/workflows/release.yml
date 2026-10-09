@@ -14,6 +14,7 @@ on:
 jobs:
   test:
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
     
@@ -33,7 +34,7 @@ jobs:
       run: go mod tidy
 
     - name: run tests
-      run: go test -v -tags=fsbroker_debug ./...
+      run: go test -v -race -tags=fsbroker_debug ./...
   
   release:
     needs: test
