@@ -7,11 +7,10 @@ import (
 	"github.com/fsnotify/fsnotify"
 )
 
-
 type FSEvent struct {
-	Event *fsnotify.Event
-	Type  OpType
-	Path string
+	Event     *fsnotify.Event
+	Type      OpType
+	Path      string
 	Timestamp time.Time
 }
 
@@ -19,7 +18,7 @@ func NewFSEvent(event *fsnotify.Event) *FSEvent {
 	return &FSEvent{
 		Event:     event,
 		Type:      mapOpToOpType(event.Op),
-		Path: 		event.Name,
+		Path:      event.Name,
 		Timestamp: time.Now(),
 	}
 }

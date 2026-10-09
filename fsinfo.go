@@ -26,10 +26,10 @@ func (info *FSInfo) String() string {
 
 func (info *FSInfo) Clone() *FSInfo {
 	return &FSInfo{
-		Id: info.Id,
-		Path: strings.Clone(info.Path),
-		Size: info.Size,
+		Id:      info.Id,
+		Path:    strings.Clone(info.Path),
+		Size:    info.Size,
 		ModTime: info.ModTime,
-		Mode: info.Mode,
+		Mode:    info.Mode,
 	}
 }

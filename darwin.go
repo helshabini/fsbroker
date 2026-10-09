@@ -166,7 +166,7 @@ func (b *FSBroker) resolveAndHandle(stack *EventStack, tickerLock *sync.Mutex) {
 
 		case Rename:
 			watchmapInfo := b.watchmap.GetByPath(event.Path)
-			if watchmapInfo == nil { 
+			if watchmapInfo == nil {
 				logDebug("Rename: No watchmap entry found, file must have been created then renamed quickly", "path", event.Path)
 				action := FromFSEvent(event)
 				action.Type = NoOp

@@ -173,7 +173,7 @@ func (b *FSBroker) resolveAndHandle(stack *EventStack, tickerLock *sync.Mutex) {
 				// First check if we're part of a rename
 				renameInfo, found := toRename[event.Path]
 				if found {
-			  	logDebug("Remove: Found rename entry in toRename map", "path", event.Path)
+					logDebug("Remove: Found rename entry in toRename map", "path", event.Path)
 					_ = AppendEvent(actions, event, renameInfo.Id)
 					logDebug("Remove: Appended event to existing Rename action", "path", event.Path)
 					continue
@@ -200,7 +200,7 @@ func (b *FSBroker) resolveAndHandle(stack *EventStack, tickerLock *sync.Mutex) {
 				// First check if we're part of a rename
 				renameInfo, found := toRename[event.Path]
 				if found {
-			  	logDebug("Rename: Found rename entry in toRename map", "path", event.Path)
+					logDebug("Rename: Found rename entry in toRename map", "path", event.Path)
 					_ = AppendEvent(actions, event, renameInfo.Id)
 					logDebug("Rename: Appended event to existing Rename action", "path", event.Path)
 					continue
