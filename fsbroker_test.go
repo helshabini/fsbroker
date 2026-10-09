@@ -24,6 +24,15 @@ const (
 // Returns the broker, the config used, the watch directory path, and a cleanup function.
 func setupTestEnv(t *testing.T) (*fsbroker.FSBroker, *fsbroker.FSConfig, string, func()) {
 	t.Helper()
+	// Reduce timeout for faster tests, but keep it > fsnotify latency
+	return setupTestEnvWithTimeout(t, 1*time.Second)
+}
+
+// setupTestEnvWithTimeout is setupTestEnv with a custom broker timeout. The
+// timeout must be set here, before the broker starts, because the broker reads
+// it once when its event loop starts.
+func setupTestEnvWithTimeout(t *testing.T, timeout time.Duration) (*fsbroker.FSBroker, *fsbroker.FSConfig, string, func()) {
+	t.Helper()
 
 	// Create a temporary directory for the test
 	tempDir, err := os.MkdirTemp("", "fsbroker_test_*")
@@ -39,8 +48,7 @@ func setupTestEnv(t *testing.T) (*fsbroker.FSBroker, *fsbroker.FSConfig, string,
 	}
 
 	config := fsbroker.DefaultFSConfig()
-	// Reduce timeout for faster tests, but keep it > fsnotify latency
-	config.Timeout = 1 * time.Second
+	config.Timeout = timeout
 
 	broker, err := fsbroker.NewFSBroker(config)
 	if err != nil {
@@ -839,10 +847,9 @@ func TestFSBrokerIntegration(t *testing.T) {
 	})
 
 	t.Run("WriteDeduplication", func(t *testing.T) {
-		broker, config, watchDir, cleanup := setupTestEnv(t)
 		// Extend timeout to ensure all rapid writes fall within one tick
 		// Make sure the test timeout is longer than the broker timeout
-		config.Timeout = 2 * time.Second
+		broker, config, watchDir, cleanup := setupTestEnvWithTimeout(t, 2*time.Second)
 		testWaitTimeout := config.Timeout + 500*time.Millisecond
 		defer cleanup()
 
@@ -883,10 +890,9 @@ func TestFSBrokerIntegration(t *testing.T) {
 	})
 
 	t.Run("DeleteDeduplication", func(t *testing.T) {
-		broker, config, watchDir, cleanup := setupTestEnv(t)
 		// Extend timeout to ensure rapid actions fall within one tick
 		// Make sure the test timeout is longer than the broker timeout
-		config.Timeout = 2 * time.Second
+		broker, config, watchDir, cleanup := setupTestEnvWithTimeout(t, 2*time.Second)
 		testWaitTimeout := config.Timeout + 500*time.Millisecond
 		defer cleanup()
 
@@ -929,10 +935,9 @@ func TestFSBrokerIntegration(t *testing.T) {
 	})
 
 	t.Run("MixedRapidActions", func(t *testing.T) {
-		broker, config, watchDir, cleanup := setupTestEnv(t)
 		// Extend timeout significantly for this specific test to ensure all actions
 		// likely fall within a single processing tick.
-		config.Timeout = 2 * time.Second
+		broker, config, watchDir, cleanup := setupTestEnvWithTimeout(t, 2*time.Second)
 		// Set the collection timeout based on the configured broker timeout + buffer
 		collectionTimeout := config.Timeout + 500*time.Millisecond
 		defer cleanup()

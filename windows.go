@@ -7,6 +7,7 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"sync"
 	"syscall"
@@ -283,8 +284,12 @@ func isHiddenFile(path string) (bool, error) {
 		return false, err
 	}
 
-	// Get file attributes
+	// Get file attributes. The thread is locked so that the NT status read
+	// after a failure belongs to this call.
+	runtime.LockOSThread()
 	attributes, err := syscall.GetFileAttributes(pointer)
+	deletePending := err != nil && errors.Is(err, syscall.ERROR_ACCESS_DENIED) && lastNtStatusIsDeletePending()
+	runtime.UnlockOSThread()
 	if err != nil {
 		// It is acceptable for these syscalls to fail
 		// This is because the file may not exist yet, and we want to ignore that
@@ -295,6 +300,14 @@ func isHiddenFile(path string) (bool, error) {
 			return false, nil
 		}
 
+		// A file that is being deleted while another handle (such as a watch)
+		// is still open on it reports ERROR_ACCESS_DENIED until that handle is
+		// closed. It is going away, so treat it like a missing file.
+		if deletePending {
+			logDebug("Ignoring benign 'delete pending' error during hidden check", "name", path)
+			return false, nil
+		}
+
 		// Any other error (permissions, etc.) OR "file not found" for non-RENAME ops.
 		return false, err
 	}
@@ -302,6 +315,19 @@ func isHiddenFile(path string) (bool, error) {
 	// Check if the hidden attribute is set
 	// FILE_ATTRIBUTE_HIDDEN = 2 in Windows
 	return attributes&syscall.FILE_ATTRIBUTE_HIDDEN != 0, nil
+}
+
+var procRtlGetLastNtStatus = windows.NewLazySystemDLL("ntdll.dll").NewProc("RtlGetLastNtStatus")
+
+// lastNtStatusIsDeletePending reports whether the last failed call on this
+// thread failed because its file is pending deletion, which Win32 reports as
+// ERROR_ACCESS_DENIED. The caller must hold the OS thread.
+func lastNtStatusIsDeletePending() bool {
+	if procRtlGetLastNtStatus.Find() != nil {
+		return false
+	}
+	status, _, _ := procRtlGetLastNtStatus.Call()
+	return windows.NTStatus(status) == windows.STATUS_DELETE_PENDING
 }
 
 func FromOSInfo(path string, fileinfo os.FileInfo) *FSInfo {
