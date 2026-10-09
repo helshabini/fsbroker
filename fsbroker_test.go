@@ -1060,3 +1060,69 @@ func mustRemove(t *testing.T, path string) {
 	}
 	time.Sleep(10 * time.Millisecond) // Tiny sleep between actions
 }
+
+// TestAddWatchPreExistingFiles checks that files that already exist when
+// AddWatch is called are registered with their own metadata, so that
+// modifying one of them is reported as a Write rather than a Create.
+func TestAddWatchPreExistingFiles(t *testing.T) {
+	tempDir, err := os.MkdirTemp("", "fsbroker_test_*")
+	if err != nil {
+		t.Fatalf("Failed to create temp dir: %v", err)
+	}
+
+	watchDir := filepath.Join(tempDir, "watch")
+	if err := os.Mkdir(watchDir, 0755); err != nil {
+		os.RemoveAll(tempDir)
+		t.Fatalf("Failed to create watch dir: %v", err)
+	}
+
+	// Create the files before watching, so AddWatch has to register them.
+	firstPath := filepath.Join(watchDir, "first.txt")
+	secondPath := filepath.Join(watchDir, "second.txt")
+	mustWrite(t, firstPath, "one")
+	mustWrite(t, secondPath, "two-three-four")
+
+	config := fsbroker.DefaultFSConfig()
+	config.Timeout = 1 * time.Second
+
+	broker, err := fsbroker.NewFSBroker(config)
+	if err != nil {
+		os.RemoveAll(tempDir)
+		t.Fatalf("Failed to create FSBroker: %v", err)
+	}
+
+	if err := broker.AddWatch(watchDir); err != nil {
+		broker.Stop()
+		os.RemoveAll(tempDir)
+		t.Fatalf("Failed to add watch on %s: %v", watchDir, err)
+	}
+
+	broker.Start()
+	defer func() {
+		broker.Stop()
+		time.Sleep(100 * time.Millisecond) // Give fsnotify a moment to release watches
+		if err := os.RemoveAll(tempDir); err != nil {
+			log.Printf("Warning: Failed to remove temp dir %s: %v", tempDir, err)
+		}
+	}()
+
+	// Every entry must be registered with its own metadata. Registering all
+	// entries with the directory's stats makes them share one id, which
+	// collapses the watchmap down to its last entry.
+	sizes := make(map[string]uint64)
+	broker.TestIteratePaths(func(path string, info *fsbroker.FSInfo) {
+		sizes[filepath.Base(path)] = info.Size
+	})
+	if sizes["first.txt"] != 3 {
+		t.Errorf("Expected first.txt to be registered with size 3, got %d", sizes["first.txt"])
+	}
+	if sizes["second.txt"] != 14 {
+		t.Errorf("Expected second.txt to be registered with size 14, got %d", sizes["second.txt"])
+	}
+
+	// Modifying a file that existed before watching started must be a Write.
+	mustWrite(t, firstPath, "updated")
+	expectAction(t, broker, fsbroker.Write, firstPath, defaultTestTimeout)
+
+	verifyWatchmapState(t, broker, config, watchDir)
+}

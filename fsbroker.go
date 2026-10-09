@@ -122,11 +122,11 @@ func (b *FSBroker) AddWatch(path string) error {
 
 	// Add the files to the watchmap. No need to add FSNotify watches, because we're already watching the directory.
 	for _, file := range files {
-		stat, err := os.Stat(path)
+		entryPath := filepath.Join(path, file.Name())
+		stat, err := os.Stat(entryPath)
 		if err != nil {
 			continue // Ignore error, file may not exist
 		}
-		entryPath := filepath.Join(path, file.Name())
 		info := FromOSInfo(entryPath, stat)
 		if info == nil {
 			logDebug("Skipping entry: no file info available", "path", entryPath)
