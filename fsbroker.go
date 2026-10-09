@@ -53,8 +53,11 @@ func (b *FSBroker) Start() {
 		for {
 			select {
 			case event := <-b.watcher.Events:
-				switch event.Op {
-				case fsnotify.Create, fsnotify.Write, fsnotify.Remove, fsnotify.Rename, fsnotify.Chmod:
+				// An event can carry several operations at once, e.g. kqueue
+				// reports a truncate and a write as a single WRITE|CHMOD, so
+				// handle each operation as its own event.
+				for _, op := range splitOps(event.Op) {
+					event := fsnotify.Event{Name: event.Name, Op: op}
 					logDebug("Received fsnotify event", "op", event.Op.String(), "name", event.Name)
 					b.handleEvent(event)
 				}

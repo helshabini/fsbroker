@@ -68,6 +68,19 @@ func AppendEvent(actions map[uint64]*FSAction, event *FSEvent, id uint64) *FSAct
 	return action
 }
 
+// splitOps returns the operations set in op, one per element, in the order
+// they would have happened: a file is created, written and chmodded before it
+// is renamed or removed. Operations other than these are dropped.
+func splitOps(op fsnotify.Op) []fsnotify.Op {
+	var ops []fsnotify.Op
+	for _, o := range []fsnotify.Op{fsnotify.Create, fsnotify.Write, fsnotify.Chmod, fsnotify.Rename, fsnotify.Remove} {
+		if op.Has(o) {
+			ops = append(ops, o)
+		}
+	}
+	return ops
+}
+
 // mapOpToActionType maps fsnotify.Op to ActionType.
 func mapOpToOpType(op fsnotify.Op) OpType {
 	switch {
