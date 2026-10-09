@@ -1,0 +1,35 @@
+name: ci
+
+permissions:
+  contents: read
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
+    runs-on: ${{ matrix.os }}
+    steps:
+    - name: checkout code
+      uses: actions/checkout@v4
+      with:
+          fetch-depth: 1
+
+    - name: set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version-file: go.mod
+
+    - name: vet
+      run: go vet -tags=fsbroker_debug ./...
+
+    - name: run tests
+      run: go test -v -tags=fsbroker_debug ./...

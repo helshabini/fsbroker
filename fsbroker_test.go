@@ -1109,15 +1109,21 @@ func TestAddWatchPreExistingFiles(t *testing.T) {
 	// Every entry must be registered with its own metadata. Registering all
 	// entries with the directory's stats makes them share one id, which
 	// collapses the watchmap down to its last entry.
-	sizes := make(map[string]uint64)
+	// Size is not compared because not every platform records it.
+	ids := make(map[string]uint64)
 	broker.TestIteratePaths(func(path string, info *fsbroker.FSInfo) {
-		sizes[filepath.Base(path)] = info.Size
+		ids[filepath.Base(path)] = info.Id
 	})
-	if sizes["first.txt"] != 3 {
-		t.Errorf("Expected first.txt to be registered with size 3, got %d", sizes["first.txt"])
+	firstID, firstOK := ids["first.txt"]
+	secondID, secondOK := ids["second.txt"]
+	if !firstOK || !secondOK {
+		t.Fatalf("Expected first.txt and second.txt to be registered, got %v", ids)
 	}
-	if sizes["second.txt"] != 14 {
-		t.Errorf("Expected second.txt to be registered with size 14, got %d", sizes["second.txt"])
+	if firstID == secondID {
+		t.Errorf("Expected first.txt and second.txt to have distinct ids, both got %d", firstID)
+	}
+	if dirID, ok := ids["watch"]; ok && (dirID == firstID || dirID == secondID) {
+		t.Errorf("Expected entries not to share the directory's id %d", dirID)
 	}
 
 	// Modifying a file that existed before watching started must be a Write.
