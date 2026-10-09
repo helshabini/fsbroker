@@ -21,29 +21,29 @@ const (
 )
 
 type FSAction struct {
-	Type      OpType
-	Timestamp time.Time
-	Subject   *FSInfo
-	Events    []*FSEvent
+	Type       OpType
+	Timestamp  time.Time
+	Subject    *FSInfo
+	Events     []*FSEvent
 	Properties map[string]any
 }
 
 func NewFSAction(op OpType, path string, timestamp time.Time) *FSAction {
 	return &FSAction{
-		Type:      op,
-		Timestamp: timestamp,
-		Subject:   nil,
-		Events:    make([]*FSEvent, 0),
+		Type:       op,
+		Timestamp:  timestamp,
+		Subject:    nil,
+		Events:     make([]*FSEvent, 0),
 		Properties: make(map[string]any, 0),
 	}
 }
 
 func FromFSEvent(event *FSEvent) *FSAction {
 	action := &FSAction{
-		Type:      event.Type,
-		Timestamp: event.Timestamp,
-		Subject:   nil,
-		Events:    make([]*FSEvent, 0),
+		Type:       event.Type,
+		Timestamp:  event.Timestamp,
+		Subject:    nil,
+		Events:     make([]*FSEvent, 0),
 		Properties: make(map[string]any, 0),
 	}
 
@@ -62,7 +62,7 @@ func AppendEvent(actions map[uint64]*FSAction, event *FSEvent, id uint64) *FSAct
 		action.Events = append(action.Events, event)
 		return action
 	}
-	
+
 	action = FromFSEvent(event)
 	actions[id] = action
 	return action
