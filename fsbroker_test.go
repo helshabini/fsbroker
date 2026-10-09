@@ -1137,3 +1137,84 @@ func TestAddWatchPreExistingFiles(t *testing.T) {
 
 	verifyWatchmapState(t, broker, config, watchDir)
 }
+
+// TestRenameDoesNotAffectSiblingPrefix checks that renaming an entry does not
+// change the paths reported for a sibling directory whose name starts with the
+// renamed entry's name. fsnotify before v1.10.1 rewrote the path of every watch
+// sharing the renamed path as a string prefix on Windows, so after renaming "a"
+// to "x", events in "ab" were reported under "xb".
+func TestRenameDoesNotAffectSiblingPrefix(t *testing.T) {
+	broker, config, watchDir, cleanup := setupTestEnv(t)
+	defer cleanup()
+
+	filePath := filepath.Join(watchDir, "a")
+	siblingDir := filepath.Join(watchDir, "ab")
+
+	mustWrite(t, filePath, "data")
+	expectAction(t, broker, fsbroker.Create, filePath, defaultTestTimeout)
+	if err := os.Mkdir(siblingDir, 0755); err != nil {
+		t.Fatalf("Failed to create %s: %v", siblingDir, err)
+	}
+	expectAction(t, broker, fsbroker.Create, siblingDir, defaultTestTimeout)
+	drainEvents(broker, config.Timeout/2)
+
+	renamedPath := filepath.Join(watchDir, "x")
+	mustRename(t, filePath, renamedPath)
+	expectAction(t, broker, fsbroker.Rename, renamedPath, defaultTestTimeout)
+
+	siblingFile := filepath.Join(siblingDir, "file.txt")
+	mustWrite(t, siblingFile, "data")
+	expectAction(t, broker, fsbroker.Create, siblingFile, defaultTestTimeout)
+
+	verifyWatchmapState(t, broker, config, watchDir)
+}
+
+// TestAddWatchWithDanglingSymlink checks that a directory containing a symlink
+// whose target does not exist can still be watched. fsnotify before v1.10.0
+// aborted adding a watch on such a directory on kqueue platforms (macOS, BSD).
+func TestAddWatchWithDanglingSymlink(t *testing.T) {
+	tempDir, err := os.MkdirTemp("", "fsbroker_test_*")
+	if err != nil {
+		t.Fatalf("Failed to create temp dir: %v", err)
+	}
+
+	watchDir := filepath.Join(tempDir, "watch")
+	if err := os.Mkdir(watchDir, 0755); err != nil {
+		os.RemoveAll(tempDir)
+		t.Fatalf("Failed to create watch dir: %v", err)
+	}
+
+	filePath := filepath.Join(watchDir, "file.txt")
+	mustWrite(t, filePath, "data")
+	if err := os.Symlink(filepath.Join(tempDir, "missing"), filepath.Join(watchDir, "dangling")); err != nil {
+		os.RemoveAll(tempDir)
+		t.Skipf("Cannot create symlinks on this system: %v", err)
+	}
+
+	config := fsbroker.DefaultFSConfig()
+	config.Timeout = 1 * time.Second
+
+	broker, err := fsbroker.NewFSBroker(config)
+	if err != nil {
+		os.RemoveAll(tempDir)
+		t.Fatalf("Failed to create FSBroker: %v", err)
+	}
+
+	if err := broker.AddRecursiveWatch(watchDir); err != nil {
+		broker.Stop()
+		os.RemoveAll(tempDir)
+		t.Fatalf("Failed to add watch on a directory with a dangling symlink: %v", err)
+	}
+
+	broker.Start()
+	defer func() {
+		broker.Stop()
+		time.Sleep(100 * time.Millisecond) // Give fsnotify a moment to release watches
+		if err := os.RemoveAll(tempDir); err != nil {
+			log.Printf("Warning: Failed to remove temp dir %s: %v", tempDir, err)
+		}
+	}()
+
+	mustWrite(t, filePath, "updated")
+	expectAction(t, broker, fsbroker.Write, filePath, defaultTestTimeout)
+}
