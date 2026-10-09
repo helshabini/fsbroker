@@ -334,13 +334,16 @@ type BY_HANDLE_FILE_INFORMATION struct {
 }
 
 func getFileID(path string) (uint64, error) {
-	file, err := os.Open(path)
+	pointer, err := syscall.UTF16PtrFromString(path)
 	if err != nil {
 		return 0, err
 	}
-	defer file.Close()
 
-	handle := windows.Handle(file.Fd())
+	handle, err := windows.CreateFile(pointer, 0, windows.FILE_SHARE_READ|windows.FILE_SHARE_WRITE|windows.FILE_SHARE_DELETE, nil, windows.OPEN_EXISTING, windows.FILE_FLAG_BACKUP_SEMANTICS, 0)
+	if err != nil {
+		return 0, err
+	}
+	defer windows.CloseHandle(handle)
 
 	var fileInfo BY_HANDLE_FILE_INFORMATION
 	err = windows.GetFileInformationByHandle(handle, (*windows.ByHandleFileInformation)(unsafe.Pointer(&fileInfo)))

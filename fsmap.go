@@ -19,6 +19,10 @@ func NewFSMap() *FSMap {
 }
 
 func (m *FSMap) Set(value *FSInfo) error {
+	if value == nil {
+		return errors.New("cannot store a nil file info")
+	}
+
 	m.mu.Lock()
 	defer m.mu.Unlock()
 

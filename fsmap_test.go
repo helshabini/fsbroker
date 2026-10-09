@@ -30,6 +30,18 @@ func TestNewFSMap(t *testing.T) {
 	}
 }
 
+func TestFSMap_SetNil(t *testing.T) {
+	m := NewFSMap()
+
+	// Set used to dereference the value, panicking on a nil entry.
+	if err := m.Set(nil); err == nil {
+		t.Error("Expected Set(nil) to return an error, got nil")
+	}
+	if m.Size() != 0 {
+		t.Errorf("Expected the map to stay empty after Set(nil), got size %d", m.Size())
+	}
+}
+
 func TestFSMap_SetAndGet(t *testing.T) {
 	m := NewFSMap()
 	info1 := newTestInfo(1, "/path/to/file1")
