@@ -37,8 +37,9 @@ FSBroker is designed and tested to work on the following operating systems:
 -   **Windows**
 -   **macOS**
 -   **Linux**
+-   **FreeBSD**
 
-The test suite runs with the race detector on all three platforms in CI, for every pull request and push to `main`.
+The test suite runs with the race detector on all three main platforms in CI, for every pull request and push to `main`.
 
 ## Changelog
 - (New v1.0.5) Fix: writes could be silently dropped on macOS when the system reported several changes to a file as a single event.
