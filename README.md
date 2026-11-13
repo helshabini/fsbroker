@@ -42,6 +42,7 @@ FSBroker is designed and tested to work on the following operating systems:
 The test suite runs with the race detector on all three main platforms in CI, for every pull request and push to `main`.
 
 ## Changelog
+- (New v1.0.6) Fix: the package failed to build on FreeBSD. FreeBSD now uses the same kqueue-based code path as macOS.
 - (New v1.0.5) Fix: writes could be silently dropped on macOS when the system reported several changes to a file as a single event.
 - (New v1.0.5) Update fsnotify to v1.10.1. Fixes wrong paths reported on Windows for a directory whose name starts with the name of a renamed sibling, and watching a directory containing a dangling symlink failing on macOS.
 - (New v1.0.4) Fix: files already present when `AddWatch` is called were registered with their directory's metadata, so modifying them was reported as `Create` instead of `Write`.
